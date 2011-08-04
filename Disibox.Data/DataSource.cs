@@ -86,15 +86,19 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<string> GetFileNames()
+        public IEnumerable<FileAndMime> GetFileNames()
         {
             // Requirements
             RequireLoggedInUser();
 
             var blobs = blobContainer.ListBlobs();
-            var names = new List<string>();
-            foreach (var blob in blobs)
-                names.Add(blob.Uri.ToString());
+//            var names = new List<string>();
+            var names = new List<FileAndMime>();
+            foreach (var blob in blobs) {
+                //                names.Add(blob.Uri.ToString());
+                var filename = blob.Uri.ToString();
+                names.Add(new FileAndMime(filename, GetContentType(filename)));
+            }
             return names;
         }
 
