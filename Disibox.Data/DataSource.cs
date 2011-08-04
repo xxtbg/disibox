@@ -12,7 +12,7 @@ namespace Disibox.Data
 {
     public class DataSource
     {
-        private const string messageTableName = "MessageTable";
+        private const string usersTableName = "users";
         private const string filesBlobName = "files";
         private const string connectionStringName = "DataConnectionString";
         
@@ -30,33 +30,45 @@ namespace Disibox.Data
         {
             string connectionString = "UseDevelopmentStorage=true";//RoleEnvironment.GetConfigurationSettingValue(connectionStringName);
 
-            storageAccount = CloudStorageAccount.Parse(connectionString );
+            storageAccount = CloudStorageAccount.Parse(connectionString);
             
-            /*tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
+            // Creates users table
+            tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
             tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-            tableClient.CreateTableIfNotExist(messageTableName);*/
+            tableClient.CreateTableIfNotExist(usersTableName);
 
-            // create blob container
+            // Creates files blob container
             blobClient = storageAccount.CreateCloudBlobClient();
             blobContainer = blobClient.GetContainerReference(filesBlobName);
             blobContainer.CreateIfNotExist();
 
-            //set blob container permissions
+            // Set blob container permissions
             var permissions = blobContainer.GetPermissions();
             permissions.PublicAccess = BlobContainerPublicAccessType.Container;
             blobContainer.SetPermissions(permissions);
-            
-
-            
-		
         }
 
-        public string AddFile(string filePath)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string AddFile(string path)
         {
-            var fileName = Path.GetFileName(filePath);
-            var fileContentType = GetContentType(filePath);
-            var fileContent = new FileStream(filePath, FileMode.Open);
+            var fileName = Path.GetFileName(path);
+            var fileContentType = GetContentType(path);
+            var fileContent = new FileStream(path, FileMode.Open);
             return UploadFile(fileName, fileContentType, fileContent);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="pwd"></param>
+        public void AddUser(string email, string pwd)
+        {
+
         }
 
         public IEnumerable<string> GetFileNames()
@@ -71,27 +83,27 @@ namespace Disibox.Data
         /// <summary>
         /// Uploads the file to blob storage.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="fileContentType"></param>
-        /// <param name="fileContent"></param>
+        /// <param name="name"></param>
+        /// <param name="contentType"></param>
+        /// <param name="content"></param>
         /// <returns></returns>
-        private string UploadFile(string fileName, string fileContentType, Stream fileContent)
+        private string UploadFile(string name, string contentType, Stream content)
         {       
-            var uniqueBlobName = filesBlobName + "/" + fileName;
+            var uniqueBlobName = filesBlobName + "/" + name;
             var blob = blobClient.GetBlockBlobReference(uniqueBlobName);
-            blob.Properties.ContentType = fileContentType;
-            blob.UploadFromStream(fileContent);
+            blob.Properties.ContentType = contentType;
+            blob.UploadFromStream(content);
             return blob.Uri.ToString();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
-        private string GetContentType(string filePath) {
+        private string GetContentType(string path) {
             var contentType = "application/octetstream";
-            var ext = Path.GetExtension(filePath).ToLower();
+            var ext = Path.GetExtension(path).ToLower();
             var registryKey = Registry.ClassesRoot.OpenSubKey(ext);
             if (registryKey != null && registryKey.GetValue("Content Type") != null)
                 contentType = registryKey.GetValue("Content Type").ToString();
