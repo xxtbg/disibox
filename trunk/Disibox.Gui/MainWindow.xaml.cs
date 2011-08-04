@@ -38,9 +38,22 @@ namespace Disibox.Gui {
         private void button2_Click(object sender, RoutedEventArgs e) {
             var ds = new DataSource();
 
-            if (textBox1.Text != "")
-                ds.AddFile(textBox1.Text);
+            if (textBox1.Text != "") {
+                var retn = ds.AddFile(textBox1.Text);
+                MessageBox.Show("The file is uploaded successfully: " + retn);
+            } else {
+                MessageBox.Show("No file to upload");
+            }
 
+        }
+
+        private void button3_Click(object sender, RoutedEventArgs e) {
+            var ds = new DataSource();
+
+            var names = ds.GetFileNames();
+
+            foreach (var name in names)
+                Console.WriteLine(name);
         }
     }
 }
