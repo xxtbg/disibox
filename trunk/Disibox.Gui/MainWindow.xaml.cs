@@ -40,7 +40,7 @@ namespace Disibox.Gui {
 
             if (textBox1.Text != "") {
                 var retn = ds.AddFile(textBox1.Text);
-                MessageBox.Show("The file is uploaded successfully: " + retn);
+                MessageBox.Show("The file has been uploaded successfully: " + retn);
             } else {
                 MessageBox.Show("No file to upload");
             }
@@ -52,8 +52,8 @@ namespace Disibox.Gui {
 
             var names = ds.GetFileNames();
 
-            foreach (var name in names)
-                Console.WriteLine(name);
+            foreach (var name in names) 
+                listView_Files.Items.Add(name);
         }
     }
 }
