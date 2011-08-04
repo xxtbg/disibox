@@ -1,18 +1,19 @@
 ﻿using System;
-using Microsoft.WindowsAzure.StorageClient;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
     class User : TableServiceEntity
     {
-        private const string UserPartitionKey = "users";
+        public const string UserPartitionKey = "users";
 
-        private static const HashAlgorithm hashAlg = new MD5Cng();
+        private static readonly HashAlgorithm hashAlg = new MD5Cng();
 
         private string _email;
         private string _hashedPwd;
+        private bool _isAdmin;
 
         /// <summary>
         /// In addition to the properties required by the data model, every entity in table 
@@ -21,19 +22,55 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="email"></param>
         /// <param name="pwd"></param>
-        public User(string email, string pwd)
+        public User(string email, string pwd, bool isAdmin)
         {
             PartitionKey = UserPartitionKey;
             RowKey = Guid.NewGuid().ToString();
             _email = email;
             _hashedPwd = EncryptPwd(pwd);
+            _isAdmin = isAdmin;
         }
 
         /// <summary>
         /// User email address.
         /// </summary>
-        public string Email { get { return _email; } }
+        public string Email 
+        { 
+            get { return _email; } 
+        }
 
+        /// <summary>
+        /// Hashed user password.
+        /// </summary>
+        public string HashedPassword 
+        { 
+            get { return _hashedPwd; } 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsAdmin
+        {
+            get { return _isAdmin; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <param name="userPwd"></param>
+        /// <returns></returns>
+        public bool Matches(string userEmail, string userPwd)
+        {
+            return (_email == userEmail) && (_hashedPwd == EncryptPwd(userPwd));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pwd"></param>
+        /// <returns></returns>
         private string EncryptPwd(string pwd)
         {
             // Converts the input string to a byte array and computes the hash.
@@ -51,25 +88,6 @@ namespace Disibox.Data
 
             // Return the hexadecimal string.
             return sBuilder.ToString();
-        }
-
-        // Verify a hash against a string.
-        private bool VerifyPwd(string pwd)
-        {
-            // Hash the input.
-            string hashOfInput = EncryptPwd(pwd);
-
-            // Create a StringComparer an compare the hashes.
-            StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
-            if (0 == comparer.Compare(hashOfInput, _hashedPwd))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
     }
 }
