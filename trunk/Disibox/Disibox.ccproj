@@ -35,12 +35,19 @@
     <ServiceConfiguration Include="ServiceConfiguration.cscfg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WorkerRole1\WorkerRole1.csproj">
-      <Name>WorkerRole1</Name>
-      <Project>{c58e6aab-51cd-4025-b2cb-39e98436592f}</Project>
+    <ProjectReference Include="..\Disibox.Processor\Disibox.Processor.csproj">
+      <Name>Disibox.Processor</Name>
+      <Project>{23b1c0d9-9a24-43bd-85b7-054a24e295e9}</Project>
       <Private>True</Private>
       <RoleType>Worker</RoleType>
-      <RoleName>WorkerRole1</RoleName>
+      <RoleName>Disibox.Processor</RoleName>
+    </ProjectReference>
+    <ProjectReference Include="..\Disibox.WebUI\Disibox.WebUI.csproj">
+      <Name>Disibox.WebUI</Name>
+      <Project>{ad645212-e83c-45a0-9536-8e59ef921b9d}</Project>
+      <Private>True</Private>
+      <RoleType>Web</RoleType>
+      <RoleName>Disibox.WebUI</RoleName>
     </ProjectReference>
   </ItemGroup>
   <!-- Import the target files for this project template -->

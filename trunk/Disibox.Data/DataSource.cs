@@ -23,11 +23,6 @@ namespace Disibox.Data
         private readonly CloudBlobClient blobClient;
         private readonly CloudBlobContainer blobContainer;
 
-        static DataSource()
-        {
-            
-        }
-
         //The default constructor initializes the storage account by reading its settings from
         //the configuration and then uses CreateTableIfNotExist method in the CloudTableClient
         //class to create the table used by the application.
@@ -82,13 +77,18 @@ namespace Disibox.Data
         /// <returns></returns>
         private string UploadFile(string fileName, string fileContentType, Stream fileContent)
         {       
-            string uniqueBlobName = filesBlobName + "/" + fileName;
-            CloudBlockBlob blob = blobClient.GetBlockBlobReference(uniqueBlobName);
+            var uniqueBlobName = filesBlobName + "/" + fileName;
+            var blob = blobClient.GetBlockBlobReference(uniqueBlobName);
             blob.Properties.ContentType = fileContentType;
             blob.UploadFromStream(fileContent);
             return blob.Uri.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         private string GetContentType(string filePath) {
             var contentType = "application/octetstream";
             var ext = Path.GetExtension(filePath).ToLower();
