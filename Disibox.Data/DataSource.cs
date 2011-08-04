@@ -55,6 +55,13 @@ namespace Disibox.Data
 		
         }
 
+        public string AddFile(string fileName)
+        {
+            var fileContentType = GetContentType(fileName);
+            var fileContent = new FileStream(fileName, FileMode.Open);
+            return UploadFile(fileName, fileContentType, fileContent);
+        }
+
         /// <summary>
         /// Uploads the file to blob storage.
         /// </summary>
@@ -62,7 +69,7 @@ namespace Disibox.Data
         /// <param name="fileContentType"></param>
         /// <param name="fileContent"></param>
         /// <returns></returns>
-        public string AddFile(string fileName, string fileContentType, Stream fileContent)
+        private string UploadFile(string fileName, string fileContentType, Stream fileContent)
         {       
             string uniqueBlobName = filesBlobName + fileName;
             CloudBlockBlob blob = blobClient.GetBlockBlobReference(uniqueBlobName);
