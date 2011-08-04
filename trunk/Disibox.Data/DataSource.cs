@@ -6,6 +6,7 @@ using Microsoft.WindowsAzure.StorageClient;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System.IO;
+using Microsoft.Win32;
 
 namespace Disibox.Data
 {
@@ -55,10 +56,11 @@ namespace Disibox.Data
 		
         }
 
-        public string AddFile(string fileName)
+        public string AddFile(string filePath)
         {
-            var fileContentType = GetContentType(fileName);
-            var fileContent = new FileStream(fileName, FileMode.Open);
+            var fileName = Path.GetFileName(filePath);
+            var fileContentType = GetContentType(filePath);
+            var fileContent = new FileStream(filePath, FileMode.Open);
             return UploadFile(fileName, fileContentType, fileContent);
         }
 
@@ -78,10 +80,10 @@ namespace Disibox.Data
             return blob.Uri.ToString();
         }
 
-        private string GetContentType(string fileName) {
-            string contentType = "application/octetstream";
-            string ext = System.IO.Path.GetExtension(fileName).ToLower();
-            Microsoft.Win32.RegistryKey registryKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext);
+        private string GetContentType(string filePath) {
+            var contentType = "application/octetstream";
+            var ext = Path.GetExtension(filePath).ToLower();
+            var registryKey = Registry.ClassesRoot.OpenSubKey(ext);
             if (registryKey != null && registryKey.GetValue("Content Type") != null)
                 contentType = registryKey.GetValue("Content Type").ToString();
             return contentType;
