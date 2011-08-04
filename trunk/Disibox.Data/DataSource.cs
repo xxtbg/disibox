@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.WindowsAzure.StorageClient;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using System.IO;
 using Microsoft.Win32;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
