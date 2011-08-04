@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.ServiceRuntime;
 using System.IO;
 using Microsoft.Win32;
+using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
@@ -22,6 +20,10 @@ namespace Disibox.Data
 
         private readonly CloudBlobClient blobClient;
         private readonly CloudBlobContainer blobContainer;
+
+        private string _loggedUserId = null;
+        private bool _userIsAdmin = false;
+        private bool _userIsLoggedIn = false;
 
         //The default constructor initializes the storage account by reading its settings from
         //the configuration and then uses CreateTableIfNotExist method in the CloudTableClient
@@ -55,6 +57,9 @@ namespace Disibox.Data
         /// <returns></returns>
         public string AddFile(string path)
         {
+            // Requirements
+            RequireLoggedInUser();
+
             var fileName = Path.GetFileName(path);
             var fileContentType = GetContentType(path);
             var fileContent = new FileStream(path, FileMode.Open);
@@ -64,20 +69,69 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="email"></param>
-        /// <param name="pwd"></param>
-        public void AddUser(string email, string pwd)
+        /// <param name="userEmail"></param>
+        /// <param name="userPwd"></param>
+        /// <param name="userIsAdmin"></param>
+        public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
+            // Requirements
+            RequireLoggedInUser();
+            RequireAdminUser();
 
+            var user = new User(userEmail, userPwd, userIsAdmin);
+            UploadUser(user);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<string> GetFileNames()
         {
+            // Requirements
+            RequireLoggedInUser();
+
             var blobs = blobContainer.ListBlobs();
             var names = new List<string>();
             foreach (var blob in blobs)
                 names.Add(blob.Uri.ToString());
             return names;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <param name="userPwd"></param>
+        /// <exception cref="UserNotExistingException"></exception>
+        public void Login(string userEmail, string userPwd)
+        {
+            var ctx = tableClient.GetDataServiceContext();
+            
+            var q = ctx.CreateQuery<User>(User.UserPartitionKey).Where(u => u.Matches(userEmail, userPwd)); 
+            if (q.Count() != 1)
+                throw new UserNotExistingException();
+            var user = q.First();
+            
+            lock (this)
+            {
+                _loggedUserId = user.RowKey;
+                _userIsAdmin = user.IsAdmin;
+                _userIsLoggedIn = true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Logout()
+        {
+            lock (this)
+            {
+                _loggedUserId = null;
+                _userIsAdmin = false;
+                _userIsLoggedIn = false;
+            }
         }
 
         /// <summary>
@@ -99,15 +153,37 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="user"></param>
+        private void UploadUser(User user)
+        {
+            var ctx = tableClient.GetDataServiceContext();
+            ctx.AddObject(user.PartitionKey, user);
+            ctx.SaveChanges();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private string GetContentType(string path) {
+        private string GetContentType(string path) 
+        {
             var contentType = "application/octetstream";
             var ext = Path.GetExtension(path).ToLower();
             var registryKey = Registry.ClassesRoot.OpenSubKey(ext);
             if (registryKey != null && registryKey.GetValue("Content Type") != null)
                 contentType = registryKey.GetValue("Content Type").ToString();
             return contentType;
+        }
+
+        private void RequireAdminUser()
+        {
+            return; // Da fare...
+        }
+
+        private void RequireLoggedInUser()
+        {
+            return; // Da fare...
         }
     }
 }
