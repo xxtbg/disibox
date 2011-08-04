@@ -33,7 +33,7 @@ namespace Disibox.Data
         //class to create the table used by the application.
         public DataSource()
         {
-            string connectionString = RoleEnvironment.GetConfigurationSettingValue(connectionStringName);
+            string connectionString = "UseDevelopmentStorage=true";//RoleEnvironment.GetConfigurationSettingValue(connectionStringName);
 
             storageAccount = CloudStorageAccount.Parse(connectionString );
             
@@ -73,7 +73,7 @@ namespace Disibox.Data
         /// <returns></returns>
         private string UploadFile(string fileName, string fileContentType, Stream fileContent)
         {       
-            string uniqueBlobName = filesBlobName + fileName;
+            string uniqueBlobName = filesBlobName + "/" + fileName;
             CloudBlockBlob blob = blobClient.GetBlockBlobReference(uniqueBlobName);
             blob.Properties.ContentType = fileContentType;
             blob.UploadFromStream(fileContent);
