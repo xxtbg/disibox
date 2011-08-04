@@ -64,6 +64,15 @@ namespace Disibox.Data
             return UploadFile(fileName, fileContentType, fileContent);
         }
 
+        public IEnumerable<string> GetFileNames()
+        {
+            var blobs = blobContainer.ListBlobs();
+            var names = new List<string>();
+            foreach (var blob in blobs)
+                names.Add(blob.Uri.ToString());
+            return names;
+        }
+
         /// <summary>
         /// Uploads the file to blob storage.
         /// </summary>
