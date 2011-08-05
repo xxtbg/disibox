@@ -2,7 +2,7 @@
 
 namespace Disibox.Processing
 {
-    abstract class BaseProcessor<TResult> : IProcessor<TResult>
+    public abstract class BaseProcessor<TResult> : IProcessor<TResult>
     {
         protected BaseProcessor()
         {

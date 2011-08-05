@@ -13,9 +13,6 @@ namespace Disibox.Data
     {
         private const string ConnectionStringName = "DataConnectionString";
 
-        private const string DataTableName = "data";
-        private const string UsersTableName = "users";
-
         private const string FilesBlobName = "files";
 
         private readonly CloudStorageAccount _storageAccount;
@@ -42,18 +39,10 @@ namespace Disibox.Data
             // Creates users table
             _tableClient = new CloudTableClient(_storageAccount.TableEndpoint.AbsoluteUri, _storageAccount.Credentials);
             _tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-            _tableClient.CreateTableIfNotExist(DataTableName);
-            _tableClient.CreateTableIfNotExist(UsersTableName);
 
             // Creates files blob container
             _blobClient = _storageAccount.CreateCloudBlobClient();
             _blobContainer = _blobClient.GetContainerReference(FilesBlobName);
-            _blobContainer.CreateIfNotExist();
-
-            // Set blob container permissions
-            var permissions = _blobContainer.GetPermissions();
-            permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-            _blobContainer.SetPermissions(permissions);
         }
 
         /// <summary>
