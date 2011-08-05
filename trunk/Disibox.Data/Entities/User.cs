@@ -1,6 +1,6 @@
 ﻿using Microsoft.WindowsAzure.StorageClient;
 
-namespace Disibox.Data
+namespace Disibox.Data.Entities
 {
     internal sealed class User : TableServiceEntity
     {
@@ -11,18 +11,23 @@ namespace Disibox.Data
         /// storage has two key properties: the PartitionKey and the RowKey. These properties 
         /// together form the table's primary key and uniquely identify each entity in the table. 
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="email"></param>
-        /// <param name="pwd"></param>
+        /// <param name="userId"></param>
+        /// <param name="userEmail"></param>
+        /// <param name="userPwd"></param>
         /// <param name="userType"></param>
-        public User(string id, string email, string pwd, UserType userType)
+        public User(string userId, string userEmail, string userPwd, UserType userType)
         {
+            // TableServiceEntity properties
             PartitionKey = UserPartitionKey;
-            RowKey = char.ToLower(userType.ToString()[0]) + id;
-            Email = email;
-            HashedPassword = Utils.EncryptPwd(pwd);
+            RowKey = userId;
+            
+            Id = userId;
+            Email = userEmail;
+            HashedPassword = Utils.EncryptPwd(userPwd);
             Type = userType;
         }
+
+        public string Id { get; private set; }
 
         /// <summary>
         /// User email address.

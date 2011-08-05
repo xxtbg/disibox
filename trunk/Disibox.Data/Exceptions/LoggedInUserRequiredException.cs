@@ -2,7 +2,7 @@
 
 namespace Disibox.Data.Exceptions
 {
-    class LoggedInUserRequiredException : Exception
+    public class LoggedInUserRequiredException : Exception
     {
         // Empty
     }
