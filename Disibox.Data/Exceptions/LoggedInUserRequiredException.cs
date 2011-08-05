@@ -2,7 +2,7 @@
 
 namespace Disibox.Data.Exceptions
 {
-    class UserNotExistingException : Exception
+    class LoggedInUserRequiredException : Exception
     {
         // Empty
     }

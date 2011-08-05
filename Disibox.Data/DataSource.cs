@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using Disibox.Data.Exceptions;
 using Microsoft.Win32;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
@@ -10,19 +11,22 @@ namespace Disibox.Data
 {
     public class DataSource
     {
-        private const string usersTableName = "users";
-        private const string filesBlobName = "files";
-        private const string connectionStringName = "DataConnectionString";
-        
-        private static CloudStorageAccount storageAccount;
-        
-        private CloudTableClient tableClient;
+        private const string ConnectionStringName = "DataConnectionString";
 
-        private readonly CloudBlobClient blobClient;
-        private readonly CloudBlobContainer blobContainer;
+        private const string DataTableName = "data";
+        private const string UsersTableName = "users";
+        
+        private const string FilesBlobName = "files";
+        
+        private readonly CloudStorageAccount _storageAccount;
+        
+        private readonly CloudTableClient _tableClient;
 
-        private string _loggedUserId = null;
-        private bool _userIsAdmin = false;
+        private readonly CloudBlobClient _blobClient;
+        private readonly CloudBlobContainer _blobContainer;
+
+        private string _loggedUserId;
+        private UserType _loggedUserType;
         private bool _userIsLoggedIn = false;
 
         //The default constructor initializes the storage account by reading its settings from
@@ -32,22 +36,23 @@ namespace Disibox.Data
         {
             string connectionString = "UseDevelopmentStorage=true";//RoleEnvironment.GetConfigurationSettingValue(connectionStringName);
 
-            storageAccount = CloudStorageAccount.Parse(connectionString);
+            _storageAccount = CloudStorageAccount.Parse(connectionString);
             
             // Creates users table
-            tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
-            tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-            tableClient.CreateTableIfNotExist(usersTableName);
+            _tableClient = new CloudTableClient(_storageAccount.TableEndpoint.AbsoluteUri, _storageAccount.Credentials);
+            _tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
+            _tableClient.CreateTableIfNotExist(DataTableName);
+            _tableClient.CreateTableIfNotExist(UsersTableName);
 
             // Creates files blob container
-            blobClient = storageAccount.CreateCloudBlobClient();
-            blobContainer = blobClient.GetContainerReference(filesBlobName);
-            blobContainer.CreateIfNotExist();
+            _blobClient = _storageAccount.CreateCloudBlobClient();
+            _blobContainer = _blobClient.GetContainerReference(FilesBlobName);
+            _blobContainer.CreateIfNotExist();
 
             // Set blob container permissions
-            var permissions = blobContainer.GetPermissions();
+            var permissions = _blobContainer.GetPermissions();
             permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-            blobContainer.SetPermissions(permissions);
+            _blobContainer.SetPermissions(permissions);
         }
 
         /// <summary>
@@ -71,14 +76,14 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="userEmail"></param>
         /// <param name="userPwd"></param>
-        /// <param name="userIsAdmin"></param>
-        public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
+        /// <param name="userType"></param>
+        public void AddUser(string userEmail, string userPwd, UserType userType)
         {
             // Requirements
             RequireLoggedInUser();
-            RequireAdminUser();
+            RequireUserType(UserType.AdminUser);
 
-            var user = new User(userEmail, userPwd, userIsAdmin);
+            var user = new User(userEmail, userPwd, userType);
             UploadUser(user);
         }
 
@@ -91,7 +96,7 @@ namespace Disibox.Data
             // Requirements
             RequireLoggedInUser();
 
-            var blobs = blobContainer.ListBlobs();
+            var blobs = _blobContainer.ListBlobs();
 //            var names = new List<string>();
             var names = new List<FileAndMime>();
             foreach (var blob in blobs) {
@@ -110,7 +115,7 @@ namespace Disibox.Data
         /// <exception cref="UserNotExistingException"></exception>
         public void Login(string userEmail, string userPwd)
         {
-            var ctx = tableClient.GetDataServiceContext();
+            var ctx = _tableClient.GetDataServiceContext();
             
             var q = ctx.CreateQuery<User>(User.UserPartitionKey).Where(u => u.Matches(userEmail, userPwd)); 
             if (q.Count() != 1)
@@ -119,9 +124,9 @@ namespace Disibox.Data
             
             lock (this)
             {
-                _loggedUserId = user.RowKey;
-                _userIsAdmin = user.IsAdmin;
                 _userIsLoggedIn = true;
+                _loggedUserId = user.RowKey;
+                _loggedUserType = user.Type;
             }
         }
 
@@ -132,8 +137,6 @@ namespace Disibox.Data
         {
             lock (this)
             {
-                _loggedUserId = null;
-                _userIsAdmin = false;
                 _userIsLoggedIn = false;
             }
         }
@@ -147,8 +150,8 @@ namespace Disibox.Data
         /// <returns></returns>
         private string UploadFile(string name, string contentType, Stream content)
         {       
-            var uniqueBlobName = filesBlobName + "/" + name;
-            var blob = blobClient.GetBlockBlobReference(uniqueBlobName);
+            var uniqueBlobName = FilesBlobName + "/" + name;
+            var blob = _blobClient.GetBlockBlobReference(uniqueBlobName);
             blob.Properties.ContentType = contentType;
             blob.UploadFromStream(content);
             return blob.Uri.ToString();
@@ -160,7 +163,7 @@ namespace Disibox.Data
         /// <param name="user"></param>
         private void UploadUser(User user)
         {
-            var ctx = tableClient.GetDataServiceContext();
+            var ctx = _tableClient.GetDataServiceContext();
             ctx.AddObject(user.PartitionKey, user);
             ctx.SaveChanges();
         }
@@ -170,7 +173,7 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private string GetContentType(string path) 
+        private static string GetContentType(string path) 
         {
             var contentType = "application/octetstream";
             var ext = Path.GetExtension(path).ToLower();
@@ -180,14 +183,25 @@ namespace Disibox.Data
             return contentType;
         }
 
-        private void RequireAdminUser()
-        {
-            return; // Da fare...
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="LoggedInUserRequiredException"></exception>
         private void RequireLoggedInUser()
         {
-            return; // Da fare...
+            if (_userIsLoggedIn) return;
+            //throw new LoggedInUserRequiredException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userType"></param>
+        /// <exception cref="SpecialUserRequiredException"></exception>
+        private void RequireUserType(UserType userType)
+        {
+            if (_loggedUserType == userType) return;
+            //throw new SpecialUserRequiredException(userType);
         }
     }
 }
