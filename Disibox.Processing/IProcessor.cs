@@ -23,7 +23,7 @@ namespace Disibox.Processing
         /// 
         /// </summary>
         /// <returns></returns>
-        IEnumerable<string> GetProcessableTypes();
+        IEnumerable<string> ProcessableTypes { get; }
 
         /// <summary>
         /// 
