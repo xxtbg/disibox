@@ -1,26 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
-using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Dispatcher
 {
-    public class WorkerRole : RoleEntryPoint {
-        private AutoResetEvent _connectionHandler = new AutoResetEvent(false);
+    public class Dispatcher : RoleEntryPoint {
+        private readonly AutoResetEvent _connectionHandler = new AutoResetEvent(false);
 
         public override void Run()
         {
             Trace.WriteLine("Disibox.Dispatcher entry point called", "Information");
 
-            TcpListener tcpListener = null;
+            TcpListener tcpListener;
 
             try {
                 tcpListener = new TcpListener(RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["EndpointDispatcher"].IPEndpoint);
@@ -48,7 +43,7 @@ namespace Disibox.Dispatcher
             _connectionHandler.Set();
 
             var clientId = Guid.NewGuid();
-            Trace.Write("Accepted connection with ID " + clientId.ToString(), "Information");
+            Trace.Write("Accepted connection with ID " + clientId, "Information");
 
             var reader = new StreamReader(client.GetStream());
             var writer = new StreamWriter(client.GetStream());

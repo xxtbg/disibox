@@ -20,6 +20,7 @@ namespace Disibox.Processor
             {
                 Thread.Sleep(10000);
                 Trace.WriteLine("Working", "Information");
+
 //                var procReq = _dataSource.DequeueProcessingRequest();
             }
         }
