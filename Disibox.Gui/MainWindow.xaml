@@ -9,9 +9,9 @@
                 <Separator />
                 <MenuItem Header="Exit" Click="ExitProgram"/>
             </MenuItem>
-            <MenuItem Header="Filters">
-                <MenuItem Header="Filter for image"/>
-                <MenuItem Header="Filter for text file"/>
+            <MenuItem Header="Process">
+                <MenuItem Header="Process selected File" Click="processFile"/>
+               
             </MenuItem>
         </Menu>
         <TabControl Margin="10,10,10,10" Name="tabControl1">
