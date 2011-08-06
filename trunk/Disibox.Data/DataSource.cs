@@ -150,7 +150,7 @@ namespace Disibox.Data
             {
                 _userIsLoggedIn = true;
                 _loggedUserId = user.RowKey;
-                _loggedUserType = user.Type;
+                _loggedUserType = (user.IsAdmin) ? UserType.AdminUser : UserType.CommonUser;
             }
         }
 
