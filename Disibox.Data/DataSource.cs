@@ -11,33 +11,31 @@ namespace Disibox.Data
 {
     public class DataSource
     {
-        private readonly CloudStorageAccount _storageAccount;
-
         private readonly CloudTableClient _tableClient;
 
         private readonly CloudBlobClient _blobClient;
         private readonly CloudBlobContainer _blobContainer;
         private readonly string _filesBlobName;
 
+        private readonly CloudQueue _processingQueue;
+
         private string _loggedUserId = "test_da_togliere";
         private UserType _loggedUserType;
         private bool _userIsLoggedIn;
 
-        //The default constructor initializes the storage account by reading its settings from
-        //the configuration and then uses CreateTableIfNotExist method in the CloudTableClient
-        //class to create the table used by the application.
+        /// <summary>
+        /// 
+        /// </summary>
         public DataSource()
         {
-            string connectionString = Properties.Settings.Default.DataConnectionString;
+            var connectionString = Properties.Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-            _storageAccount = CloudStorageAccount.Parse(connectionString);
-
-            // Creates users table
-            _tableClient = new CloudTableClient(_storageAccount.TableEndpoint.AbsoluteUri, _storageAccount.Credentials);
-            _tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
+            _processingQueue = InitQueueClient(storageAccount);
+            _tableClient = InitTableClient(storageAccount);
 
             // Creates files blob container
-            _blobClient = _storageAccount.CreateCloudBlobClient();
+            _blobClient = storageAccount.CreateCloudBlobClient();
             _filesBlobName = Properties.Settings.Default.FilesBlobName;
             _blobContainer = _blobClient.GetContainerReference(_filesBlobName);
         }
@@ -59,6 +57,11 @@ namespace Disibox.Data
             return UploadFile(fileName, fileContentType, fileContent);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="fileContent"></param>
         public void AddFile(string fileName, Stream fileContent)
         {
             // Requirements
@@ -85,6 +88,26 @@ namespace Disibox.Data
             var userId = GenerateUserId(userType);
             var user = new User(userId, userEmail, userPwd, userType);
             UploadUser(user);
+        }
+
+        public ProcessingRequest DequeueProcessingRequest()
+        {
+            var msg = _processingQueue.GetMessage();
+            if (msg == null) return null;
+
+            var procReq = ProcessingRequest.FromString(msg.AsString);
+            _processingQueue.DeleteMessage(msg);
+
+            return procReq;
+        }
+
+        public void EnqueueProcessingRequest(ProcessingRequest procReq)
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            var msg = new CloudQueueMessage(procReq.ToString());
+            _processingQueue.AddMessage(msg);
         }
 
         /// <summary>
@@ -157,6 +180,25 @@ namespace Disibox.Data
             ctx.SaveChanges();
 
             return userId;
+        }
+
+        private void InitBlobClient(CloudStorageAccount storageAccount)
+        {
+            
+        }
+
+        private static CloudQueue InitQueueClient(CloudStorageAccount storageAccount)
+        {
+            var queueClient = storageAccount.CreateCloudQueueClient();
+            var processingQueueName = Properties.Settings.Default.ProcessingQueueName;
+            return queueClient.GetQueueReference(processingQueueName);
+        }
+
+        private static CloudTableClient InitTableClient(CloudStorageAccount storageAccount)
+        {
+            var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
+            tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
+            return tableClient;
         }
 
         /// <summary>
