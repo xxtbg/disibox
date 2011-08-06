@@ -18,14 +18,13 @@ namespace Disibox.Data
 
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-            var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials)
-                                  {
-                                      RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1))
-                                  };
+            InitBlobs(storageAccount);
+            InitQueues(storageAccount);
+            InitTables(storageAccount);
+        }
 
-            InitEntriesTable(tableClient);
-            InitUsersTable(tableClient);
-
+        private static void InitBlobs(CloudStorageAccount storageAccount)
+        {
             // Creates files blob container
             var blobClient = storageAccount.CreateCloudBlobClient();
             var blobContainer = blobClient.GetContainerReference(FilesBlobName);
@@ -35,6 +34,22 @@ namespace Disibox.Data
             var permissions = blobContainer.GetPermissions();
             permissions.PublicAccess = BlobContainerPublicAccessType.Container;
             blobContainer.SetPermissions(permissions);
+        }
+
+        private static void InitQueues(CloudStorageAccount storageAccount)
+        {
+            
+        }
+
+        private static void InitTables(CloudStorageAccount storageAccount)
+        {
+            var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials)
+            {
+                RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1))
+            };
+
+            InitEntriesTable(tableClient);
+            InitUsersTable(tableClient);
         }
 
         private static void InitEntriesTable(CloudTableClient tableClient)
