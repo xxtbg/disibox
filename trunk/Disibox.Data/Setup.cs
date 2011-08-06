@@ -35,8 +35,8 @@ namespace Disibox.Data
         {
             var queueClient = storageAccount.CreateCloudQueueClient();
             var processingQueueName = Properties.Settings.Default.ProcessingQueueName;
-            var queue = queueClient.GetQueueReference(processingQueueName);
-            queue.CreateIfNotExist();
+            var processingQueue = queueClient.GetQueueReference(processingQueueName);
+            processingQueue.CreateIfNotExist();
         }
 
         private static void InitTables(CloudStorageAccount storageAccount)
