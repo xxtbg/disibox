@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Disibox.Data.Entities;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
@@ -53,6 +54,10 @@ namespace Disibox.Data
             tableClient.CreateTableIfNotExist(Entry.EntryPartitionKey);
 
             var ctx = tableClient.GetDataServiceContext();
+
+            var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
+            if (q.Count() != 0) return;
+
             var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
             ctx.AddObject(Entry.EntryPartitionKey, nextUserIdEntry);
             ctx.SaveChanges();

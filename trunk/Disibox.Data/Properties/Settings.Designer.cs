@@ -61,7 +61,7 @@ namespace Disibox.Data.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("processing_queue")]
+        [global::System.Configuration.DefaultSettingValueAttribute("processingqueue")]
         public string ProcessingQueueName {
             get {
                 return ((string)(this["ProcessingQueueName"]));
