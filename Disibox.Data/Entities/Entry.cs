@@ -11,19 +11,19 @@ namespace Disibox.Data.Entities
         /// storage has two key properties: the PartitionKey and the RowKey. These properties 
         /// together form the table's primary key and uniquely identify each entity in the table. 
         /// </summary>
-        /// <param name="entryKey"></param>
+        /// <param name="entryName"></param>
         /// <param name="entryValue"></param>
-        public Entry(string entryKey, string entryValue)
+        public Entry(string entryName, string entryValue)
         {
             // TableServiceEntity properties
             PartitionKey = EntryPartitionKey;
-            RowKey = entryKey;
+            RowKey = entryName;
 
-            Key = entryKey;
+            Name = entryName;
             Value = entryValue;
         }
 
-        public string Key { get; private set; }
+        public string Name { get; private set; }
 
         public string Value { get; set; }
     }

@@ -169,7 +169,7 @@ namespace Disibox.Data
         {
             var ctx = _tableClient.GetDataServiceContext();
 
-            var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Key == "NextUserId");
+            var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
             var nextUserId = int.Parse(q.First().Value);
 
             var userId = string.Format("{0}{1:16}", char.ToLower(userType.ToString()[0]), nextUserId);
