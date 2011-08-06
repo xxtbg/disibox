@@ -25,11 +25,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace Disibox.Data
+namespace Disibox.Utils
 {
-    public enum UserType
+    public class Pair<TFirst, TSecond>
     {
-        AdminUser,
-        CommonUser
+        public Pair(TFirst first, TSecond second)
+        {
+            First = first;
+            Second = second;
+        }
+
+        public TFirst First { get; set; }
+
+        public TSecond Second { get; set; }
     }
 }
