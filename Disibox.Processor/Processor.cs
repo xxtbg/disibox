@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
-using System.Reflection;
 using System.Threading;
+using Disibox.Data;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Disibox.Processor
 {
     public class Processor : RoleEntryPoint
     {
-        private const string ProcAssemblyPath = @"c:\Test.dll";
-
-        private Dictionary<string, object> _procTools;
- 
-        public Processor()
-        {
-            InitProcTools();
-        }
+        private DataSource _dataSource;
 
         public override void Run()
         {
@@ -28,6 +20,7 @@ namespace Disibox.Processor
             {
                 Thread.Sleep(10000);
                 Trace.WriteLine("Working", "Information");
+                var procReq = _dataSource.DequeueProcessingRequest();
             }
         }
 
@@ -36,8 +29,7 @@ namespace Disibox.Processor
             // Set the maximum number of concurrent connections 
             ServicePointManager.DefaultConnectionLimit = 12;
 
-            // For information on handling configuration changes
-            // see the MSDN topic at http://go.microsoft.com/fwlink/?LinkId=166357.
+            _dataSource = new DataSource();
 
             return base.OnStart();
         }
@@ -46,24 +38,10 @@ namespace Disibox.Processor
         {
             object tool;
             
-            if (!_procTools.TryGetValue(toolName, out tool))
+            //if (!_procTools.TryGetValue(toolName, out tool))
                 throw new ArgumentException(toolName + " does not exist.", "toolName");
 
 
-        }
-
-        private void InitProcTools()
-        {
-            _procTools = new Dictionary<string, object>();
-
-            var procAssembly = Assembly.LoadFile(ProcAssemblyPath);
-            var procTypes = procAssembly.GetTypes();
-
-            foreach (var procType in procTypes)
-            {
-                var procObject = Activator.CreateInstance(procType);
-                _procTools.Add(procType.ToString(), procObject);
-            }
         }
     }
 }

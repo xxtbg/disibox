@@ -27,7 +27,7 @@ namespace Disibox.Gui {
 
         //for accessing the server
         private string _serverString = "127.0.0.1";
-        private int _serverPort = "10000";
+        private int _serverPort = 10000;
 
         public MainWindow() {
             InitializeComponent();
