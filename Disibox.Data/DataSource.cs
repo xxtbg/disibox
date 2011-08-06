@@ -11,16 +11,13 @@ namespace Disibox.Data
 {
     public class DataSource
     {
-        private const string ConnectionStringName = "DataConnectionString";
-
-        private const string FilesBlobName = "files";
-
         private readonly CloudStorageAccount _storageAccount;
 
         private readonly CloudTableClient _tableClient;
 
         private readonly CloudBlobClient _blobClient;
         private readonly CloudBlobContainer _blobContainer;
+        private readonly string _filesBlobName;
 
         private string _loggedUserId = "test_da_togliere";
         private UserType _loggedUserType;
@@ -31,8 +28,7 @@ namespace Disibox.Data
         //class to create the table used by the application.
         public DataSource()
         {
-            string connectionString = "UseDevelopmentStorage=true";
-                //RoleEnvironment.GetConfigurationSettingValue(connectionStringName);
+            string connectionString = Properties.Settings.Default.DataConnectionString;
 
             _storageAccount = CloudStorageAccount.Parse(connectionString);
 
@@ -42,7 +38,8 @@ namespace Disibox.Data
 
             // Creates files blob container
             _blobClient = _storageAccount.CreateCloudBlobClient();
-            _blobContainer = _blobClient.GetContainerReference(FilesBlobName);
+            _filesBlobName = Properties.Settings.Default.FilesBlobName;
+            _blobContainer = _blobClient.GetContainerReference(_filesBlobName);
         }
 
         /// <summary>
@@ -161,7 +158,7 @@ namespace Disibox.Data
         /// <returns></returns>
         private string UploadFile(string name, string contentType, Stream content)
         {
-            var uniqueBlobName = FilesBlobName + "/" + _loggedUserId + "/" + name;
+            var uniqueBlobName = _filesBlobName + "/" + _loggedUserId + "/" + name;
             var blob = _blobClient.GetBlockBlobReference(uniqueBlobName);
             blob.Properties.ContentType = contentType;
             blob.UploadFromStream(content);
