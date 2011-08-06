@@ -47,6 +47,7 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
+        [Obsolete]
         public string AddFile(string path)
         {
             // Requirements
@@ -56,6 +57,15 @@ namespace Disibox.Data
             var fileContentType = Utils.GetContentType(path);
             var fileContent = new FileStream(path, FileMode.Open);
             return UploadFile(fileName, fileContentType, fileContent);
+        }
+
+        public void AddFile(string fileName, Stream fileContent)
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            var fileContentType = Utils.GetContentType(fileName);
+            UploadFile(fileName, fileContentType, fileContent);
         }
 
         /// <summary>
