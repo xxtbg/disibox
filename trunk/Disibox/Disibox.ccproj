@@ -35,6 +35,13 @@
     <ServiceConfiguration Include="ServiceConfiguration.cscfg" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Disibox.Dispatcher\Disibox.Dispatcher.csproj">
+      <Name>Disibox.Dispatcher</Name>
+      <Project>{45b4963a-2a75-46c7-8274-226d0c511778}</Project>
+      <Private>True</Private>
+      <RoleType>Worker</RoleType>
+      <RoleName>Disibox.Dispatcher</RoleName>
+    </ProjectReference>
     <ProjectReference Include="..\Disibox.Processor\Disibox.Processor.csproj">
       <Name>Disibox.Processor</Name>
       <Project>{23b1c0d9-9a24-43bd-85b7-054a24e295e9}</Project>

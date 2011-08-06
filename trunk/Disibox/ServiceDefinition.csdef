@@ -20,4 +20,9 @@
       <Import moduleName="Diagnostics" />
     </Imports>
   </WorkerRole>
+  <WorkerRole name="Disibox.Dispatcher">
+    <Imports>
+      <Import moduleName="Diagnostics" />
+    </Imports>
+  </WorkerRole>
 </ServiceDefinition>
