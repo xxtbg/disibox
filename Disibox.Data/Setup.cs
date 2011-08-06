@@ -53,14 +53,14 @@ namespace Disibox.Data
         {
             tableClient.CreateTableIfNotExist(Entry.EntryPartitionKey);
 
-            var ctx = tableClient.GetDataServiceContext();
+            /*var ctx = tableClient.GetDataServiceContext();
 
             var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
             if (q.Count() != 0) return;
 
             var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
             ctx.AddObject(Entry.EntryPartitionKey, nextUserIdEntry);
-            ctx.SaveChanges();
+            ctx.SaveChanges();*/
         }
 
         private static void InitUsersTable(CloudTableClient tableClient)
@@ -68,9 +68,14 @@ namespace Disibox.Data
             tableClient.CreateTableIfNotExist(User.UserPartitionKey);
 
             var ctx = tableClient.GetDataServiceContext();
+
+            var q = ctx.CreateQuery<User>(User.UserPartitionKey).Where(e => e.Id == "a0");
+            if (q.Count() != 0) return;
+
             var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
             var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
             var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, UserType.AdminUser);
+
             ctx.AddObject(User.UserPartitionKey, defaultAdminUser);
             ctx.SaveChanges();
         }

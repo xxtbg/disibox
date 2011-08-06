@@ -24,25 +24,25 @@ namespace Disibox.Data.Entities
             Id = userId;
             Email = userEmail;
             HashedPassword = Utils.EncryptPwd(userPwd);
-            Type = userType;
+            IsAdmin = (userType == UserType.AdminUser);
         }
 
-        public string Id { get; private set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// User email address.
         /// </summary>
-        public string Email { get; private set; }
+        public string Email { get; set; }
 
         /// <summary>
         /// Hashed user password.
         /// </summary>
-        public string HashedPassword { get; private set; }
+        public string HashedPassword { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public UserType Type { get; private set; }
+        public bool IsAdmin { get; set; }
 
         /// <summary>
         /// 
