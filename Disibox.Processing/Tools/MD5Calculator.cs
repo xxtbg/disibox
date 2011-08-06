@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Disibox.Processing
+namespace Disibox.Processing.Tools
 {
-    public class MD5Calculator : BaseProcessor<string>
+    public class MD5Calculator : BaseTool
     {
         public override string Name
         {
@@ -22,7 +19,7 @@ namespace Disibox.Processing
             get { throw new NotImplementedException(); }
         }
 
-        public override string ProcessFile()
+        public override object ProcessFile()
         {
             throw new NotImplementedException();
         }

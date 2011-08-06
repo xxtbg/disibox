@@ -2,9 +2,9 @@
 
 namespace Disibox.Processing
 {
-    public abstract class BaseProcessor<TResult> : IProcessor<TResult>
+    public abstract class BaseTool : ITool
     {
-        protected BaseProcessor()
+        protected BaseTool()
         {
             ProcessableTypes = new List<string>();
         }
@@ -17,6 +17,6 @@ namespace Disibox.Processing
 
         public IEnumerable<string> ProcessableTypes { get; private set; }
         
-        public abstract TResult ProcessFile();
+        public abstract object ProcessFile();
     }
 }

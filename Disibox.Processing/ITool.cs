@@ -2,7 +2,7 @@
 
 namespace Disibox.Processing
 {
-    public interface IProcessor<out TResult>
+    public interface ITool
     {
         /// <summary>
         /// 
@@ -29,6 +29,6 @@ namespace Disibox.Processing
         /// 
         /// </summary>
         /// <returns></returns>
-        TResult ProcessFile();
+        object ProcessFile();
     }
 }
