@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +24,11 @@ namespace Disibox.Gui {
     public partial class MainWindow : Window {
         private string _user;
         private DataSource _dataSource;
+
+        //for accessing the server
+        private string _serverString = "127.0.0.1";
+        private int _serverPort = "10000";
+
         public MainWindow() {
             InitializeComponent();
         }
@@ -93,6 +101,38 @@ namespace Disibox.Gui {
 
             if (selectedItem == null) return;
 //            to download the file with this name = selectedItem.Filename
+        }
+
+        private void processFile(object sender, RoutedEventArgs e) {
+            var selectedItem = (FileAndMime)listView_Files.SelectedItem;
+
+//            if (selectedItem == null) return;
+            //            to download the file with this name = selectedItem.Filename
+            var server = new TcpClient();
+            server.Connect(IPAddress.Parse(_serverString), _serverPort);
+
+            var reader = new StreamReader(server.GetStream());
+            var writer = new StreamWriter(server.GetStream());
+
+            writer.WriteLine("user");
+            writer.WriteLine("password");
+            writer.WriteLine("mime");
+            writer.WriteLine("file to process");
+
+
+            var p1 = reader.ReadLine();
+            var p2 = reader.ReadLine();
+            var p3 = reader.ReadLine();
+
+
+            writer.WriteLine("1");
+
+            var uriprocessedfile = reader.ReadLine();
+
+            Console.WriteLine(uriprocessedfile);
+
+            server.Close();
+
         }
 
     }
