@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Disibox.Data.Entities;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
@@ -7,15 +8,16 @@ namespace Disibox.Data
 {
     public static class Setup
     {
-        private const string ConnectionStringName = "DataConnectionString";
-
-        private const string FilesBlobName = "files";
+        // Keys to access settings in app.config
+        private const string DataConnectionStringKey = "DataConnectionString";
+        private const string DefaultAdminEmailKey = "DefaultAdminName";
+        private const string DefaultAdminPwdKey = "DefaultAdminPwd";
+        private const string FilesBlobNameKey = "FilesBlobName";
+        private const string ProcessingQueueNameKey = "ProcessingQueueName";
 
         public static void Main(string[] args)
         {
-            string connectionString = "UseDevelopmentStorage=true";
-                //RoleEnvironment.GetConfigurationSettingValue(connectionStringName);
-
+            var connectionString = ConfigurationManager.AppSettings.Get(DataConnectionStringKey);
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
             InitBlobs(storageAccount);
@@ -27,7 +29,8 @@ namespace Disibox.Data
         {
             // Creates files blob container
             var blobClient = storageAccount.CreateCloudBlobClient();
-            var blobContainer = blobClient.GetContainerReference(FilesBlobName);
+            var filesBlobName = ConfigurationManager.AppSettings.Get(FilesBlobNameKey);
+            var blobContainer = blobClient.GetContainerReference(filesBlobName);
             blobContainer.CreateIfNotExist();
 
             // Set blob container permissions
@@ -38,7 +41,10 @@ namespace Disibox.Data
 
         private static void InitQueues(CloudStorageAccount storageAccount)
         {
-            
+            var queueClient = storageAccount.CreateCloudQueueClient();
+            var processingQueueName = ConfigurationManager.AppSettings.Get(ProcessingQueueNameKey);
+            var queue = queueClient.GetQueueReference(processingQueueName);
+            queue.CreateIfNotExist();
         }
 
         private static void InitTables(CloudStorageAccount storageAccount)
@@ -67,7 +73,9 @@ namespace Disibox.Data
             tableClient.CreateTableIfNotExist(User.UserPartitionKey);
 
             var ctx = tableClient.GetDataServiceContext();
-            var defaultAdminUser = new User("a0", "admin", "admin", UserType.AdminUser);
+            var defaultAdminEmail = ConfigurationManager.AppSettings.Get(DefaultAdminEmailKey);
+            var defaultAdminPwd = ConfigurationManager.AppSettings.Get(DefaultAdminPwdKey);
+            var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, UserType.AdminUser);
             ctx.AddObject(User.UserPartitionKey, defaultAdminUser);
             ctx.SaveChanges();
         }
