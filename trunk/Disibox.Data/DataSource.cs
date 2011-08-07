@@ -187,16 +187,29 @@ namespace Disibox.Data
             // Requirements
             RequireLoggedInUser();
 
-            var blobs = _blobContainer.ListBlobs();
-//            var names = new List<string>();
+            var options = new BlobRequestOptions();
+            options.UseFlatBlobListing = true;
+
+            var blobs = _blobContainer.ListBlobs(options);
+
             var names = new List<FileAndMime>();
+
+            var prefix = _filesBlobName + "/";
+            if (!_loggedUserIsAdmin) 
+                prefix += _loggedUserId;
+            var prefixLength = prefix.Length;
+
+            if (_loggedUserIsAdmin)
+                prefixLength--;
+
             foreach (var blob in blobs)
             {
-                //                names.Add(blob.Uri.ToString());
-                
-                var filename = blob.Uri.ToString();
-                names.Add(new FileAndMime(filename, Common.GetContentType(filename)));
+                var uri = blob.Uri.ToString();
+                var prefixStart = uri.IndexOf(prefix);
+                var fileName = uri.Substring(prefixStart + prefixLength + 1);
+                names.Add(new FileAndMime(fileName, Common.GetContentType(fileName), uri));
             }
+
             return names;
         }
 

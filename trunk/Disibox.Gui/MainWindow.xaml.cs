@@ -65,9 +65,12 @@ namespace Disibox.Gui {
 
         private void buttonUpload_Click(object sender, RoutedEventArgs e)
         {
-            if (textBoxFileToUpload.Text != "") {
-                var retn = _dataSource.AddFile(textBoxFileToUpload.Text);
-                MessageBox.Show("The file has been uploaded successfully: " + retn);
+            if (textBoxFileToUpload.Text != "")
+            {
+                var fileName = textBoxFileToUpload.Text;
+                var fileStream = new FileStream(fileName, FileMode.Open);
+                _dataSource.AddFile(fileName, fileStream);
+                MessageBox.Show("The file has been uploaded successfully!");
             } else {
                 MessageBox.Show("No file to upload");
             }
@@ -105,9 +108,22 @@ namespace Disibox.Gui {
 
         private void buttonDownloadFile_Click(object sender, RoutedEventArgs e) {
             var selectedItem = (FileAndMime)listView_Files.SelectedItem;
+            var saveDialog = new SaveFileDialog();
 
-            if (selectedItem == null) return;
-//            to download the file with this name = selectedItem.Filename
+            if (selectedItem == null || saveDialog.ShowDialog() != true || !saveDialog.CheckPathExists) return;
+            var fileToDownload = _dataSource.GetFile(selectedItem.Uri);
+
+            //catch exception if any
+            try
+            {
+                fileToDownload.CopyTo(File.Create(saveDialog.FileName));
+            } catch (Exception)
+            {
+                MessageBox.Show("Error during the download of the file", "Downloading file");
+                return;
+            }
+
+            MessageBox.Show("File successfuly downloaded to: " + saveDialog.FileName, "Downloading file");
         }
 
         private void processFile(object sender, RoutedEventArgs e) {
@@ -131,7 +147,7 @@ namespace Disibox.Gui {
             writer.WriteLine("file to process");
 
 
-            var processWindow = new ProcessWindow(reader, writer);
+            var processWindow = new ProcessWindow(reader, writer, _dataSource);
             processWindow.ShowDialog();
 
         }

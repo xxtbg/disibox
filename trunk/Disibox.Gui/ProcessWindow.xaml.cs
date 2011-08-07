@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Disibox.Data;
 using Microsoft.Win32;
 
 namespace Disibox.Gui
@@ -21,23 +22,62 @@ namespace Disibox.Gui
     /// </summary>
     public partial class ProcessWindow : Window
     {
-        private StreamReader _reader;
-        private StreamWriter _writer;
-        public ProcessWindow(StreamReader reader, StreamWriter writer)
+        private readonly StreamReader _reader;
+        private readonly StreamWriter _writer;
+        private readonly DataSource _ds;
+        public ProcessWindow(StreamReader reader, StreamWriter writer, DataSource ds)
         {
             InitializeComponent();
             _reader = reader;
             _writer = writer;
+            _ds = ds;
             FillListView();
         }
 
         private void FillListView()
         {
-            var numberOfProcessingTools = Int32.Parse(_reader.ReadLine());
-
-            for(int i=0; i<numberOfProcessingTools; ++i)
+            string temp = null;
+            var numberOfProcessingTools = 0;
+            try
             {
-                var listItem = _reader.ReadLine();
+                temp = _reader.ReadLine();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("The server is not responding, try later!", "Information");
+                Close();
+                return;
+            }
+
+            if (temp == null)
+            {
+                MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                Close();
+                return;
+            }
+
+            try
+            {
+                numberOfProcessingTools = Int32.Parse(temp);
+            } catch (Exception)
+            {
+                MessageBox.Show("Mesage returned from server is wrong format or null, try later!", "Information");
+                Close();
+                return;
+            }
+
+            for(var i=0; i<numberOfProcessingTools; ++i)
+            {
+                string listItem = null;
+                try
+                {
+                    listItem = _reader.ReadLine();   
+                } catch (Exception)
+                {
+                    MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                    Close();
+                    return;
+                }
                 listView.Items.Add(listItem);
             }
         }
@@ -47,37 +87,63 @@ namespace Disibox.Gui
         private void buttonApply_Click(object sender, RoutedEventArgs e)
         {
             if (listView.SelectedIndex == -1) return;
+            string processedFile = null;
 
-            _writer.WriteLine(listView.SelectedIndex);
+            try
+            {
+                _writer.WriteLine(listView.SelectedIndex);
 
-            //leggo l'uri del file processato
-            var processedFile = _reader.ReadLine();
+                //leggo l'uri del file processato
+                processedFile = _reader.ReadLine();
+            } catch (Exception)
+            {
+                MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                Close();
+                return;
+            }
+
+            if (processedFile == null)
+            {
+                MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                Close();
+                return;
+            }
 
 
             var saveDialog = new SaveFileDialog();
 
-            var result = saveDialog.ShowDialog();
-            if (result == true && saveDialog.CheckPathExists)
+            if (saveDialog.ShowDialog() == true && saveDialog.CheckPathExists)
             {
-                var path = System.IO.Path.GetDirectoryName(saveDialog.FileName);
-                    
+                var path = saveDialog.FileName;
+                var fileblob = _ds.GetFile(processedFile);
+                
                 //downloading file to the path
+                try
+                {
+                    fileblob.CopyTo(File.Create(path));
+                } catch (Exception)
+                {
+                    MessageBox.Show("Error during the download of the file", "Downloading file");
 
-                MessageBox.Show("file successfuly downloaded to: " + path);
+                    //delete the file fileblob
 
+                    Close();
+                    return;
+                }
+                MessageBox.Show("File successfuly downloaded to: " + path, "Downloading file");
             } else
             {
-                //delete the temporary file from the cloud - processedFile
-                MessageBox.Show("processed file deleted from the cloud because you didn't want to save it or the specified path does not exist");
+                MessageBox.Show("processed file deleted from the cloud because you didn't " +
+                                "want to save it or the specified path does not exist", "Downloading file");
 
             }
 
+            //delete the file fileblob
             this.Close();
         }
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e)
         {
-            //_server.Close();
             this.Close();
         }
     }
