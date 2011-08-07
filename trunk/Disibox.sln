@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Utils", "Disibox.Ut
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Dispatcher", "Disibox.Dispatcher\Disibox.Dispatcher.csproj", "{45B4963A-2A75-46C7-8274-226D0C511778}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Data.Tests", "Disibox.Data.Tests\Disibox.Data.Tests.csproj", "{AF07F114-277E-4FE8-819C-5E3B43C7B532}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -123,6 +125,16 @@ Global
 		{45B4963A-2A75-46C7-8274-226D0C511778}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{45B4963A-2A75-46C7-8274-226D0C511778}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{45B4963A-2A75-46C7-8274-226D0C511778}.Release|x86.ActiveCfg = Release|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
