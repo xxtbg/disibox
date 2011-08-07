@@ -31,7 +31,7 @@ namespace Disibox.Gui {
             var password = passwordBox.Password;
 
             try {
-//                _dataSource.Login(username, password);
+                _dataSource.Login(username, password);
                 if (!_mainWindow.IsVisible) {
                     _mainWindow.User = username;
                     _mainWindow.Password = password;
@@ -40,7 +40,7 @@ namespace Disibox.Gui {
                     this.Close();
                 }
             } catch (UserNotExistingException) {
-                MessageBox.Show("User and/or Passowrd are not correct");
+                MessageBox.Show("User and/or Passowrd are not correct, please retry!", "Error when Log in");
             }
 
         }
