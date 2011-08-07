@@ -160,7 +160,9 @@ namespace Disibox.Data
         {
             var ctx = _tableClient.GetDataServiceContext();
 
-            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.Matches(userEmail, userPwd));
+            var hashedPwd = Hash.ComputeMD5(userPwd);
+            var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
+            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(predicate);
             if (q.Count() != 1)
                 throw new UserNotExistingException();
             var user = q.First();
@@ -194,14 +196,17 @@ namespace Disibox.Data
             var ctx = _tableClient.GetDataServiceContext();
 
             var q = GetTable<Entry>(ctx, Entry.EntryPartitionKey).Where(e => e.RowKey == "NextUserId");
-            var nextUserId = int.Parse(q.First().Value);
+            var nextUserIdEntry = q.First();
+            var nextUserId = int.Parse(nextUserIdEntry.Value);
 
             var firstIdChar = (userIsAdmin) ? 'a' : 'u';
-            var userId = string.Format("{0}{1:16}", firstIdChar, nextUserId);
+            var userId = string.Format("{0}{1}", firstIdChar, nextUserId.ToString("D16"));
 
             nextUserId += 1;
-            q.First().Value = nextUserId.ToString();
-
+            nextUserIdEntry.Value = nextUserId.ToString();
+            
+            // Next method must be called in order to save the update.
+            ctx.UpdateObject(nextUserIdEntry);
             ctx.SaveChanges();
 
             return userId;
@@ -317,7 +322,7 @@ namespace Disibox.Data
         private void RequireLoggedInUser()
         {
             if (_userIsLoggedIn) return;
-            //throw new LoggedInUserRequiredException();
+            throw new LoggedInUserRequiredException();
         }
 
         /// <summary>
@@ -327,7 +332,7 @@ namespace Disibox.Data
         private void RequireAdminUser()
         {
             if (_loggedUserIsAdmin) return;
-            //throw new SpecialUserRequiredException(userType);
+            throw new AdminUserRequiredException();
         }
     }
 }
