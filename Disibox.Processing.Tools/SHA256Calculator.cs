@@ -4,16 +4,16 @@ using Disibox.Utils;
 
 namespace Disibox.Processing.Tools
 {
-    public class MD5Calculator : BaseTool
+    public class SHA256Calculator : BaseTool
     {
         public override string Name
         {
-            get { return "MD5 Calculator"; }
+            get { return "SHA256 Calculator"; }
         }
 
         public override string BriefDescription
         {
-            get { return "Calculates MD5 hash of given file."; }
+            get { return "Calculates SHA256 hash of given file."; }
         }
 
         public override string LongDescription
@@ -23,7 +23,7 @@ namespace Disibox.Processing.Tools
 
         public override object ProcessFile(Stream file, string fileContentType)
         {
-            return Hash.ComputeMD5(file);
+            return Hash.ComputeSHA256(file);
         }
     }
 }
