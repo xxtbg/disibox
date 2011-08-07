@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.StorageClient;
+﻿using System;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
 {
@@ -19,11 +20,17 @@ namespace Disibox.Data.Entities
             PartitionKey = EntryPartitionKey;
             RowKey = entryName;
 
-            Name = entryName;
+            // Custom properties
             Value = entryValue;
         }
 
-        public string Name { get; private set; }
+        [Obsolete]
+        public Entry()
+        {
+            // TableServiceEntity properties
+            PartitionKey = EntryPartitionKey;
+            RowKey = EntryPartitionKey;
+        }
 
         public string Value { get; set; }
     }

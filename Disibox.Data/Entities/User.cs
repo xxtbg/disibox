@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.StorageClient;
+﻿using System;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
 {
@@ -21,13 +22,19 @@ namespace Disibox.Data.Entities
             PartitionKey = UserPartitionKey;
             RowKey = userId;
             
-            Id = userId;
+            // Custom properties
             Email = userEmail;
             HashedPassword = Utils.EncryptPwd(userPwd);
             IsAdmin = userIsAdmin;
         }
 
-        public string Id { get; set; }
+        [Obsolete]
+        public User()
+        {
+            // TableServiceEntity properties
+            PartitionKey = UserPartitionKey;
+            RowKey = UserPartitionKey;
+        }
 
         /// <summary>
         /// User email address.
