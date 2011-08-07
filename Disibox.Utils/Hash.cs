@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Disibox.Utils
@@ -13,7 +14,17 @@ namespace Disibox.Utils
             return ComputeHash(input, MD5Alg);
         }
 
+        public static string ComputeMD5(Stream input)
+        {
+            return ComputeHash(input, MD5Alg);
+        }
+
         public static string ComputeSHA256(string input)
+        {
+            return ComputeHash(input, SHA256Alg);
+        }
+
+        public static string ComputeSHA256(Stream input)
         {
             return ComputeHash(input, SHA256Alg);
         }
@@ -23,6 +34,18 @@ namespace Disibox.Utils
             // Converts the input string to a byte array and computes the hash.
             var data = hashAlg.ComputeHash(Encoding.UTF8.GetBytes(input));
 
+            return HashToString(data);
+        }
+
+        private static string ComputeHash(Stream input, HashAlgorithm hashAlg)
+        {
+            var data = hashAlg.ComputeHash(input);
+
+            return HashToString(data);
+        }
+
+        private static string HashToString(byte[] data)
+        {
             // Creates a new Stringbuilder to collect the bytes and create a string.
             var sBuilder = new StringBuilder();
 

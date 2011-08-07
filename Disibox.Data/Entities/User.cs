@@ -1,4 +1,5 @@
 ﻿using System;
+using Disibox.Utils;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
@@ -24,7 +25,7 @@ namespace Disibox.Data.Entities
             
             // Custom properties
             Email = userEmail;
-            HashedPassword = Utils.EncryptPwd(userPwd);
+            HashedPassword = Hash.ComputeMD5(userPwd);
             IsAdmin = userIsAdmin;
         }
 
@@ -59,7 +60,7 @@ namespace Disibox.Data.Entities
         /// <returns></returns>
         public bool Matches(string userEmail, string userPwd)
         {
-            return (Email == userEmail) && (HashedPassword == Utils.EncryptPwd(userPwd));
+            return (Email == userEmail) && (HashedPassword == Hash.ComputeMD5(userPwd));
         }
     }
 }
