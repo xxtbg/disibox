@@ -22,14 +22,13 @@ namespace Disibox.Processing
 
         static Manifest()
         {
-            //InitTools();
+            InitTools();
         }
 
         public static IList<string> GetAvailableTools(string fileContentType)
         {
-            //var availableTools = _availableTools[fileContentType];
-            //return _multiPurposeTools.Concat(availableTools);
-            return new List<string> {"PINO", "GINO", "BOBBERTO"};
+            var availableTools = _availableTools[fileContentType];
+            return _multiPurposeTools.Concat(availableTools).ToList();
         }
 
         public static ITool GetTool(string toolName)

@@ -25,7 +25,7 @@ namespace Disibox.Processing.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PINO")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Disibox\\Disibox.Processing.Tools\\bin\\Debug\\Disibox.Processing.Tools.dll")]
         public string ToolsAssemblyPath {
             get {
                 return ((string)(this["ToolsAssemblyPath"]));

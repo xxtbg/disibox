@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="ToolsAssemblyPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">PINO</Value>
+      <Value Profile="(Default)">C:\Disibox\Disibox.Processing.Tools\bin\Debug\Disibox.Processing.Tools.dll</Value>
     </Setting>
   </Settings>
 </SettingsFile>
