@@ -5,6 +5,7 @@ using System.Linq;
 using System.IO;
 using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
+using Disibox.Utils;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -61,7 +62,7 @@ namespace Disibox.Data
             RequireLoggedInUser();
 
             var fileName = Path.GetFileName(path);
-            var fileContentType = Utils.GetContentType(path);
+            var fileContentType = Common.GetContentType(path);
             var fileContent = new FileStream(path, FileMode.Open);
             return UploadFile(fileName, fileContentType, fileContent);
         }
@@ -76,7 +77,7 @@ namespace Disibox.Data
             // Requirements
             RequireLoggedInUser();
 
-            var fileContentType = Utils.GetContentType(fileName);
+            var fileContentType = Common.GetContentType(fileName);
             UploadFile(fileName, fileContentType, fileContent);
         }
 
@@ -135,7 +136,7 @@ namespace Disibox.Data
             {
                 //                names.Add(blob.Uri.ToString());
                 var filename = blob.Uri.ToString();
-                names.Add(new FileAndMime(filename, Utils.GetContentType(filename)));
+                names.Add(new FileAndMime(filename, Common.GetContentType(filename)));
             }
             return names;
         }
