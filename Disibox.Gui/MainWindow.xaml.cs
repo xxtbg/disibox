@@ -76,7 +76,7 @@ namespace Disibox.Gui {
 
         private void buttonRefreshFiles_Click(object sender, RoutedEventArgs e)
         {
-            var names = _dataSource.GetFileNames();
+            var names = _dataSource.GetFilesMetadata();
 
             listView_Files.Items.Clear();
 

@@ -67,9 +67,13 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="fileContent"></param>
+        /// /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
+        /// /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         public void AddFile(string fileName, Stream fileContent)
         {
             // Requirements
+            RequireNotNull(fileName, "fileName");
+            RequireNotNull(fileContent, "fileContent");
             RequireLoggedInUser();
 
             var fileContentType = Common.GetContentType(fileName);
@@ -178,7 +182,7 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<FileAndMime> GetFileNames()
+        public IList<FileAndMime> GetFilesMetadata()
         {
             // Requirements
             RequireLoggedInUser();
@@ -189,9 +193,36 @@ namespace Disibox.Data
             foreach (var blob in blobs)
             {
                 //                names.Add(blob.Uri.ToString());
+                
                 var filename = blob.Uri.ToString();
                 names.Add(new FileAndMime(filename, Common.GetContentType(filename)));
             }
+            return names;
+        }
+
+        public IList<string> GetFilesNames()
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            var options = new BlobRequestOptions();
+            options.UseFlatBlobListing = true;
+            //options.BlobListingDetails = BlobListingDetails.All;
+
+            var blobs = _blobContainer.ListBlobs(options);
+            var names = new List<string>();
+
+            var prefix = _filesBlobName + "/" + _loggedUserId;
+            var prefixLength = prefix.Length;
+
+            foreach (var blob in blobs)
+            {
+                var uri = blob.Uri.ToString();
+                var prefixStart = uri.IndexOf(prefix);
+                var fileName = uri.Substring(prefixStart + prefixLength + 1);
+                names.Add(fileName);
+            }  
+
             return names;
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Disibox.Data.Exceptions;
 using Disibox.Utils;
 using NUnit.Framework;
 
@@ -41,6 +42,31 @@ namespace Disibox.Data.Tests
 
         [Test]
         public void AddOneFile()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddFile(_fileNames[0], _files[0]);
+
+            var fileNames = DataSource.GetFilesNames();
+            Assert.True(fileNames.Contains(_fileNames[0]));
+
+            // controllare contenuto!!!
+        }
+
+        [Test]
+        public void AddManyFiles()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            for (var i = 0; i < FileCount; ++i)
+                DataSource.AddFile(_fileNames[i], _files[i]);
+
+            var fileNames = DataSource.GetFilesNames();
+            for (var i = 0; i < FileCount; ++i)
+                Assert.True(fileNames.Contains(_fileNames[i]));
+        }
+
+        [Test]
+        [ExpectedException(typeof(LoggedInUserRequiredException))]
+        public void AddOneFileWithoutLoggingIn()
         {
             DataSource.AddFile(_fileNames[0], _files[0]);
         }
