@@ -22,7 +22,7 @@ namespace Disibox.Processing
 
         static Manifest()
         {
-            InitTools();
+            //InitTools();
         }
 
         public static IList<string> GetAvailableTools(string fileContentType)

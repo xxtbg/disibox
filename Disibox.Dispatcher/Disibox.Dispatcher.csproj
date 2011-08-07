@@ -106,6 +106,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Disibox.Processing\Disibox.Processing.csproj">
+      <Project>{14EA228E-5FAA-4AC6-8313-A5A7690570A3}</Project>
+      <Name>Disibox.Processing</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
