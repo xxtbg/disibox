@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Services.Client;
 using System.Linq;
 using System.IO;
 using Disibox.Data.Entities;
@@ -149,7 +150,7 @@ namespace Disibox.Data
         {
             var ctx = _tableClient.GetDataServiceContext();
 
-            var q = ctx.CreateQuery<User>(User.UserPartitionKey).Where(u => u.Matches(userEmail, userPwd));
+            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.Matches(userEmail, userPwd));
             if (q.Count() != 1)
                 throw new UserNotExistingException();
             var user = q.First();
@@ -177,7 +178,7 @@ namespace Disibox.Data
         {
             var ctx = _tableClient.GetDataServiceContext();
 
-            var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
+            var q = GetTable<Entry>(ctx, Entry.EntryPartitionKey).Where(e => e.RowKey == "NextUserId");
             var nextUserId = int.Parse(q.First().Value);
 
             var firstIdChar = (userIsAdmin) ? 'a' : 'u';
@@ -189,6 +190,11 @@ namespace Disibox.Data
             ctx.SaveChanges();
 
             return userId;
+        }
+
+        private static IQueryable<T> GetTable<T>(DataServiceContext ctx, string tableName) where T : TableServiceEntity
+        {
+            return ctx.CreateQuery<T>(tableName).Where(e => e.PartitionKey == tableName);
         }
 
         private static void InitBlobs(CloudStorageAccount storageAccount, bool doInitialSetup)
@@ -235,14 +241,14 @@ namespace Disibox.Data
         {
             _tableClient.CreateTableIfNotExist(Entry.EntryPartitionKey);
 
-            /*var ctx = tableClient.GetDataServiceContext();
+            var ctx = _tableClient.GetDataServiceContext();
 
-            var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
-            if (q.Count() != 0) return;
+            var q = GetTable<Entry>(ctx, Entry.EntryPartitionKey).Where(e => e.RowKey == "NextUserId");
+            if (Enumerable.Any(q)) return;
 
             var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
             ctx.AddObject(Entry.EntryPartitionKey, nextUserIdEntry);
-            ctx.SaveChanges();*/
+            ctx.SaveChanges();
         }
 
         private static void InitUsersTable()
@@ -251,10 +257,8 @@ namespace Disibox.Data
 
             var ctx = _tableClient.GetDataServiceContext();
 
-            var q = ctx.CreateQuery<User>(User.UserPartitionKey).Where(e => e.Id == "a0");
-            if (q.Count() != 0) return;
-
-            
+            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.RowKey == "a0");
+            if (Enumerable.Any(q)) return;
 
             var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
             var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
