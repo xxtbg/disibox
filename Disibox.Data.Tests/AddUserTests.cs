@@ -30,7 +30,7 @@ namespace Disibox.Data.Tests
                 var email = new string(currChar, EmailLength);
                 _adminUserEmails.Add(email + "_admin");
 
-                var pwd = new string(currChar, EmailLength);
+                var pwd = new string(currChar, PwdLength);
                 _adminUserPwds.Add(pwd + "_pwd");
             }
 
@@ -63,6 +63,9 @@ namespace Disibox.Data.Tests
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(_commonUserEmails[0], _commonUserPwds[0], false);
+
+            var commonUsersEmails = DataSource.GetCommonUsersEmails();
+            Assert.True(commonUsersEmails.Contains(_commonUserEmails[0]));
         }
 
         [Test]
@@ -71,6 +74,10 @@ namespace Disibox.Data.Tests
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < CommonUserCount; ++i)
                 DataSource.AddUser(_commonUserEmails[i], _commonUserPwds[i], false);
+
+            var commonUsersEmails = DataSource.GetCommonUsersEmails();
+            for (var i = 0; i < CommonUserCount; ++i)
+                Assert.True(commonUsersEmails.Contains(_commonUserEmails[i]));
         }
 
         [Test]
@@ -97,6 +104,9 @@ namespace Disibox.Data.Tests
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(_adminUserEmails[0], _adminUserPwds[0], true);
+
+            var adminUsersEmails = DataSource.GetAdminUsersEmails();
+            Assert.True(adminUsersEmails.Contains(_adminUserEmails[0]));
         }
 
         [Test]
@@ -105,6 +115,10 @@ namespace Disibox.Data.Tests
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < AdminUserCount; ++i)
                 DataSource.AddUser(_adminUserEmails[i], _adminUserPwds[i], true);
+
+            var adminUsersEmails = DataSource.GetAdminUsersEmails();
+            for (var i = 0; i < AdminUserCount; ++i)
+                Assert.True(adminUsersEmails.Contains(_adminUserEmails[i]));
         }
 
         [Test]
