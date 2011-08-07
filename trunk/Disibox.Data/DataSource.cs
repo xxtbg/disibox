@@ -82,11 +82,14 @@ namespace Disibox.Data
         /// <param name="userEmail"></param>
         /// <param name="userPwd"></param>
         /// <param name="userIsAdmin"></param>
-        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
             // Requirements
+            RequireNotNull(userEmail, "userEmail");
+            RequireNotNull(userPwd, "userPwd");
             RequireLoggedInUser();
             RequireAdminUser();
 
@@ -368,6 +371,17 @@ namespace Disibox.Data
         }
 
         /// <summary>
+        /// Checks if currently logged in user is administrator;
+        /// if he's not, an appropriate exception is thrown.
+        /// </summary>
+        /// <exception cref="AdminUserRequiredException">If logged in user is not administrator.</exception>
+        private void RequireAdminUser()
+        {
+            if (_loggedUserIsAdmin) return;
+            throw new AdminUserRequiredException();
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <exception cref="LoggedInUserRequiredException"></exception>
@@ -380,11 +394,13 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
-        /// <exception cref="AdminUserRequiredException"></exception>
-        private void RequireAdminUser()
+        /// <param name="obj"></param>
+        /// <param name="paramName"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        private void RequireNotNull(object obj, string paramName)
         {
-            if (_loggedUserIsAdmin) return;
-            throw new AdminUserRequiredException();
+            if (obj != null) return;
+            throw new ArgumentNullException(paramName);
         }
     }
 }
