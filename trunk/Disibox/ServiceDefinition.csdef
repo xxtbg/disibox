@@ -2,7 +2,7 @@
 <ServiceDefinition name="Disibox" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition">
   <WebRole name="Disibox.WebUI">
     <Sites>
-      <Site name="Web">
+      <Site name="Disibox" physicalDirectory="..\Disibox.WebUI">
         <Bindings>
           <Binding name="Endpoint1" endpointName="Endpoint1" />
         </Bindings>

@@ -14,8 +14,8 @@ namespace Disibox.Data.Entities
         /// <param name="userId"></param>
         /// <param name="userEmail"></param>
         /// <param name="userPwd"></param>
-        /// <param name="userType"></param>
-        public User(string userId, string userEmail, string userPwd, UserType userType)
+        /// <param name="userIsAdmin"></param>
+        public User(string userId, string userEmail, string userPwd, bool userIsAdmin)
         {
             // TableServiceEntity properties
             PartitionKey = UserPartitionKey;
@@ -24,7 +24,7 @@ namespace Disibox.Data.Entities
             Id = userId;
             Email = userEmail;
             HashedPassword = Utils.EncryptPwd(userPwd);
-            IsAdmin = (userType == UserType.AdminUser);
+            IsAdmin = userIsAdmin;
         }
 
         public string Id { get; set; }

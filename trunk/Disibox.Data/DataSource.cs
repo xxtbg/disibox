@@ -11,16 +11,16 @@ namespace Disibox.Data
 {
     public class DataSource
     {
-        private readonly CloudTableClient _tableClient;
+        private static CloudBlobClient _blobClient;
+        private static CloudBlobContainer _blobContainer;
+        private static string _filesBlobName;
 
-        private readonly CloudBlobClient _blobClient;
-        private readonly CloudBlobContainer _blobContainer;
-        private readonly string _filesBlobName;
+        private static CloudQueue _processingQueue;
 
-        private readonly CloudQueue _processingQueue;
+        private static CloudTableClient _tableClient;
 
         private string _loggedUserId = "test_da_togliere";
-        private UserType _loggedUserType;
+        private bool _loggedUserIsAdmin;
         private bool _userIsLoggedIn;
 
         /// <summary>
@@ -31,13 +31,21 @@ namespace Disibox.Data
             var connectionString = Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-            _processingQueue = InitQueueClient(storageAccount);
-            _tableClient = InitTableClient(storageAccount);
+            // We do not have to setup everything up every time,
+            // that's why we pass "false" as parameter to next three calls.
+            InitBlobs(storageAccount, false);
+            InitQueues(storageAccount, false);
+            InitTables(storageAccount, false);
+        }
 
-            // Creates files blob container
-            _blobClient = storageAccount.CreateCloudBlobClient();
-            _filesBlobName = Properties.Settings.Default.FilesBlobName;
-            _blobContainer = _blobClient.GetContainerReference(_filesBlobName);
+        public static void Main()
+        {
+            var connectionString = Properties.Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+
+            InitBlobs(storageAccount, true);
+            InitQueues(storageAccount, true);
+            InitTables(storageAccount, true);
         }
 
         /// <summary>
@@ -76,17 +84,17 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="userEmail"></param>
         /// <param name="userPwd"></param>
-        /// <param name="userType"></param>
+        /// <param name="userIsAdmin"></param>
         /// <exception cref="LoggedInUserRequiredException"></exception>
-        /// <exception cref="SpecialUserRequiredException"></exception>
-        public void AddUser(string userEmail, string userPwd, UserType userType)
+        /// <exception cref="AdminUserRequiredException"></exception>
+        public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
             // Requirements
             RequireLoggedInUser();
-            RequireUserType(UserType.AdminUser);
+            RequireAdminUser();
 
-            var userId = GenerateUserId(userType);
-            var user = new User(userId, userEmail, userPwd, userType);
+            var userId = GenerateUserId(userIsAdmin);
+            var user = new User(userId, userEmail, userPwd, userIsAdmin);
             UploadUser(user);
         }
 
@@ -150,7 +158,7 @@ namespace Disibox.Data
             {
                 _userIsLoggedIn = true;
                 _loggedUserId = user.RowKey;
-                _loggedUserType = (user.IsAdmin) ? UserType.AdminUser : UserType.CommonUser;
+                _loggedUserIsAdmin = user.IsAdmin;
             }
         }
 
@@ -165,14 +173,15 @@ namespace Disibox.Data
             }
         }
 
-        private string GenerateUserId(UserType userType)
+        private string GenerateUserId(bool userIsAdmin)
         {
             var ctx = _tableClient.GetDataServiceContext();
 
             var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
             var nextUserId = int.Parse(q.First().Value);
 
-            var userId = string.Format("{0}{1:16}", char.ToLower(userType.ToString()[0]), nextUserId);
+            var firstIdChar = (userIsAdmin) ? 'a' : 'u';
+            var userId = string.Format("{0}{1:16}", firstIdChar, nextUserId);
 
             nextUserId += 1;
             q.First().Value = nextUserId.ToString();
@@ -182,23 +191,77 @@ namespace Disibox.Data
             return userId;
         }
 
-        private void InitBlobClient(CloudStorageAccount storageAccount)
+        private static void InitBlobs(CloudStorageAccount storageAccount, bool doInitialSetup)
         {
-            
+            _blobClient = storageAccount.CreateCloudBlobClient();
+            _filesBlobName = Properties.Settings.Default.FilesBlobName;
+            _blobContainer = _blobClient.GetContainerReference(_filesBlobName);
+
+            // Next instructions are dedicated to initial setup.
+            if (!doInitialSetup) return;
+
+            _blobContainer.CreateIfNotExist();
+
+            var permissions = _blobContainer.GetPermissions();
+            permissions.PublicAccess = BlobContainerPublicAccessType.Container;
+            _blobContainer.SetPermissions(permissions);
         }
 
-        private static CloudQueue InitQueueClient(CloudStorageAccount storageAccount)
+        private static void InitQueues(CloudStorageAccount storageAccount, bool doInitialSetup)
         {
             var queueClient = storageAccount.CreateCloudQueueClient();
             var processingQueueName = Properties.Settings.Default.ProcessingQueueName;
-            return queueClient.GetQueueReference(processingQueueName);
+            _processingQueue = queueClient.GetQueueReference(processingQueueName);
+
+            // Next instructions are dedicated to initial setup.
+            if (!doInitialSetup) return;
+
+            _processingQueue.CreateIfNotExist();
         }
 
-        private static CloudTableClient InitTableClient(CloudStorageAccount storageAccount)
+        private static void InitTables(CloudStorageAccount storageAccount, bool doInitialSetup)
         {
-            var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
-            tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-            return tableClient;
+            _tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
+            _tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
+
+            // Next instructions are dedicated to initial setup.
+            if (!doInitialSetup) return;
+
+            InitEntriesTable();
+            InitUsersTable();
+        }
+
+        private static void InitEntriesTable()
+        {
+            _tableClient.CreateTableIfNotExist(Entry.EntryPartitionKey);
+
+            /*var ctx = tableClient.GetDataServiceContext();
+
+            var q = ctx.CreateQuery<Entry>(Entry.EntryPartitionKey).Where(e => e.Name == "NextUserId");
+            if (q.Count() != 0) return;
+
+            var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
+            ctx.AddObject(Entry.EntryPartitionKey, nextUserIdEntry);
+            ctx.SaveChanges();*/
+        }
+
+        private static void InitUsersTable()
+        {
+            _tableClient.CreateTableIfNotExist(User.UserPartitionKey);
+
+            var ctx = _tableClient.GetDataServiceContext();
+
+            var q = ctx.CreateQuery<User>(User.UserPartitionKey).Where(e => e.Id == "a0");
+            if (q.Count() != 0) return;
+
+            
+
+            var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
+            var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
+            var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, true);
+
+            ctx.AddObject(User.UserPartitionKey, defaultAdminUser);
+            ctx.SaveChanges();
         }
 
         /// <summary>
@@ -241,11 +304,10 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="userType"></param>
-        /// <exception cref="SpecialUserRequiredException"></exception>
-        private void RequireUserType(UserType userType)
+        /// <exception cref="AdminUserRequiredException"></exception>
+        private void RequireAdminUser()
         {
-            if (_loggedUserType == userType) return;
+            if (_loggedUserIsAdmin) return;
             //throw new SpecialUserRequiredException(userType);
         }
     }

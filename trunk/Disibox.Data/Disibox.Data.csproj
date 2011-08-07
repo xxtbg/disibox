@@ -50,7 +50,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Disibox.Data.Setup</StartupObject>
+    <StartupObject>Disibox.Data.DataSource</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -79,7 +79,7 @@
     <Compile Include="Entities\Entry.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Exceptions\LoggedInUserRequiredException.cs" />
-    <Compile Include="Exceptions\SpecialUserRequiredException.cs" />
+    <Compile Include="Exceptions\AdminUserRequiredException.cs" />
     <Compile Include="FileAndMime.cs" />
     <Compile Include="ProcessingRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -89,8 +89,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Setup.cs" />
-    <Compile Include="UserType.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

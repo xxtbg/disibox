@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Disibox.Data {
-    public class FileAndMime {
-        private string _filename;
-        private string _mime;
-
-        public FileAndMime(string filename, string mime) {
-            _filename = filename;
-            _mime = mime;
+﻿namespace Disibox.Data 
+{
+    public class FileAndMime 
+    {
+        public FileAndMime(string filename, string mime) 
+        {
+            Filename = filename;
+            Mime = mime;
         }
 
-        public string Filename {
-            get { return _filename; }
-        }
+        public string Filename { get; private set; }
 
-        public string Mime {
-            get { return _mime; }
-        }
+        public string Mime { get; private set; }
     }
 }
