@@ -69,7 +69,7 @@ namespace Disibox.Data
         /// <param name="fileContent"></param>
         /// /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
         /// /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
-        public void AddFile(string fileName, Stream fileContent)
+        public string AddFile(string fileName, Stream fileContent)
         {
             // Requirements
             RequireNotNull(fileName, "fileName");
@@ -77,7 +77,7 @@ namespace Disibox.Data
             RequireLoggedInUser();
 
             var fileContentType = Common.GetContentType(fileName);
-            UploadFile(fileName, fileContentType, fileContent);
+            return UploadFile(fileName, fileContentType, fileContent);
         }
 
         /// <summary>

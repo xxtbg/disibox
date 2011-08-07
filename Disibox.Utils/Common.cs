@@ -28,6 +28,18 @@ namespace Disibox.Utils
             return contentType;
         }
 
+        public static byte[] StreamToByteArray(Stream input)
+        {
+            var buffer = new byte[input.Length];
+
+            //for (var i = 0; i < input.Length; ++i)
+            //    buffer[i] = (byte) input.ReadByte();
+
+            input.Read(buffer, 0, (int) input.Length);
+
+            return buffer;
+        }
+
         /// <summary>
         /// 
         /// </summary>
