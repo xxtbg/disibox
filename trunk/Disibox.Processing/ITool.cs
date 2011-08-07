@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Disibox.Processing
 {
@@ -29,6 +30,6 @@ namespace Disibox.Processing
         /// 
         /// </summary>
         /// <returns></returns>
-        object ProcessFile();
+        object ProcessFile(Stream file, string fileContentType);
     }
 }

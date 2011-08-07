@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Disibox.Processing
 {
@@ -16,7 +17,7 @@ namespace Disibox.Processing
         public abstract string LongDescription { get; }
 
         public IEnumerable<string> ProcessableTypes { get; private set; }
-        
-        public abstract object ProcessFile();
+
+        public abstract object ProcessFile(Stream file, string fileContentType);
     }
 }

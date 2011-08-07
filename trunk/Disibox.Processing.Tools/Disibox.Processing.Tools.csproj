@@ -57,7 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="SHA256Calculator.cs" />
     <Compile Include="MD5Calculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -65,6 +65,10 @@
     <ProjectReference Include="..\Disibox.Processing\Disibox.Processing.csproj">
       <Project>{14EA228E-5FAA-4AC6-8313-A5A7690570A3}</Project>
       <Name>Disibox.Processing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Disibox.Utils\Disibox.Utils.csproj">
+      <Project>{5885EA43-7F42-4C18-ACFB-DE788F25EF6A}</Project>
+      <Name>Disibox.Utils</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
