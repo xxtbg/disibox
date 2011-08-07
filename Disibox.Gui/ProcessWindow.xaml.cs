@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace Disibox.Gui
 {
@@ -45,17 +46,33 @@ namespace Disibox.Gui
 
         private void buttonApply_Click(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex != -1)
+            if (listView.SelectedIndex == -1) return;
+
+            _writer.WriteLine(listView.SelectedIndex);
+
+            //leggo l'uri del file processato
+            var processedFile = _reader.ReadLine();
+
+
+            var saveDialog = new SaveFileDialog();
+
+            var result = saveDialog.ShowDialog();
+            if (result == true && saveDialog.CheckPathExists)
             {
-                Console.WriteLine(listView.SelectedIndex);
-                _writer.WriteLine("index: " + listView.SelectedIndex);
+                var path = System.IO.Path.GetDirectoryName(saveDialog.FileName);
+                    
+                //downloading file to the path
 
-                Console.WriteLine("trasmesso l'index");
-                //leggo l'uri del file processato
-                var processedFile = _reader.ReadLine();
+                MessageBox.Show("file successfuly downloaded to: " + path);
 
-                MessageBox.Show("uri of processed file (want to save or not?): " + processedFile);
+            } else
+            {
+                //delete the temporary file from the cloud - processedFile
+                MessageBox.Show("processed file deleted from the cloud because you didn't want to save it or the specified path does not exist");
+
             }
+
+            this.Close();
         }
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e)

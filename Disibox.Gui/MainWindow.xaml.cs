@@ -51,7 +51,8 @@ namespace Disibox.Gui {
             set { _dataSource = value; }
         }
 
-        private void button1_Click(object sender, RoutedEventArgs e) {
+        private void buttonBrowse_Click(object sender, RoutedEventArgs e)
+        {
             OpenFileDialog ofd = new OpenFileDialog();
 
             Nullable<bool> result = ofd.ShowDialog();
@@ -62,11 +63,10 @@ namespace Disibox.Gui {
             }
         }
 
-        private void button2_Click(object sender, RoutedEventArgs e) {
-            var ds = new DataSource();
-
+        private void buttonUpload_Click(object sender, RoutedEventArgs e)
+        {
             if (textBoxFileToUpload.Text != "") {
-                var retn = ds.AddFile(textBoxFileToUpload.Text);
+                var retn = _dataSource.AddFile(textBoxFileToUpload.Text);
                 MessageBox.Show("The file has been uploaded successfully: " + retn);
             } else {
                 MessageBox.Show("No file to upload");
@@ -74,10 +74,11 @@ namespace Disibox.Gui {
 
         }
 
-        private void button3_Click(object sender, RoutedEventArgs e) {
-            var ds = new DataSource();
+        private void buttonRefreshFiles_Click(object sender, RoutedEventArgs e)
+        {
+            var names = _dataSource.GetFileNames();
 
-            var names = ds.GetFileNames();
+            listView_Files.Items.Clear();
 
             foreach (var name in names) 
                 listView_Files.Items.Add(name);
@@ -135,5 +136,32 @@ namespace Disibox.Gui {
 
         }
 
+        private void buttonAddUser_Click(object sender, RoutedEventArgs e)
+        {
+            var addWindow = new AddUserWindow(_dataSource);
+            addWindow.ShowDialog();
+        }
+
+        private void buttonDeleteUser_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void buttonRefreshUsers_Click(object sender, RoutedEventArgs e)
+        {
+            var adminUsers = _dataSource.GetAdminUsersEmails();
+            var commonUsers = _dataSource.GetCommonUsersEmails();
+
+            listView_Files.Items.Clear();
+
+            foreach (var adminUser in adminUsers)
+                listView_Users.Items.Add(adminUser);
+
+            foreach (var commonUser in commonUsers)
+                listView_Users.Items.Add(commonUser);
+
+        }
+
+        
     }
 }
