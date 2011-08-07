@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using Disibox.Data;
+using Disibox.Processing;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Disibox.Processor
@@ -21,7 +22,9 @@ namespace Disibox.Processor
                 Thread.Sleep(10000);
                 Trace.WriteLine("Working", "Information");
 
-//                var procReq = _dataSource.DequeueProcessingRequest();
+                var procReq = DataSource.DequeueProcessingRequest();
+                if (procReq != null)
+                    ProcessRequest(procReq);
             }
         }
 
@@ -35,14 +38,19 @@ namespace Disibox.Processor
             return base.OnStart();
         }
 
-        private void ProcessFile(string file, string toolName)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="procReq"></param>
+        private void ProcessRequest(ProcessingRequest procReq)
         {
-            object tool;
-            
-            //if (!_procTools.TryGetValue(toolName, out tool))
-                throw new ArgumentException(toolName + " does not exist.", "toolName");
+            var tool = Manifest.GetTool(procReq.ToolName);
+            if (tool == null)
+                throw new ArgumentException(procReq.ToolName + " does not exist.", "procReq");
 
+            var file = _dataSource.GetFile(procReq.FileUri);
 
+            tool.ProcessFile(file, procReq.FileContentType);
         }
     }
 }

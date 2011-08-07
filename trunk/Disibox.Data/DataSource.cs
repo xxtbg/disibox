@@ -100,7 +100,7 @@ namespace Disibox.Data
             UploadUser(user);
         }
 
-        public ProcessingRequest DequeueProcessingRequest()
+        public static ProcessingRequest DequeueProcessingRequest()
         {
             var msg = _processingQueue.GetMessage();
             if (msg == null) return null;
@@ -118,6 +118,15 @@ namespace Disibox.Data
 
             var msg = new CloudQueueMessage(procReq.ToString());
             _processingQueue.AddMessage(msg);
+        }
+
+        public Stream GetFile(string fileUri)
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            var blob = _blobContainer.GetBlobReference(fileUri);
+            return blob.OpenRead();
         }
 
         /// <summary>
@@ -175,7 +184,12 @@ namespace Disibox.Data
             }
         }
 
-        private string GenerateUserId(bool userIsAdmin)
+        private static string GenerateFileName(string userId, string fileName)
+        {
+            return _filesBlobName + "/" + userId + "/" + fileName;
+        }
+
+        private static string GenerateUserId(bool userIsAdmin)
         {
             var ctx = _tableClient.GetDataServiceContext();
 
@@ -278,7 +292,7 @@ namespace Disibox.Data
         /// <returns></returns>
         private string UploadFile(string name, string contentType, Stream content)
         {
-            var uniqueBlobName = _filesBlobName + "/" + _loggedUserId + "/" + name;
+            var uniqueBlobName = GenerateFileName(_loggedUserId, name);
             var blob = _blobClient.GetBlockBlobReference(uniqueBlobName);
             blob.Properties.ContentType = contentType;
             blob.UploadFromStream(content);
@@ -289,7 +303,7 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <param name="user"></param>
-        private void UploadUser(TableServiceEntity user)
+        private static void UploadUser(TableServiceEntity user)
         {
             var ctx = _tableClient.GetDataServiceContext();
             ctx.AddObject(user.PartitionKey, user);

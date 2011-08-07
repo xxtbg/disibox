@@ -32,6 +32,13 @@ namespace Disibox.Processing
             return new List<string> {"PINO", "GINO", "BOBBERTO"};
         }
 
+        public static ITool GetTool(string toolName)
+        {
+            ITool tool;
+            _procTools.TryGetValue(toolName, out tool);
+            return tool;
+        }
+
         private static void InitTools()
         {
             _procTools = new Dictionary<string, ITool>();
