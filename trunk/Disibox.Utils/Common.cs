@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 using Microsoft.Win32;
 
 namespace Disibox.Utils
@@ -8,13 +9,13 @@ namespace Disibox.Utils
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="filePath"></param>
         /// <returns></returns>
-        public static string GetContentType(string path)
+        public static string GetContentType(string filePath)
         {
             var contentType = "application/octetstream";
             
-            var ext = Path.GetExtension(path);
+            var ext = Path.GetExtension(filePath);
             if (ext != null)
             {
                 ext = ext.ToLower();
@@ -25,6 +26,16 @@ namespace Disibox.Utils
             }
             
             return contentType;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static byte[] StringToByteArray(string input)
+        {
+            return Encoding.UTF8.GetBytes(input);
         }
     }
 }
