@@ -41,19 +41,20 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        public void AddOneFile()
+        public void AddOneFileAsAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddFile(_fileNames[0], _files[0]);
+            var fileUri = DataSource.AddFile(_fileNames[0], _files[0]);
 
             var fileNames = DataSource.GetFilesNames();
             Assert.True(fileNames.Contains(_fileNames[0]));
 
-            // controllare contenuto!!!
+            var file = DataSource.GetFile(fileUri);
+            Assert.True(StreamsAreEqual(file, _files[0]));
         }
 
         [Test]
-        public void AddManyFiles()
+        public void AddManyFilesAsAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < FileCount; ++i)
@@ -69,6 +70,19 @@ namespace Disibox.Data.Tests
         public void AddOneFileWithoutLoggingIn()
         {
             DataSource.AddFile(_fileNames[0], _files[0]);
+        }
+
+        private bool StreamsAreEqual(Stream s1, Stream s2)
+        {
+            if (s1.Length != s2.Length) return false;
+
+            var b1 = Common.StreamToByteArray(s1);
+            var b2 = Common.StreamToByteArray(s2);
+
+            for (var i = 0; i < b1.Length; ++i)
+                if (b1[i] != b2[i]) return false;
+
+            return true;
         }
     }
 }
