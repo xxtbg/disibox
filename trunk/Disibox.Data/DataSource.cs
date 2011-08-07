@@ -42,12 +42,7 @@ namespace Disibox.Data
 
         public static void Main()
         {
-            var connectionString = Properties.Settings.Default.DataConnectionString;
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
-
-            InitBlobs(storageAccount, true);
-            InitQueues(storageAccount, true);
-            InitTables(storageAccount, true);
+            Setup();
         }
 
         /// <summary>
@@ -87,8 +82,8 @@ namespace Disibox.Data
         /// <param name="userEmail"></param>
         /// <param name="userPwd"></param>
         /// <param name="userIsAdmin"></param>
-        /// <exception cref="LoggedInUserRequiredException"></exception>
-        /// <exception cref="AdminUserRequiredException"></exception>
+        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
+        /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
         public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
             // Requirements
@@ -98,6 +93,19 @@ namespace Disibox.Data
             var userId = GenerateUserId(userIsAdmin);
             var user = new User(userId, userEmail, userPwd, userIsAdmin);
             UploadUser(user);
+        }
+
+        /// <summary>
+        /// Completely clears the storage and sets it up to the initial state.
+        /// </summary>
+        public static void Clear()
+        {
+            _blobContainer.Delete();
+            _processingQueue.Delete();
+            _tableClient.DeleteTableIfExist(Entry.EntryPartitionKey);
+            _tableClient.DeleteTableIfExist(User.UserPartitionKey);
+
+            Setup();
         }
 
         public static ProcessingRequest DequeueProcessingRequest()
@@ -118,6 +126,40 @@ namespace Disibox.Data
 
             var msg = new CloudQueueMessage(procReq.ToString());
             _processingQueue.AddMessage(msg);
+        }
+
+        /// <summary>
+        /// Fetches and returns all administrators emails.
+        /// </summary>
+        /// <returns>All administrators emails.</returns>
+        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
+        /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
+        public IList<string> GetAdminUsersEmails()
+        {
+            // Requirements
+            RequireLoggedInUser();
+            RequireAdminUser();
+
+            var ctx = _tableClient.GetDataServiceContext();
+            var adminUsers = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.IsAdmin).ToList();
+            return adminUsers.Select(u => u.Email).ToList();
+        }
+
+        /// <summary>
+        /// Fetches and returns all common users emails.
+        /// </summary>
+        /// <returns>All common users emails.</returns>
+        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
+        /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
+        public IList<string> GetCommonUsersEmails()
+        {
+            // Requirements
+            RequireLoggedInUser();
+            RequireAdminUser();
+
+            var ctx = _tableClient.GetDataServiceContext();
+            var commonUsers = GetTable<User>(ctx, User.UserPartitionKey).Where(u => !u.IsAdmin).ToList();
+            return commonUsers.Select(u => u.Email).ToList();
         }
 
         public Stream GetFile(string fileUri)
@@ -286,6 +328,16 @@ namespace Disibox.Data
 
             ctx.AddObject(User.UserPartitionKey, defaultAdminUser);
             ctx.SaveChanges();
+        }
+
+        private static void Setup()
+        {
+            var connectionString = Properties.Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+
+            InitBlobs(storageAccount, true);
+            InitQueues(storageAccount, true);
+            InitTables(storageAccount, true);
         }
 
         /// <summary>

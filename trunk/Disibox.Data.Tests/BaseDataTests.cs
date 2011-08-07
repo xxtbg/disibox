@@ -9,6 +9,7 @@ namespace Disibox.Data.Tests
         protected virtual void SetUp()
         {
             DataSource = new DataSource();
+            DataSource.Clear();
         }
 
         [TearDown]
