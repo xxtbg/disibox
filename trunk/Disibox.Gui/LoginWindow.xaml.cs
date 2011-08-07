@@ -34,6 +34,7 @@ namespace Disibox.Gui {
 //                _dataSource.Login(username, password);
                 if (!_mainWindow.IsVisible) {
                     _mainWindow.User = username;
+                    _mainWindow.Password = password;
                     _mainWindow.Datasource = _dataSource;
                     _mainWindow.Show();
                     this.Close();

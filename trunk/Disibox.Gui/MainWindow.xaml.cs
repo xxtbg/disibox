@@ -23,11 +23,12 @@ namespace Disibox.Gui {
     /// </summary>
     public partial class MainWindow : Window {
         private string _user;
+        private string _password;
         private DataSource _dataSource;
 
         //for accessing the server
         private string _serverString = "127.0.0.1";
-        private int _serverPort = 10000;
+        private int _serverPort = 2345;
 
         public MainWindow() {
             InitializeComponent();
@@ -38,6 +39,11 @@ namespace Disibox.Gui {
             set { _user = value;
                 this.Title = "Disibox - " + _user;
             }
+        }
+
+        public string Password
+        {
+            set { _password = value; }
         }
 
         public DataSource Datasource {
@@ -108,30 +114,24 @@ namespace Disibox.Gui {
 
 //            if (selectedItem == null) return;
             //            to download the file with this name = selectedItem.Filename
+            
+            // estabilishing connection with the server
             var server = new TcpClient();
             server.Connect(IPAddress.Parse(_serverString), _serverPort);
 
             var reader = new StreamReader(server.GetStream());
-            var writer = new StreamWriter(server.GetStream());
+            var writer = new StreamWriter(server.GetStream()) {AutoFlush = true};
 
-            writer.WriteLine("user");
-            writer.WriteLine("password");
+            
+            writer.WriteLine(_user);
+            writer.WriteLine(_password);
+
             writer.WriteLine("mime");
             writer.WriteLine("file to process");
 
 
-            var p1 = reader.ReadLine();
-            var p2 = reader.ReadLine();
-            var p3 = reader.ReadLine();
-
-
-            writer.WriteLine("1");
-
-            var uriprocessedfile = reader.ReadLine();
-
-            Console.WriteLine(uriprocessedfile);
-
-            server.Close();
+            var processWindow = new ProcessWindow(reader, writer);
+            processWindow.ShowDialog();
 
         }
 

@@ -1,0 +1,11 @@
+﻿<Window x:Class="Disibox.Gui.ProcessWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ProcessWindow" Height="300" Width="300">
+    <Grid>
+        <ListView Margin="12,30,12,45" Name="listView" />
+        <Button Content="Cancel" HorizontalAlignment="Right" Margin="0,0,12,12" Name="buttonCancel" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonCancel_Click" />
+        <Button Content="Apply" Margin="0,0,96,12" Name="buttonApply" HorizontalAlignment="Right" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonApply_Click" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,6,0,0" Name="textBlock1" Text="Process File" VerticalAlignment="Top" FontSize="16" />
+    </Grid>
+</Window>

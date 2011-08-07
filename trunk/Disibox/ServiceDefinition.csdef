@@ -25,7 +25,7 @@
       <Import moduleName="Diagnostics" />
     </Imports>
     <Endpoints>
-      <InputEndpoint name="EndpointDispatcher" protocol="tcp" port="10000" />
+      <InputEndpoint name="EndpointDispatcher" protocol="tcp" port="2345" />
     </Endpoints>
   </WorkerRole>
 </ServiceDefinition>
