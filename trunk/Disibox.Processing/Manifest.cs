@@ -25,7 +25,7 @@ namespace Disibox.Processing
             InitTools();
         }
 
-        public static IEnumerable<string> GetAvailableTools(string fileContentType)
+        public static IList<string> GetAvailableTools(string fileContentType)
         {
             //var availableTools = _availableTools[fileContentType];
             //return _multiPurposeTools.Concat(availableTools);
