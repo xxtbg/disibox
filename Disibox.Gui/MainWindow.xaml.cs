@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using Disibox.Data;
+using Path = System.IO.Path;
 
 namespace Disibox.Gui {
     /// <summary>
@@ -67,8 +68,9 @@ namespace Disibox.Gui {
         {
             if (textBoxFileToUpload.Text != "")
             {
-                var fileName = textBoxFileToUpload.Text;
-                var fileStream = new FileStream(fileName, FileMode.Open);
+                var filePath = textBoxFileToUpload.Text;
+                var fileName = Path.GetFileName(filePath);
+                var fileStream = new FileStream(filePath, FileMode.Open);
                 _dataSource.AddFile(fileName, fileStream);
                 MessageBox.Show("The file has been uploaded successfully!");
             } else {
