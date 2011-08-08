@@ -78,10 +78,6 @@ namespace Disibox.Data
 
         private static ProcessingMessage DequeueProcessingMessage(CloudQueue procQueue)
         {
-            CloudQueueMessage msg;
-            while ((msg = procQueue.GetMessage()) == null)
-                Thread.Sleep(10);
-
             procQueue.BeginGetMessage(AsyncGetMessage, procQueue);
             ProcQueueHandler.WaitOne();
 
@@ -105,8 +101,6 @@ namespace Disibox.Data
         private static void EnqueueProcessingMessage(ProcessingMessage procMsg, CloudQueue procQueue)
         {
             var msg = new CloudQueueMessage(procMsg.ToString());
-            
-            
 
             lock (procQueue)
             {
