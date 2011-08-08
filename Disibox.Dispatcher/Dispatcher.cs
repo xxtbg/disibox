@@ -122,7 +122,7 @@ namespace Disibox.Dispatcher
             catch (Exception)
             {
                 Trace.WriteLine("Error sending the number of tools to processed file (connection: " + clientId + "). Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
@@ -133,7 +133,7 @@ namespace Disibox.Dispatcher
             } catch(Exception)
             {
                 Trace.WriteLine("Error sending the tools to processed file (connection: " + clientId + "). Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
@@ -145,14 +145,14 @@ namespace Disibox.Dispatcher
             } catch(Exception)
             {
                 Trace.WriteLine("Error reading the operation (connection: " + clientId + "). Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
             if (operation==null)
             {
                 Trace.WriteLine("Error reading the operation (connection: " + clientId + "). Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
@@ -171,7 +171,7 @@ namespace Disibox.Dispatcher
             catch (Exception)
             {
                 Trace.WriteLine("Error sending the uri of processed file (connection: " + clientId + "). Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 

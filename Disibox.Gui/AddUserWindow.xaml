@@ -1,17 +1,17 @@
 ﻿<Window x:Class="Disibox.Gui.AddUserWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Add User" Height="270" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="Add User" Height="230" Width="350" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-        <TextBox Margin="110,33,12,0" Name="textBox" Height="23" VerticalAlignment="Top" />
-        <PasswordBox Height="23" Margin="110,74,12,0" Name="passwordBox" VerticalAlignment="Top" />
-        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="185,0,0,20" Name="buttonCancel" VerticalAlignment="Bottom" Width="75" Click="buttonCancel_Click" />
-        <Button Content="Add user" HorizontalAlignment="Left" Margin="90,0,0,20" Name="buttonAdd" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonAdd_Click" />
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,33,0,0" Name="textBlock1" Text="Username" VerticalAlignment="Top" />
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,74,0,0" Name="textBlock2" Text="Password" VerticalAlignment="Top" />
+        <TextBox Margin="110,12,12,0" Name="textBox" Height="23" VerticalAlignment="Top" TabIndex="1" />
+        <PasswordBox Height="23" Margin="110,49,12,0" Name="passwordBox" VerticalAlignment="Top" TabIndex="2" />
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="188,0,0,12" Name="buttonCancel" VerticalAlignment="Bottom" Width="75" Click="buttonCancel_Click" TabIndex="6"/>
+        <Button Content="Add user" HorizontalAlignment="Left" Margin="93,0,0,12" Name="buttonAdd" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonAdd_Click" TabIndex="5" IsDefault="True"/>
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="textBlock1" Text="Username" VerticalAlignment="Top" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,49,0,0" Name="textBlock2" Text="Password" VerticalAlignment="Top" />
 
-        <PasswordBox Height="23" Margin="110,115,12,0" Name="passwordBox2" VerticalAlignment="Top" />
-        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,115,0,0" Name="textBlock3" Text="Repeat Password" VerticalAlignment="Top" />
-        <CheckBox Content="Administrator" Height="16" HorizontalAlignment="Left" Margin="110,155,0,0" Name="checkBoxAdmin" VerticalAlignment="Top" />
+        <PasswordBox Height="23" Margin="110,86,12,0" Name="passwordBox2" VerticalAlignment="Top" TabIndex="3" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,86,0,0" Name="textBlock3" Text="Repeat Password" VerticalAlignment="Top" />
+        <CheckBox Content="Administrator" Height="16" HorizontalAlignment="Left" Margin="110,123,0,0" Name="checkBoxAdmin" VerticalAlignment="Top" TabIndex="4"/>
     </Grid>
 </Window>

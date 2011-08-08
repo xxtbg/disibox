@@ -25,6 +25,8 @@ namespace Disibox.Gui
         private readonly StreamReader _reader;
         private readonly StreamWriter _writer;
         private readonly DataSource _ds;
+
+        private bool _erroFillingList = false;
         public ProcessWindow(StreamReader reader, StreamWriter writer, DataSource ds)
         {
             InitializeComponent();
@@ -33,8 +35,9 @@ namespace Disibox.Gui
             _ds = ds;
 
             FillListView();
-
-            ShowDialog();
+            
+            if (!_erroFillingList)
+                ShowDialog();
         }
 
         private void FillListView()
@@ -48,14 +51,16 @@ namespace Disibox.Gui
             catch (Exception)
             {
                 MessageBox.Show("The server is not responding, try later!", "Information");
-                Close();
+//                Close();
+                _erroFillingList = true;
                 return;
             }
 
             if (temp == null)
             {
                 MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
-                Close();
+//                Close();
+                _erroFillingList = true;
                 return;
             }
 
@@ -65,7 +70,8 @@ namespace Disibox.Gui
             } catch (Exception)
             {
                 MessageBox.Show("Mesage returned from server is wrong format or null, try later!", "Information");
-                Close();
+//                Close();
+                _erroFillingList = true;
                 return;
             }
 
@@ -78,7 +84,8 @@ namespace Disibox.Gui
                 } catch (Exception)
                 {
                     MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
-                    Close();
+//                    Close();
+                    _erroFillingList = true;
                     return;
                 }
                 listView.Items.Add(listItem);
@@ -113,7 +120,6 @@ namespace Disibox.Gui
                 return;
             }
 
-
             var saveDialog = new SaveFileDialog();
 
             if (saveDialog.ShowDialog() == true && saveDialog.CheckPathExists)
@@ -143,12 +149,12 @@ namespace Disibox.Gui
             }
 
             //delete the file fileblob
-            this.Close();
+            Close();
         }
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }
