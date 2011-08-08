@@ -23,8 +23,9 @@ namespace Disibox.Processing.Tools
 
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
-            var output = Hash.ComputeMD5(file);
-            return new ProcessingOutput(output, "text/plain");
+            var md5 = Hash.ComputeMD5(file);
+            var streamedMD5 = new MemoryStream(Common.StringToByteArray(md5));
+            return new ProcessingOutput(streamedMD5, "text/plain");
         }
     }
 }
