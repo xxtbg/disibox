@@ -21,9 +21,10 @@ namespace Disibox.Processing.Tools
             get { throw new NotImplementedException(); }
         }
 
-        public override object ProcessFile(Stream file, string fileContentType)
+        public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
-            return Hash.ComputeSHA256(file);
+            var output = Hash.ComputeSHA256(file);
+            return new ProcessingOutput(output, "text/plain");
         }
     }
 }

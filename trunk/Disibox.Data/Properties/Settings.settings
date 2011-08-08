@@ -20,5 +20,8 @@
     <Setting Name="ProcessingCompletionsName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">processingcompletions</Value>
     </Setting>
+    <Setting Name="OutputsBlobName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">outputs</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -157,7 +157,7 @@ namespace Disibox.Dispatcher
             }
 
 
-            //datasource.EnqueueProcessingRequest(new ProcessingMessage(uriFile, mime, operation));
+            datasource.EnqueueProcessingRequest(new ProcessingMessage(uriFile, mime, operation));
 
 
             Trace.WriteLine("operazione da compiere: " + operation, "Information");

@@ -14,8 +14,10 @@ namespace Disibox.Data
     public class DataSource
     {
         private static CloudBlobClient _blobClient;
-        private static CloudBlobContainer _blobContainer;
+        private static CloudBlobContainer _filesContainer;
+        private static CloudBlobContainer _outputsContainer;
         private static string _filesBlobName;
+        private static string _outputsBlobName;
 
         private static CloudQueue _processingRequests;
         private static CloudQueue _processingCompletions;
@@ -91,7 +93,7 @@ namespace Disibox.Data
         }
 
         /*=============================================================================
-            File handling methods
+            File and output handling methods
         =============================================================================*/
 
         /// <summary>
@@ -108,8 +110,114 @@ namespace Disibox.Data
             RequireNotNull(fileContent, "fileContent");
             RequireLoggedInUser();
 
+            var cloudFileName = GenerateFileName(_loggedUserId, fileName);
             var fileContentType = Common.GetContentType(fileName);
-            return UploadFile(fileName, fileContentType, fileContent);
+            return UploadBlob(cloudFileName, fileContentType, fileContent);
+        }
+
+        public Stream GetFile(string fileUri)
+        {
+            // Requirements
+            // TODO RequireLoggedInUser();
+
+            var blob = _filesContainer.GetBlobReference(fileUri);
+            return blob.OpenRead();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public IList<FileAndMime> GetFilesMetadata()
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            var options = new BlobRequestOptions();
+            options.UseFlatBlobListing = true;
+
+            var blobs = _filesContainer.ListBlobs(options);
+
+            var names = new List<FileAndMime>();
+
+            var prefix = _filesBlobName + "/";
+            if (!_loggedUserIsAdmin)
+                prefix += _loggedUserId;
+            var prefixLength = prefix.Length;
+
+            if (_loggedUserIsAdmin)
+                prefixLength--;
+
+            foreach (var blob in blobs)
+            {
+                var uri = blob.Uri.ToString();
+                var prefixStart = uri.IndexOf(prefix);
+                var fileName = uri.Substring(prefixStart + prefixLength + 1);
+                names.Add(new FileAndMime(fileName, Common.GetContentType(fileName), uri));
+            }
+
+            return names;
+        }
+
+        public IList<string> GetFilesNames()
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            var options = new BlobRequestOptions();
+            options.UseFlatBlobListing = true;
+
+            var blobs = _filesContainer.ListBlobs(options);
+            var names = new List<string>();
+
+            var prefix = _filesBlobName + "/" + _loggedUserId;
+            var prefixLength = prefix.Length;
+
+            foreach (var blob in blobs)
+            {
+                var uri = blob.Uri.ToString();
+                var prefixStart = uri.IndexOf(prefix);
+                var fileName = uri.Substring(prefixStart + prefixLength + 1);
+                names.Add(fileName);
+            }
+
+            return names;
+        }
+
+        public string AddOutput(string toolName, string outputContentType, Stream outputContent)
+        {
+            // Requirements
+            RequireNotNull(toolName, "toolName");
+            RequireNotNull(outputContentType, "outputContentType");
+            RequireNotNull(outputContent, "outputContent");
+
+            var outputName = GenerateOutputName(toolName);
+            return UploadBlob(outputName, outputContentType, outputContent);
+        }
+
+        private static string GenerateFileName(string userId, string fileName)
+        {
+            return _filesBlobName + "/" + userId + "/" + fileName;
+        }
+
+        private static string GenerateOutputName(string toolName)
+        {
+            return _outputsBlobName + "/" + toolName + Guid.NewGuid();
+        }
+
+        /// <summary>
+        /// Uploads given stream to blob storage.
+        /// </summary>
+        /// <param name="blobName"></param>
+        /// <param name="blobContentType"></param>
+        /// <param name="blobContent"></param>
+        /// <returns></returns>
+        private static string UploadBlob(string blobName, string blobContentType, Stream blobContent)
+        {
+            var blob = _blobClient.GetBlockBlobReference(blobName);
+            blob.Properties.ContentType = blobContentType;
+            blob.UploadFromStream(blobContent);
+            return blob.Uri.ToString();
         }
 
         /*=============================================================================
@@ -143,7 +251,7 @@ namespace Disibox.Data
         /// </summary>
         public static void Clear()
         {
-            _blobContainer.Delete();
+            _filesContainer.Delete();
             _processingRequests.Delete();
             _tableClient.DeleteTableIfExist(Entry.EntryPartitionKey);
             _tableClient.DeleteTableIfExist(User.UserPartitionKey);
@@ -185,76 +293,6 @@ namespace Disibox.Data
             return commonUsers.Select(u => u.Email).ToList();
         }
 
-        public Stream GetFile(string fileUri)
-        {
-            // Requirements
-            RequireLoggedInUser();
-
-            var blob = _blobContainer.GetBlobReference(fileUri);
-            return blob.OpenRead();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public IList<FileAndMime> GetFilesMetadata()
-        {
-            // Requirements
-            RequireLoggedInUser();
-
-            var options = new BlobRequestOptions();
-            options.UseFlatBlobListing = true;
-
-            var blobs = _blobContainer.ListBlobs(options);
-
-            var names = new List<FileAndMime>();
-
-            var prefix = _filesBlobName + "/";
-            if (!_loggedUserIsAdmin) 
-                prefix += _loggedUserId;
-            var prefixLength = prefix.Length;
-
-            if (_loggedUserIsAdmin)
-                prefixLength--;
-
-            foreach (var blob in blobs)
-            {
-                var uri = blob.Uri.ToString();
-                var prefixStart = uri.IndexOf(prefix);
-                var fileName = uri.Substring(prefixStart + prefixLength + 1);
-                names.Add(new FileAndMime(fileName, Common.GetContentType(fileName), uri));
-            }
-
-            return names;
-        }
-
-        public IList<string> GetFilesNames()
-        {
-            // Requirements
-            RequireLoggedInUser();
-
-            var options = new BlobRequestOptions();
-            options.UseFlatBlobListing = true;
-            //options.BlobListingDetails = BlobListingDetails.All;
-
-            var blobs = _blobContainer.ListBlobs(options);
-            var names = new List<string>();
-
-            var prefix = _filesBlobName + "/" + _loggedUserId;
-            var prefixLength = prefix.Length;
-
-            foreach (var blob in blobs)
-            {
-                var uri = blob.Uri.ToString();
-                var prefixStart = uri.IndexOf(prefix);
-                var fileName = uri.Substring(prefixStart + prefixLength + 1);
-                names.Add(fileName);
-            }  
-
-            return names;
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -291,11 +329,6 @@ namespace Disibox.Data
             }
         }
 
-        private static string GenerateFileName(string userId, string fileName)
-        {
-            return _filesBlobName + "/" + userId + "/" + fileName;
-        }
-
         private static string GenerateUserId(bool userIsAdmin)
         {
             var ctx = _tableClient.GetDataServiceContext();
@@ -325,17 +358,23 @@ namespace Disibox.Data
         private static void InitBlobs(CloudStorageAccount storageAccount, bool doInitialSetup)
         {
             _blobClient = storageAccount.CreateCloudBlobClient();
+            
             _filesBlobName = Properties.Settings.Default.FilesBlobName;
-            _blobContainer = _blobClient.GetContainerReference(_filesBlobName);
+            _filesContainer = _blobClient.GetContainerReference(_filesBlobName);
+
+            _outputsBlobName = Properties.Settings.Default.OutputsBlobName;
+            _outputsContainer = _blobClient.GetContainerReference(_outputsBlobName);
 
             // Next instructions are dedicated to initial setup.
             if (!doInitialSetup) return;
 
-            _blobContainer.CreateIfNotExist();
+            _filesContainer.CreateIfNotExist();
+            _outputsContainer.CreateIfNotExist();
 
-            var permissions = _blobContainer.GetPermissions();
+            var permissions = _filesContainer.GetPermissions();
             permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-            _blobContainer.SetPermissions(permissions);
+            _filesContainer.SetPermissions(permissions);
+            _outputsContainer.SetPermissions(permissions);
         }
 
         private static void InitQueues(CloudStorageAccount storageAccount, bool doInitialSetup)
@@ -406,22 +445,6 @@ namespace Disibox.Data
             InitBlobs(storageAccount, true);
             InitQueues(storageAccount, true);
             InitTables(storageAccount, true);
-        }
-
-        /// <summary>
-        /// Uploads the file to blob storage.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="contentType"></param>
-        /// <param name="content"></param>
-        /// <returns></returns>
-        private string UploadFile(string name, string contentType, Stream content)
-        {
-            var uniqueBlobName = GenerateFileName(_loggedUserId, name);
-            var blob = _blobClient.GetBlockBlobReference(uniqueBlobName);
-            blob.Properties.ContentType = contentType;
-            blob.UploadFromStream(content);
-            return blob.Uri.ToString();
         }
 
         /// <summary>

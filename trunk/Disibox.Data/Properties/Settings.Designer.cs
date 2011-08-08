@@ -76,5 +76,14 @@ namespace Disibox.Data.Properties {
                 return ((string)(this["ProcessingCompletionsName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("outputs")]
+        public string OutputsBlobName {
+            get {
+                return ((string)(this["OutputsBlobName"]));
+            }
+        }
     }
 }

@@ -30,6 +30,6 @@ namespace Disibox.Processing
         /// 
         /// </summary>
         /// <returns></returns>
-        object ProcessFile(Stream file, string fileContentType);
+        ProcessingOutput ProcessFile(Stream file, string fileContentType);
     }
 }
