@@ -21,9 +21,10 @@ namespace Disibox.Processing.Tools
             get { throw new NotImplementedException(); }
         }
 
-        public override object ProcessFile(Stream file, string fileContentType)
+        public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
-            return Hash.ComputeMD5(file);
+            var output = Hash.ComputeMD5(file);
+            return new ProcessingOutput(output, "text/plain");
         }
     }
 }

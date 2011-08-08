@@ -48,7 +48,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Disibox.Processing.Manifest</StartupObject>
+    <StartupObject>Disibox.Processing.ToolsManifest</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -63,6 +63,7 @@
     <Compile Include="BaseTool.cs" />
     <Compile Include="Exceptions\ToolNotExistingException.cs" />
     <Compile Include="ITool.cs" />
+    <Compile Include="ProcessingOutput.cs" />
     <Compile Include="ToolsManifest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

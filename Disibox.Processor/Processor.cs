@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Disibox.Data;
 using Disibox.Processing;
@@ -49,8 +51,13 @@ namespace Disibox.Processor
                 throw new ArgumentException(procReq.ToolName + " does not exist.", "procReq");
 
             var file = _dataSource.GetFile(procReq.FileUri);
+            var output = tool.ProcessFile(file, procReq.FileContentType);
+            
+            var bf = new BinaryFormatter();
+            var outputContent = new MemoryStream();
+            bf.Serialize(outputContent, output.Output);
 
-            tool.ProcessFile(file, procReq.FileContentType);
+            _dataSource.AddOutput(procReq.ToolName, output.OutputContentType, outputContent);
         }
     }
 }

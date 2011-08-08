@@ -18,6 +18,6 @@ namespace Disibox.Processing
 
         public IEnumerable<string> ProcessableTypes { get; private set; }
 
-        public abstract object ProcessFile(Stream file, string fileContentType);
+        public abstract ProcessingOutput ProcessFile(Stream file, string fileContentType);
     }
 }
