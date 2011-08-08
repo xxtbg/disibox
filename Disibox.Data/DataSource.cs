@@ -120,8 +120,7 @@ namespace Disibox.Data
             // Requirements
             // TODO RequireLoggedInUser();
 
-            var blob = _filesContainer.GetBlobReference(fileUri);
-            return blob.OpenRead();
+            return DownloadBlob(fileUri, _filesContainer);
         }
 
         /// <summary>
@@ -195,6 +194,14 @@ namespace Disibox.Data
             return UploadBlob(outputName, outputContentType, outputContent);
         }
 
+        public Stream GetOutput(string outputUri)
+        {
+            // Requirements
+            // TODO RequireLoggedInUser();
+
+            return DownloadBlob(outputUri, _outputsContainer);
+        }
+
         private static string GenerateFileName(string userId, string fileName)
         {
             return _filesBlobName + "/" + userId + "/" + fileName;
@@ -203,6 +210,12 @@ namespace Disibox.Data
         private static string GenerateOutputName(string toolName)
         {
             return _outputsBlobName + "/" + toolName + Guid.NewGuid();
+        }
+
+        private static Stream DownloadBlob(string blobUri, CloudBlobContainer blobContainer)
+        {
+            var blob = blobContainer.GetBlobReference(blobUri);
+            return blob.OpenRead();
         }
 
         /// <summary>
