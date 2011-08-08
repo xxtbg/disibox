@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Linq;
 using System.IO;
+using System.Threading;
 using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
 using Disibox.Utils;
@@ -77,19 +78,41 @@ namespace Disibox.Data
 
         private static ProcessingMessage DequeueProcessingMessage(CloudQueue procQueue)
         {
-            var msg = procQueue.GetMessage();
-            if (msg == null) return null;
+            CloudQueueMessage msg;
+            while ((msg = procQueue.GetMessage()) == null)
+                Thread.Sleep(10);
 
-            var procMsg = ProcessingMessage.FromString(msg.AsString);
-            procQueue.DeleteMessage(msg);
+            procQueue.BeginGetMessage(AsyncGetMessage, procQueue);
+            ProcQueueHandler.WaitOne();
+
+            var procMsg = ProcessingMessage.FromString(_dequeuedMsg.AsString);
+            procQueue.DeleteMessage(_dequeuedMsg);
 
             return procMsg;
+        }
+
+        private static readonly AutoResetEvent ProcQueueHandler = new AutoResetEvent(false);
+        private static CloudQueueMessage _dequeuedMsg;
+
+        private static void AsyncGetMessage(IAsyncResult result) 
+        {
+            var procQueue = (CloudQueue) result.AsyncState;
+            _dequeuedMsg = procQueue.EndGetMessage(result);
+
+            ProcQueueHandler.Set();
         }
 
         private static void EnqueueProcessingMessage(ProcessingMessage procMsg, CloudQueue procQueue)
         {
             var msg = new CloudQueueMessage(procMsg.ToString());
-            procQueue.AddMessage(msg);
+            
+            
+
+            lock (procQueue)
+            {
+                procQueue.AddMessage(msg);
+                Monitor.PulseAll(procQueue);
+            }
         }
 
         /*=============================================================================
