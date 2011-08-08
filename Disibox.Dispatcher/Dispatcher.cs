@@ -107,7 +107,7 @@ namespace Disibox.Dispatcher
             var numberOfTools = 0;
             try
             {
-                processingTools = Manifest.GetAvailableTools(mime);
+                processingTools = ToolsManifest.GetAvailableTools(mime);
                 numberOfTools = processingTools.Count;
             } catch
             {
@@ -157,7 +157,7 @@ namespace Disibox.Dispatcher
             }
 
 
-            //datasource.EnqueueProcessingRequest(new ProcessingRequest(uriFile, mime, operation));
+            //datasource.EnqueueProcessingRequest(new ProcessingMessage(uriFile, mime, operation));
 
 
             Trace.WriteLine("operazione da compiere: " + operation, "Information");

@@ -32,9 +32,9 @@ namespace Disibox.Gui
             _writer = writer;
             _ds = ds;
 
-            ShowDialog();
-
             FillListView();
+
+            ShowDialog();
         }
 
         private void FillListView()

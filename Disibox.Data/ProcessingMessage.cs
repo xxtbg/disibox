@@ -1,8 +1,8 @@
 ﻿namespace Disibox.Data
 {
-    public class ProcessingRequest
+    public class ProcessingMessage
     {
-        public ProcessingRequest(string fileUri, string fileContentType, string processingToolName)
+        public ProcessingMessage(string fileUri, string fileContentType, string processingToolName)
         {
             FileUri = fileUri;
             FileContentType = fileContentType;
@@ -15,7 +15,7 @@
 
         public string ToolName { get; private set; }
 
-        public static ProcessingRequest FromString(string req)
+        public static ProcessingMessage FromString(string req)
         {
             var reqParts = req.Split(new[] { ',' });
 
@@ -23,7 +23,7 @@
             var fileContentType = reqParts[1];
             var toolName = reqParts[2];
 
-            return new ProcessingRequest(fileUri, fileContentType, toolName);
+            return new ProcessingMessage(fileUri, fileContentType, toolName);
         }
 
         public override string ToString()
