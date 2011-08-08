@@ -51,7 +51,6 @@ namespace Disibox.Gui
             catch (Exception)
             {
                 MessageBox.Show("The server is not responding, try later!", "Information");
-//                Close();
                 _erroFillingList = true;
                 return;
             }
@@ -59,7 +58,6 @@ namespace Disibox.Gui
             if (temp == null)
             {
                 MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
-//                Close();
                 _erroFillingList = true;
                 return;
             }
@@ -70,7 +68,6 @@ namespace Disibox.Gui
             } catch (Exception)
             {
                 MessageBox.Show("Mesage returned from server is wrong format or null, try later!", "Information");
-//                Close();
                 _erroFillingList = true;
                 return;
             }
@@ -84,7 +81,6 @@ namespace Disibox.Gui
                 } catch (Exception)
                 {
                     MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
-//                    Close();
                     _erroFillingList = true;
                     return;
                 }
@@ -126,6 +122,8 @@ namespace Disibox.Gui
             {
                 var path = saveDialog.FileName;
                 var fileblob = _ds.GetFile(processedFile);
+
+                Console.WriteLine(path);
                 
                 //downloading file to the path
                 try

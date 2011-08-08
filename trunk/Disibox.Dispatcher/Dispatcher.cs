@@ -162,11 +162,13 @@ namespace Disibox.Dispatcher
 
             Trace.WriteLine("operazione da compiere: " + operation, "Information");
             //processo il file con l'operazione operation e ritorno con il uri del file processato
-//            uriProcessedFile = proces(uriFile, operation);
+
+
+            var returnMessage = datasource.DequeueProcessingCompletion();
 
             try
             {
-                writer.WriteLine("uriProcessedFile");
+                writer.WriteLine(returnMessage.FileUri);
             }
             catch (Exception)
             {
