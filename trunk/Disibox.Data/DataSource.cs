@@ -48,23 +48,6 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        [Obsolete]
-        public string AddFile(string path)
-        {
-            // Requirements
-            RequireLoggedInUser();
-
-            var fileName = Path.GetFileName(path);
-            var fileContentType = Common.GetContentType(path);
-            var fileContent = new FileStream(path, FileMode.Open);
-            return UploadFile(fileName, fileContentType, fileContent);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="fileName"></param>
         /// <param name="fileContent"></param>
         /// /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Disibox.Data.Exceptions;
 using Disibox.Utils;
@@ -50,19 +51,26 @@ namespace Disibox.Data.Tests
             Assert.True(fileNames.Contains(_fileNames[0]));
 
             var file = DataSource.GetFile(fileUri);
-            Assert.True(StreamsAreEqual(file, _files[0]));
+            Assert.True(Common.StreamsAreEqual(file, _files[0]));
         }
 
         [Test]
         public void AddManyFilesAsAdminUser()
         {
+            var uris = new string[FileCount];
+
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < FileCount; ++i)
-                DataSource.AddFile(_fileNames[i], _files[i]);
+                uris[i] = DataSource.AddFile(_fileNames[i], _files[i]);
 
             var fileNames = DataSource.GetFilesNames();
             for (var i = 0; i < FileCount; ++i)
+            {
                 Assert.True(fileNames.Contains(_fileNames[i]));
+                var file = DataSource.GetFile(uris[i]);
+                Assert.True(Common.StreamsAreEqual(file, _files[i]));
+            }
+                
         }
 
         [Test]
@@ -72,17 +80,20 @@ namespace Disibox.Data.Tests
             DataSource.AddFile(_fileNames[0], _files[0]);
         }
 
-        private bool StreamsAreEqual(Stream s1, Stream s2)
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NullFileNameArgument()
         {
-            if (s1.Length != s2.Length) return false;
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddFile(null, _files[0]);
+        }
 
-            var b1 = Common.StreamToByteArray(s1);
-            var b2 = Common.StreamToByteArray(s2);
-
-            for (var i = 0; i < b1.Length; ++i)
-                if (b1[i] != b2[i]) return false;
-
-            return true;
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void NullFileContentArgument()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddFile(_fileNames[0], null);
         }
     }
 }
