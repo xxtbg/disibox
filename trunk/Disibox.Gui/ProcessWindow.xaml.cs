@@ -31,6 +31,9 @@ namespace Disibox.Gui
             _reader = reader;
             _writer = writer;
             _ds = ds;
+
+            ShowDialog();
+
             FillListView();
         }
 
@@ -86,12 +89,13 @@ namespace Disibox.Gui
 
         private void buttonApply_Click(object sender, RoutedEventArgs e)
         {
-            if (listView.SelectedIndex == -1) return;
+            var operationToApply = (string)listView.SelectedItem;
+            if (operationToApply == null) return;
             string processedFile = null;
 
             try
             {
-                _writer.WriteLine(listView.SelectedIndex);
+                _writer.WriteLine(operationToApply);
 
                 //leggo l'uri del file processato
                 processedFile = _reader.ReadLine();

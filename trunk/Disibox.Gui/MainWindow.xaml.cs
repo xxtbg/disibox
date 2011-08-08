@@ -131,26 +131,47 @@ namespace Disibox.Gui {
         private void processFile(object sender, RoutedEventArgs e) {
             var selectedItem = (FileAndMime)listView_Files.SelectedItem;
 
-//            if (selectedItem == null) return;
-            //            to download the file with this name = selectedItem.Filename
+            if (selectedItem == null)
+            {
+                MessageBox.Show("You must select a file in order to process it!", "Processing file");
+                return;
+            }
             
             // estabilishing connection with the server
             var server = new TcpClient();
-            server.Connect(IPAddress.Parse(_serverString), _serverPort);
+            StreamReader reader;
+            StreamWriter writer;
 
-            var reader = new StreamReader(server.GetStream());
-            var writer = new StreamWriter(server.GetStream()) {AutoFlush = true};
+            try
+            {
+                server.Connect(IPAddress.Parse(_serverString), _serverPort);
+                reader = new StreamReader(server.GetStream());
+                writer = new StreamWriter(server.GetStream()) {AutoFlush = true};
+            } catch(Exception)
+            {
+                MessageBox.Show("Error during the connection to the processing Server", "Processing file");
+                return;
+            }
 
-            
+
             writer.WriteLine(_user);
             writer.WriteLine(_password);
 
-            writer.WriteLine("mime");
-            writer.WriteLine("file to process");
+            writer.WriteLine(selectedItem.Mime);
+            writer.WriteLine(selectedItem.Uri);
 
+
+            var answer = reader.ReadLine();
+
+            if (answer == null || answer.Equals("KO"))
+            {
+                MessageBox.Show("Error during the authentication to the Dispatcher Role", "Processing File");
+                server.Close();
+                return;
+            }
 
             var processWindow = new ProcessWindow(reader, writer, _dataSource);
-            processWindow.ShowDialog();
+            //processWindow.ShowDialog();
 
         }
 
