@@ -27,8 +27,8 @@ namespace Disibox.Processing
 
         public static IList<string> GetAvailableTools(string fileContentType)
         {
-            var availableTools = _availableTools[fileContentType];
-            return _multiPurposeTools.Concat(availableTools).ToList();
+            //var availableTools = _availableTools[fileContentType];
+            return _multiPurposeTools;//.Concat(availableTools).ToList();
         }
 
         public static ITool GetTool(string toolName)
@@ -72,7 +72,7 @@ namespace Disibox.Processing
                     tmpAvailableTools.Add(tmpPair);
                 }
 
-                _availableTools = tmpAvailableTools.ToLookup(p => p.First, p => p.Second);
+                //_availableTools = tmpAvailableTools.ToLookup(p => p.First, p => p.Second);
             }
         }
     }

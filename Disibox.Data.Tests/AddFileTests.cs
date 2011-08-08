@@ -15,6 +15,9 @@ namespace Disibox.Data.Tests
         private readonly IList<string> _fileNames = new List<string>();
         private readonly IList<Stream> _files = new List<Stream>();
 
+        private const string CommonUserName = "common";
+        private const string CommonUserPwd = "common";
+
         [SetUp]
         protected override void SetUp()
         {
@@ -71,6 +74,23 @@ namespace Disibox.Data.Tests
                 Assert.True(Common.StreamsAreEqual(file, _files[i]));
             }
                 
+        }
+
+        [Test]
+        public void AddOneFileAsCommonUser()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddUser(CommonUserName, CommonUserPwd, false);
+            DataSource.Logout();
+
+            DataSource.Login(CommonUserName, CommonUserPwd);
+            var fileUri = DataSource.AddFile(_fileNames[0], _files[0]);
+
+            var fileNames = DataSource.GetFilesNames();
+            Assert.True(fileNames.Contains(_fileNames[0]));
+
+            var file = DataSource.GetFile(fileUri);
+            Assert.True(Common.StreamsAreEqual(file, _files[0]));
         }
 
         [Test]
