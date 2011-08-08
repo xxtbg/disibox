@@ -53,7 +53,10 @@ namespace Disibox.Processor
             var file = _dataSource.GetFile(procReq.FileUri);
             var output = tool.ProcessFile(file, procReq.FileContentType);
 
-            _dataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
+            var outputUri = _dataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
+
+            var procCompl = new ProcessingMessage(outputUri, output.ContentType, procReq.ToolName);
+            _dataSource.EnqueueProcessingCompletion(procCompl);
         }
     }
 }
