@@ -188,10 +188,20 @@ namespace Disibox.Gui {
 
         private void buttonRefreshUsers_Click(object sender, RoutedEventArgs e)
         {
-            var adminUsers = _dataSource.GetAdminUsersEmails();
-            var commonUsers = _dataSource.GetCommonUsersEmails();
+            IList<string> adminUsers;
+            IList<string> commonUsers;
 
-            listView_Files.Items.Clear();
+            try
+            {
+                adminUsers = _dataSource.GetAdminUsersEmails();
+                commonUsers = _dataSource.GetCommonUsersEmails();
+            } catch(Exception)
+            {
+                MessageBox.Show("Only a logged user (only administrator) can see the list of users", "User Listing");
+                return;
+            }
+
+            listView_Users.Items.Clear();
 
             foreach (var adminUser in adminUsers)
                 listView_Users.Items.Add(adminUser);

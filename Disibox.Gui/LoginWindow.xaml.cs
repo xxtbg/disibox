@@ -24,6 +24,7 @@ namespace Disibox.Gui {
             InitializeComponent();
             _mainWindow = new MainWindow();
             _dataSource = new DataSource();
+            textBox.Focus();
         }
 
         private void buttonLogin_Click(object sender, RoutedEventArgs e) {

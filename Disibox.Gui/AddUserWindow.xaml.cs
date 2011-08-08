@@ -24,11 +24,12 @@ namespace Disibox.Gui
         {
             InitializeComponent();
             _ds = ds;
+            textBox.Focus();
         }
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void buttonAdd_Click(object sender, RoutedEventArgs e)
@@ -39,11 +40,24 @@ namespace Disibox.Gui
 
             if (password1.Equals(password2))
             {
-                _ds.AddUser(username, password1, (bool)checkBoxAdmin.IsChecked);
-                this.Close();
+                var isAdmin = false;
+                if (checkBoxAdmin.IsChecked == true)
+                    isAdmin = true;
+
+                try
+                {
+                    _ds.AddUser(username, password1, isAdmin);
+                } catch(Exception)
+                {
+                    MessageBox.Show("Only a user with administrator priviledges can add a user", "Error inserting a new user");
+                    textBox.Focus();
+                    return;
+                }
+                Close();
             } else
             {
                 MessageBox.Show("The two passwords must be the same!", "Error inserting a new user");
+                passwordBox.Focus();
             }
 
         }
