@@ -110,7 +110,9 @@ namespace Disibox.Dispatcher
                 processingTools = Manifest.GetAvailableTools(mime);
                 numberOfTools = processingTools.Count;
             } catch
-            {}
+            {
+                Trace.WriteLine("Error getting available tools (connection: " + clientId + ")", "Information");
+            }
 
             try
             {
