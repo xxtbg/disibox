@@ -42,7 +42,7 @@ namespace Disibox.Processing.Tools
                 {
                     for (var x = 0; x < nWidth; ++x)
                     {
-                        *p = (byte)(255 - *p);
+                        // inverted[x+(y*) = (byte)(255 - *p);
                         ++p;
                     }
                     p += nOffset;
