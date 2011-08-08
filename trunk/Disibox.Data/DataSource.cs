@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Linq;
@@ -18,11 +17,12 @@ namespace Disibox.Data
         private static CloudBlobContainer _blobContainer;
         private static string _filesBlobName;
 
-        private static CloudQueue _processingQueue;
+        private static CloudQueue _processingRequests;
+        private static CloudQueue _processingCompletions;
 
         private static CloudTableClient _tableClient;
 
-        private string _loggedUserId = "test_da_togliere";
+        private string _loggedUserId;
         private bool _loggedUserIsAdmin;
         private bool _userIsLoggedIn;
 
@@ -46,6 +46,54 @@ namespace Disibox.Data
             Setup();
         }
 
+        /*=============================================================================
+            Processing queues methods
+        =============================================================================*/
+
+        public static ProcessingMessage DequeueProcessingRequest()
+        {
+            return DequeueProcessingMessage(_processingRequests);
+        }
+
+        public void EnqueueProcessingRequest(ProcessingMessage procReq)
+        {
+            // Requirements
+            RequireLoggedInUser();
+
+            EnqueueProcessingMessage(procReq, _processingRequests);
+        }
+
+        public ProcessingMessage DequeueProcessingCompletion()
+        {
+            return DequeueProcessingMessage(_processingCompletions);
+        }
+
+        public void EnqueueProcessingCompletion(ProcessingMessage procCompl)
+        {
+            EnqueueProcessingMessage(procCompl, _processingCompletions);
+        }
+
+        private static ProcessingMessage DequeueProcessingMessage(CloudQueue procQueue)
+        {
+            var msg = procQueue.GetMessage();
+            if (msg == null) return null;
+
+            var procMsg = ProcessingMessage.FromString(msg.AsString);
+            procQueue.DeleteMessage(msg);
+
+            return procMsg;
+        }
+
+        private static void EnqueueProcessingMessage(ProcessingMessage procMsg, CloudQueue procQueue)
+        {
+            var msg = new CloudQueueMessage(procMsg.ToString());
+            procQueue.AddMessage(msg);
+        }
+
+        /*=============================================================================
+            File handling methods
+        =============================================================================*/
+
         /// <summary>
         /// 
         /// </summary>
@@ -63,6 +111,10 @@ namespace Disibox.Data
             var fileContentType = Common.GetContentType(fileName);
             return UploadFile(fileName, fileContentType, fileContent);
         }
+
+        /*=============================================================================
+            User handling methods
+        =============================================================================*/
 
         /// <summary>
         /// 
@@ -92,31 +144,11 @@ namespace Disibox.Data
         public static void Clear()
         {
             _blobContainer.Delete();
-            _processingQueue.Delete();
+            _processingRequests.Delete();
             _tableClient.DeleteTableIfExist(Entry.EntryPartitionKey);
             _tableClient.DeleteTableIfExist(User.UserPartitionKey);
 
             Setup();
-        }
-
-        public static ProcessingRequest DequeueProcessingRequest()
-        {
-            var msg = _processingQueue.GetMessage();
-            if (msg == null) return null;
-
-            var procReq = ProcessingRequest.FromString(msg.AsString);
-            _processingQueue.DeleteMessage(msg);
-
-            return procReq;
-        }
-
-        public void EnqueueProcessingRequest(ProcessingRequest procReq)
-        {
-            // Requirements
-            RequireLoggedInUser();
-
-            var msg = new CloudQueueMessage(procReq.ToString());
-            _processingQueue.AddMessage(msg);
         }
 
         /// <summary>
@@ -309,13 +341,18 @@ namespace Disibox.Data
         private static void InitQueues(CloudStorageAccount storageAccount, bool doInitialSetup)
         {
             var queueClient = storageAccount.CreateCloudQueueClient();
-            var processingQueueName = Properties.Settings.Default.ProcessingQueueName;
-            _processingQueue = queueClient.GetQueueReference(processingQueueName);
+            
+            var processingRequestsName = Properties.Settings.Default.ProcessingRequestsName;
+            _processingRequests = queueClient.GetQueueReference(processingRequestsName);
 
-            // Next instructions are dedicated to initial setup.
+            var processingCompletionsName = Properties.Settings.Default.ProcessingCompletionsName;
+            _processingCompletions = queueClient.GetQueueReference(processingCompletionsName);
+
+            // Next instructions are dedicated to initial setup.)
             if (!doInitialSetup) return;
 
-            _processingQueue.CreateIfNotExist();
+            _processingRequests.CreateIfNotExist();
+            _processingCompletions.CreateIfNotExist();
         }
 
         private static void InitTables(CloudStorageAccount storageAccount, bool doInitialSetup)
@@ -398,6 +435,10 @@ namespace Disibox.Data
             ctx.SaveChanges();
         }
 
+        /*=============================================================================
+            Requirement checking methods
+        =============================================================================*/
+
         /// <summary>
         /// Checks if currently logged in user is administrator;
         /// if he's not, an appropriate exception is thrown.
@@ -425,7 +466,7 @@ namespace Disibox.Data
         /// <param name="obj"></param>
         /// <param name="paramName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        private void RequireNotNull(object obj, string paramName)
+        private static void RequireNotNull(object obj, string paramName)
         {
             if (obj != null) return;
             throw new ArgumentNullException(paramName);

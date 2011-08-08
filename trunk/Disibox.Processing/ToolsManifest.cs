@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Disibox.Processing.Exceptions;
 using Disibox.Utils;
 
 namespace Disibox.Processing
 {
-    public static class Manifest
+    public static class ToolsManifest
     {
         private static IDictionary<string, ITool> _procTools;
 
@@ -20,7 +21,7 @@ namespace Disibox.Processing
         /// </summary>
         private static ILookup<string, string> _availableTools;
 
-        static Manifest()
+        static ToolsManifest()
         {
             InitTools();
         }
@@ -54,15 +55,20 @@ namespace Disibox.Processing
 
         public static IList<string> GetAvailableTools(string fileContentType)
         {
-            //var availableTools = _availableTools[fileContentType];
-            return _multiPurposeTools;//.Concat(availableTools).ToList();
+            var availableTools = _availableTools[fileContentType];
+            return _multiPurposeTools.Concat(availableTools).ToList();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="toolName"></param>
+        /// <returns></returns>
         public static ITool GetTool(string toolName)
         {
             ITool tool;
-            _procTools.TryGetValue(toolName, out tool);
-            return tool;
+            if (_procTools.TryGetValue(toolName, out tool)) return tool;
+            throw new ToolNotExistingException();
         }
 
         private static void InitTools()

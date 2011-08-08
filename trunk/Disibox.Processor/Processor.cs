@@ -42,9 +42,9 @@ namespace Disibox.Processor
         /// 
         /// </summary>
         /// <param name="procReq"></param>
-        private void ProcessRequest(ProcessingRequest procReq)
+        private void ProcessRequest(ProcessingMessage procReq)
         {
-            var tool = Manifest.GetTool(procReq.ToolName);
+            var tool = ToolsManifest.GetTool(procReq.ToolName);
             if (tool == null)
                 throw new ArgumentException(procReq.ToolName + " does not exist.", "procReq");
 

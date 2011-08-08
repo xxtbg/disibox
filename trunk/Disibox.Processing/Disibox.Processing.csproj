@@ -61,8 +61,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseTool.cs" />
+    <Compile Include="Exceptions\ToolNotExistingException.cs" />
     <Compile Include="ITool.cs" />
-    <Compile Include="Manifest.cs" />
+    <Compile Include="ToolsManifest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
