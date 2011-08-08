@@ -21,7 +21,6 @@ namespace Disibox.Processor
 
             while (true)
             {
-                Thread.Sleep(10000);
                 Trace.WriteLine("Working", "Information");
 
                 var procReq = DataSource.DequeueProcessingRequest();
