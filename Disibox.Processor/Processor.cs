@@ -52,12 +52,8 @@ namespace Disibox.Processor
 
             var file = _dataSource.GetFile(procReq.FileUri);
             var output = tool.ProcessFile(file, procReq.FileContentType);
-            
-            var bf = new BinaryFormatter();
-            var outputContent = new MemoryStream();
-            bf.Serialize(outputContent, output.Output);
 
-            _dataSource.AddOutput(procReq.ToolName, output.OutputContentType, outputContent);
+            _dataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
         }
     }
 }

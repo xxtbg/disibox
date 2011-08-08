@@ -1,15 +1,17 @@
-﻿namespace Disibox.Processing
+﻿using System.IO;
+
+namespace Disibox.Processing
 {
     public class ProcessingOutput
     {
-        public ProcessingOutput(object output, string outputContentType)
+        public ProcessingOutput(Stream outputContent, string outputContentType)
         {
-            Output = output;
-            OutputContentType = outputContentType;
+            Content = outputContent;
+            ContentType = outputContentType;
         }
 
-        public object Output { get; private set; }
+        public Stream Content { get; private set; }
 
-        public string OutputContentType { get; private set; }
+        public string ContentType { get; private set; }
     }
 }

@@ -101,8 +101,8 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="fileContent"></param>
-        /// /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
-        /// /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
+        /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
+        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         public string AddFile(string fileName, Stream fileContent)
         {
             // Requirements
@@ -132,11 +132,7 @@ namespace Disibox.Data
             // Requirements
             RequireLoggedInUser();
 
-            var options = new BlobRequestOptions();
-            options.UseFlatBlobListing = true;
-
-            var blobs = _filesContainer.ListBlobs(options);
-
+            var blobs = ListBlobs(_filesContainer);
             var names = new List<FileAndMime>();
 
             var prefix = _filesBlobName + "/";
@@ -163,10 +159,7 @@ namespace Disibox.Data
             // Requirements
             RequireLoggedInUser();
 
-            var options = new BlobRequestOptions();
-            options.UseFlatBlobListing = true;
-
-            var blobs = _filesContainer.ListBlobs(options);
+            var blobs = ListBlobs(_filesContainer);
             var names = new List<string>();
 
             var prefix = _filesBlobName + "/" + _loggedUserId;
@@ -181,6 +174,11 @@ namespace Disibox.Data
             }
 
             return names;
+        }
+
+        private static string GenerateFileName(string userId, string fileName)
+        {
+            return _filesBlobName + "/" + userId + "/" + fileName;
         }
 
         public string AddOutput(string toolName, string outputContentType, Stream outputContent)
@@ -202,16 +200,17 @@ namespace Disibox.Data
             return DownloadBlob(outputUri, _outputsContainer);
         }
 
-        private static string GenerateFileName(string userId, string fileName)
-        {
-            return _filesBlobName + "/" + userId + "/" + fileName;
-        }
-
         private static string GenerateOutputName(string toolName)
         {
             return _outputsBlobName + "/" + toolName + Guid.NewGuid();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="blobUri"></param>
+        /// <param name="blobContainer"></param>
+        /// <returns></returns>
         private static Stream DownloadBlob(string blobUri, CloudBlobContainer blobContainer)
         {
             var blob = blobContainer.GetBlobReference(blobUri);
@@ -227,10 +226,24 @@ namespace Disibox.Data
         /// <returns></returns>
         private static string UploadBlob(string blobName, string blobContentType, Stream blobContent)
         {
+            blobContent.Seek(0, SeekOrigin.Begin);
             var blob = _blobClient.GetBlockBlobReference(blobName);
             blob.Properties.ContentType = blobContentType;
             blob.UploadFromStream(blobContent);
             return blob.Uri.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="blobContainer"></param>
+        /// <returns></returns>
+        private static IEnumerable<IListBlobItem> ListBlobs(CloudBlobContainer blobContainer)
+        {
+            var options = new BlobRequestOptions();
+            options.UseFlatBlobListing = true;
+
+            return  blobContainer.ListBlobs(options);
         }
 
         /*=============================================================================
