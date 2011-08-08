@@ -78,8 +78,11 @@ namespace Disibox.Data
 
         private static ProcessingMessage DequeueProcessingMessage(CloudQueue procQueue)
         {
-            procQueue.BeginGetMessage(AsyncGetMessage, procQueue);
-            ProcQueueHandler.WaitOne();
+            while ((_dequeuedMsg = procQueue.GetMessage()) == null)
+                Thread.Sleep(1000);
+
+            //procQueue.BeginGetMessage(AsyncGetMessage, procQueue);
+            //ProcQueueHandler.WaitOne();
 
             var procMsg = ProcessingMessage.FromString(_dequeuedMsg.AsString);
             procQueue.DeleteMessage(_dequeuedMsg);
