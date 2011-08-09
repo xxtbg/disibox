@@ -166,6 +166,9 @@ namespace Disibox.Dispatcher
 
             var returnMessage = datasource.DequeueProcessingCompletion();
 
+            Trace.WriteLine("File uri: " + returnMessage.FileUri, "Information");
+
+
             try
             {
                 writer.WriteLine(returnMessage.FileUri);

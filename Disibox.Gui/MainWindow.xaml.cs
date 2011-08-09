@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Disibox.Gui.Util;
 using Microsoft.Win32;
 using Disibox.Data;
 using Path = System.IO.Path;
@@ -54,14 +55,11 @@ namespace Disibox.Gui {
 
         private void buttonBrowse_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
+            var ofd = new OpenFileDialog();
+            var result = ofd.ShowDialog();
 
-            Nullable<bool> result = ofd.ShowDialog();
-
-            if (result == true) {
-                string filename = ofd.FileName;
-                textBoxFileToUpload.Text = filename;
-            }
+            if (result == true) 
+                textBoxFileToUpload.Text = ofd.FileName;
         }
 
         private void buttonUpload_Click(object sender, RoutedEventArgs e)
@@ -70,9 +68,30 @@ namespace Disibox.Gui {
             {
                 var filePath = textBoxFileToUpload.Text;
                 var fileName = Path.GetFileName(filePath);
-                var fileStream = new FileStream(filePath, FileMode.Open);
-                _dataSource.AddFile(fileName, fileStream);
-                MessageBox.Show("The file has been uploaded successfully!");
+                FileStream fileStream;
+                try
+                {
+                    fileStream = new FileStream(filePath, FileMode.Open);
+                } catch (Exception ex)
+                {
+                    MessageBox.Show("The file to upload cannot be opened: " + ex, "Uploading a file");
+                    textBoxFileToUpload.Text = "";
+                    return;
+                }
+
+                try
+                {
+                    _dataSource.AddFile(fileName, fileStream);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Cannot upload the file to the cloud", "Uploading a file");
+                    textBoxFileToUpload.Text = "";
+                    return;
+                }
+
+                MessageBox.Show("The file has been uploaded successfully!", "Uploading a file");
+                textBoxFileToUpload.Text = "";
             } else {
                 MessageBox.Show("No file to upload");
             }
@@ -81,7 +100,18 @@ namespace Disibox.Gui {
 
         private void buttonRefreshFiles_Click(object sender, RoutedEventArgs e)
         {
-            var names = _dataSource.GetFilesMetadata();
+            IList<FileAndMime> names = null;
+
+            try
+            {
+                names = _dataSource.GetFilesMetadata();
+            } catch (Exception)
+            {
+                MessageBox.Show("Cannot refresh the file list", "Refreshing file list");
+            }
+
+            if (names == null)
+                return;
 
             listView_Files.Items.Clear();
 
@@ -90,13 +120,14 @@ namespace Disibox.Gui {
         }
 
         private void ExitProgram(object sender, RoutedEventArgs e) {
+            _dataSource.Logout();
             Application.Current.Shutdown();
         }
 
         private void Logout(object sender, RoutedEventArgs e) {
             _dataSource.Logout();
             new LoginWindow().Show();
-            this.Close();
+            Close();
         }
 
         private void buttonDeleteFile_Click(object sender, RoutedEventArgs e) {
@@ -119,9 +150,9 @@ namespace Disibox.Gui {
             try
             {
                 fileToDownload.CopyTo(File.Create(saveDialog.FileName));
-            } catch (Exception)
+            } catch (Exception ex)
             {
-                MessageBox.Show("Error during the download of the file", "Downloading file");
+                MessageBox.Show("Error during the download of the file: " + ex, "Downloading file");
                 return;
             }
 
@@ -141,27 +172,33 @@ namespace Disibox.Gui {
             var server = new TcpClient();
             StreamReader reader;
             StreamWriter writer;
+            string answer;
 
             try
             {
                 server.Connect(IPAddress.Parse(_serverString), _serverPort);
                 reader = new StreamReader(server.GetStream());
                 writer = new StreamWriter(server.GetStream()) {AutoFlush = true};
-            } catch(Exception)
+            } catch(Exception ex)
             {
-                MessageBox.Show("Error during the connection to the processing Server", "Processing file");
+                MessageBox.Show("Error during the connection to the processing Server: " + ex, "Processing file");
                 return;
             }
 
+            try
+            {
+                writer.WriteLine(_user);
+                writer.WriteLine(_password);
 
-            writer.WriteLine(_user);
-            writer.WriteLine(_password);
+                writer.WriteLine(selectedItem.Mime);
+                writer.WriteLine(selectedItem.Uri);
 
-            writer.WriteLine(selectedItem.Mime);
-            writer.WriteLine(selectedItem.Uri);
-
-
-            var answer = reader.ReadLine();
+                answer = reader.ReadLine();
+            } catch (Exception ex)
+            {
+                MessageBox.Show("An error occured while sending credentials and item to process: " + ex, "Processing file");
+                return;
+            }
 
             if (answer == null || answer.Equals("KO"))
             {
@@ -170,8 +207,7 @@ namespace Disibox.Gui {
                 return;
             }
 
-            var processWindow = new ProcessWindow(reader, writer, _dataSource);
-            //processWindow.ShowDialog();
+            new ProcessWindow(reader, writer, _dataSource);
 
         }
 
@@ -204,10 +240,10 @@ namespace Disibox.Gui {
             listView_Users.Items.Clear();
 
             foreach (var adminUser in adminUsers)
-                listView_Users.Items.Add(adminUser);
+                listView_Users.Items.Add(new UserAndType {User = adminUser, Type = "Administrator"});
 
             foreach (var commonUser in commonUsers)
-                listView_Users.Items.Add(commonUser);
+                listView_Users.Items.Add(new UserAndType {User = commonUser, Type = "Common"});
 
         }
 

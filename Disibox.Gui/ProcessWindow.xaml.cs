@@ -123,7 +123,6 @@ namespace Disibox.Gui
                 var path = saveDialog.FileName;
                 var fileblob = _ds.GetFile(processedFile);
 
-                Console.WriteLine(path);
                 
                 //downloading file to the path
                 try
