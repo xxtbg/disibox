@@ -58,6 +58,7 @@ namespace Disibox.Gui
             {
                 MessageBox.Show("The two passwords must be the same!", "Error inserting a new user");
                 passwordBox.Focus();
+
             }
 
         }
