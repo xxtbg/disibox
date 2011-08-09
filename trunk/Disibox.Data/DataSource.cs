@@ -153,25 +153,27 @@ namespace Disibox.Data
             RequireLoggedInUser();
 
             var blobs = ListBlobs(_filesContainer);
-            var names = new List<FileAndMime>();
-
             var prefix = _filesBlobName + "/";
-            if (!_loggedUserIsAdmin)
-                prefix += _loggedUserId;
             var prefixLength = prefix.Length;
 
             if (_loggedUserIsAdmin)
                 prefixLength--;
 
-            foreach (var blob in blobs)
-            {
-                var uri = blob.Uri.ToString();
-                var prefixStart = uri.IndexOf(prefix);
-                var fileName = uri.Substring(prefixStart + prefixLength + 1);
-                names.Add(new FileAndMime(fileName, Common.GetContentType(fileName), uri));
-            }
+            if (!_loggedUserIsAdmin)
+                return (from blob in blobs
+                        select blob.Uri.ToString()
+                        into uri
+                        let controlUserFiles = prefix + "" + _loggedUserId
+                        let prefixStart = uri.IndexOf(controlUserFiles)
+                        let fileName = uri.Substring(prefixStart + prefixLength + _loggedUserId.Length + 1)
+                        where uri.IndexOf(controlUserFiles) != -1
+                        select new FileAndMime(fileName, Common.GetContentType(fileName), uri)).ToList();
 
-            return names;
+            return (from blob in blobs 
+                    select blob.Uri.ToString() into uri 
+                    let prefixStart = uri.IndexOf(prefix)
+                    let fileName = uri.Substring(prefixStart + prefixLength + 1)
+                    select new FileAndMime(fileName, Common.GetContentType(fileName), uri)).ToList();
         }
 
         public IList<string> GetFilesNames()
