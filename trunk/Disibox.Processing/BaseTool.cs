@@ -16,7 +16,7 @@ namespace Disibox.Processing
         
         public abstract string LongDescription { get; }
 
-        public IEnumerable<string> ProcessableTypes { get; private set; }
+        public IList<string> ProcessableTypes { get; private set; }
 
         public abstract ProcessingOutput ProcessFile(Stream file, string fileContentType);
     }
