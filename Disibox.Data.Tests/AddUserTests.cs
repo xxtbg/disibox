@@ -1,60 +1,19 @@
-﻿using System.Collections.Generic;
-using Disibox.Data.Exceptions;
+﻿using Disibox.Data.Exceptions;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests
 {
-    public class AddUserTests : BaseDataTests
+    public class AddUserTests : BaseUserTests
     {
-        private const int AdminUserCount = 5;
-        private const int CommonUserCount = 5;
-
-        private const int EmailLength = 7;
-        private const int PwdLength = 9;
-
-        private readonly IList<string> _adminUserEmails = new List<string>();
-        private readonly IList<string> _adminUserPwds = new List<string>();
-
-        private readonly IList<string> _commonUserEmails = new List<string>();
-        private readonly IList<string> _commonUserPwds = new List<string>();
-
         [SetUp]
         protected override void SetUp()
         {
             base.SetUp();
-
-            for (var i = 0; i < AdminUserCount; ++i)
-            {
-                var currChar = (char)('a' + i);
-                
-                var email = new string(currChar, EmailLength);
-                _adminUserEmails.Add(email + "_admin");
-
-                var pwd = new string(currChar, PwdLength);
-                _adminUserPwds.Add(pwd + "_pwd");
-            }
-
-            for (var i = 0; i < CommonUserCount; ++i)
-            {
-                var currChar = (char)('a' + i);
-
-                var email = new string(currChar, EmailLength);
-                _commonUserEmails.Add(email + "_common");
-
-                var pwd = new string(currChar, EmailLength);
-                _commonUserPwds.Add(pwd + "_pwd");
-            }
         }
 
         [TearDown]
         protected override void TearDown()
         {
-            _adminUserEmails.Clear();
-            _adminUserPwds.Clear();
-
-            _commonUserEmails.Clear();
-            _commonUserPwds.Clear();
-
             base.TearDown();
         }
 
@@ -62,10 +21,10 @@ namespace Disibox.Data.Tests
         public void AddOneCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(_commonUserEmails[0], _commonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
 
             var commonUsersEmails = DataSource.GetCommonUsersEmails();
-            Assert.True(commonUsersEmails.Contains(_commonUserEmails[0]));
+            Assert.True(commonUsersEmails.Contains(CommonUserEmails[0]));
         }
 
         [Test]
@@ -73,18 +32,18 @@ namespace Disibox.Data.Tests
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < CommonUserCount; ++i)
-                DataSource.AddUser(_commonUserEmails[i], _commonUserPwds[i], false);
+                DataSource.AddUser(CommonUserEmails[i], CommonUserPwds[i], false);
 
             var commonUsersEmails = DataSource.GetCommonUsersEmails();
             for (var i = 0; i < CommonUserCount; ++i)
-                Assert.True(commonUsersEmails.Contains(_commonUserEmails[i]));
+                Assert.True(commonUsersEmails.Contains(CommonUserEmails[i]));
         }
 
         [Test]
         [ExpectedException(typeof(LoggedInUserRequiredException))]
         public void AddOneCommonUserWithoutLoggingIn()
         {
-            DataSource.AddUser(_commonUserEmails[0], _commonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
         }
 
         [Test]
@@ -92,21 +51,21 @@ namespace Disibox.Data.Tests
         public void AddOneCommonUserLoggingInAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(_commonUserEmails[0], _commonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
             DataSource.Logout();
 
-            DataSource.Login(_commonUserEmails[0], _commonUserPwds[0]);
-            DataSource.AddUser(_commonUserEmails[1], _commonUserPwds[1], false);
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], false);
         }
 
         [Test]
         public void AddOneAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(_adminUserEmails[0], _adminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
 
             var adminUsersEmails = DataSource.GetAdminUsersEmails();
-            Assert.True(adminUsersEmails.Contains(_adminUserEmails[0]));
+            Assert.True(adminUsersEmails.Contains(AdminUserEmails[0]));
         }
 
         [Test]
@@ -114,18 +73,18 @@ namespace Disibox.Data.Tests
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < AdminUserCount; ++i)
-                DataSource.AddUser(_adminUserEmails[i], _adminUserPwds[i], true);
+                DataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], true);
 
             var adminUsersEmails = DataSource.GetAdminUsersEmails();
             for (var i = 0; i < AdminUserCount; ++i)
-                Assert.True(adminUsersEmails.Contains(_adminUserEmails[i]));
+                Assert.True(adminUsersEmails.Contains(AdminUserEmails[i]));
         }
 
         [Test]
         [ExpectedException(typeof(LoggedInUserRequiredException))]
         public void AddOneAdminUserWithoutLoggingIn()
         {
-            DataSource.AddUser(_adminUserEmails[0], _adminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
         }
 
         [Test]
@@ -133,11 +92,11 @@ namespace Disibox.Data.Tests
         public void AddOneAdminUserLoggingInAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(_commonUserEmails[0], _commonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
             DataSource.Logout();
 
-            DataSource.Login(_commonUserEmails[0], _commonUserPwds[0]);
-            DataSource.AddUser(_adminUserEmails[0], _adminUserPwds[0], true);
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
         }
     }
 }

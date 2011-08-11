@@ -338,7 +338,36 @@ namespace Disibox.Data
 
             var userId = GenerateUserId(userIsAdmin);
             var user = new User(userId, userEmail, userPwd, userIsAdmin);
-            UploadUser(user);
+            
+            var ctx = _tableClient.GetDataServiceContext();
+            ctx.AddObject(user.PartitionKey, user);
+            ctx.SaveChanges();
+        }
+
+        /// <summary>
+        /// Deletes user corresponding to given email address.
+        /// </summary>
+        /// <param name="userEmail">The email address of the user that should be deleted.</param>
+        public void DeleteUser(string userEmail)
+        {
+            // Requirements
+            RequireNotNull(userEmail, "userEmail");
+            RequireLoggedInUser();
+            RequireAdminUser();
+
+            if (userEmail == Properties.Settings.Default.DefaultAdminEmail)
+                throw new CannotDeleteUserException();
+
+            var ctx = _tableClient.GetDataServiceContext();
+            
+            // Added a call to ToList() to avoid an error on Count() call.
+            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.Email == userEmail).ToList();
+            if (q.Count() == 0)
+                throw new UserNotExistingException();
+            var user = q.First();
+            
+            ctx.DeleteObject(user);
+            ctx.SaveChanges();
         }
 
         /// <summary>
@@ -540,17 +569,6 @@ namespace Disibox.Data
             InitBlobs(storageAccount, true);
             InitQueues(storageAccount, true);
             InitTables(storageAccount, true);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user"></param>
-        private static void UploadUser(TableServiceEntity user)
-        {
-            var ctx = _tableClient.GetDataServiceContext();
-            ctx.AddObject(user.PartitionKey, user);
-            ctx.SaveChanges();
         }
 
         /*=============================================================================

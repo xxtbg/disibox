@@ -5,8 +5,19 @@ using System.IO;
 
 namespace Disibox.Processing.Tools
 {
-    class ColorInverter : BaseTool
+    public class ColorInverter : BaseTool
     {
+        private const string BmpContentType = "image/bmp";
+        private const string JpegContentType = "image/jpeg";
+        private const string PngContentType = "image/png";
+
+        public ColorInverter()
+        {
+            ProcessableTypes.Add(BmpContentType);
+            ProcessableTypes.Add(JpegContentType);
+            ProcessableTypes.Add(PngContentType);
+        }
+
         public override string Name
         {
             get { return "Color inverter"; }
@@ -62,11 +73,11 @@ namespace Disibox.Processing.Tools
         {
             switch (imageContentType)
             {
-                case "image/bmp":
+                case BmpContentType:
                     return ImageFormat.Bmp;
-                case "image/jpeg":
+                case JpegContentType:
                     return ImageFormat.Jpeg;
-                case "image/png":
+                case PngContentType:
                     return ImageFormat.Png;
                 default:
                     throw new ArgumentException("Content type not supported.", "imageContentType");
