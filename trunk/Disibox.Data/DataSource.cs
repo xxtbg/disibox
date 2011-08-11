@@ -135,6 +135,24 @@ namespace Disibox.Data
             return UploadBlob(cloudFileName, fileContentType, fileContent);
         }
 
+        public bool DeleteFile(string fileUri)
+        {
+            // TODO RequireLoggedInUser();
+            // TODO può cancellare solo i suoi files...
+
+            RequireNotNull(fileUri, "fileUri");
+            if (_loggedUserIsAdmin)
+                return DeleteBlob(fileUri, _filesContainer);
+
+            var prefix = _filesContainer + "/" + _loggedUserId;
+
+            if (fileUri.IndexOf(prefix) == -1 )
+                throw new DeletingNotOwnedFileException();
+
+            return DeleteBlob(fileUri, _filesContainer);
+
+        }
+
         public Stream GetFile(string fileUri)
         {
             // Requirements
@@ -253,6 +271,18 @@ namespace Disibox.Data
             blob.Properties.ContentType = blobContentType;
             blob.UploadFromStream(blobContent);
             return blob.Uri.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="blobUri"></param>
+        /// <param name="blobContaner"></param>
+        /// <returns></returns>
+        private static bool DeleteBlob(string blobUri, CloudBlobContainer blobContaner)
+        {
+            var blob = blobContaner.GetBlobReference(blobUri);
+            return blob.DeleteIfExists();
         }
 
         /// <summary>

@@ -18,6 +18,7 @@ using Disibox.Gui.Util;
 using Microsoft.Win32;
 using Disibox.Data;
 using Path = System.IO.Path;
+using Disibox.Data.Exceptions;
 
 namespace Disibox.Gui {
     /// <summary>
@@ -134,9 +135,19 @@ namespace Disibox.Gui {
             var selectedItem = (FileAndMime)listView_Files.SelectedItem;
 
             if (selectedItem == null) return;
-            
-            Console.WriteLine(selectedItem.Filename);
-//            to delete the file with this name = selectedItem.Filename
+
+            var error = false;
+            try
+            {
+                error = _dataSource.DeleteFile(selectedItem.Uri);
+            }
+            catch (DeletingNotOwnedFileException)
+            {
+                MessageBox.Show("Error deleting not owned file", "Deleting file");
+                return;
+            }
+
+            MessageBox.Show(error ? "Error deleting the file" : "The file was deleted successfully", "Deleting file");
         }
 
         private void buttonDownloadFile_Click(object sender, RoutedEventArgs e) {
