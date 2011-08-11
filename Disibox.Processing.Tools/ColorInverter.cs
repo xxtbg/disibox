@@ -53,8 +53,24 @@ namespace Disibox.Processing.Tools
             bitmap.UnlockBits(data);
 
             var invertedStream = new MemoryStream();
-            bitmap.Save(invertedStream, ImageFormat.Bmp);
+            var invertedFormat = GetFormatFromContentType(fileContentType);
+            bitmap.Save(invertedStream, invertedFormat);
             return new ProcessingOutput(invertedStream, fileContentType);
+        }
+
+        private static ImageFormat GetFormatFromContentType(string imageContentType)
+        {
+            switch (imageContentType)
+            {
+                case "image/bmp":
+                    return ImageFormat.Bmp;
+                case "image/jpeg":
+                    return ImageFormat.Jpeg;
+                case "image/png":
+                    return ImageFormat.Png;
+                default:
+                    throw new ArgumentException("Content type not supported.", "imageContentType");
+            }
         }
     }
 }
