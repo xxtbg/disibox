@@ -24,25 +24,26 @@ namespace Disibox.Processing.Tools
 
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
-            var bitmap = new Bitmap(file);
+            var bitmap = (Bitmap) (new Bitmap(file)).Clone();
 
             var area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             var data = bitmap.LockBits(area, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             var stride = data.Stride;
 
-            var inverted = new byte[bitmap.Width*bitmap.Height];
+            var nWidth = bitmap.Width * 3;
+            var nHeight = bitmap.Height;
+            var nOffset = stride - bitmap.Width * 3;
             
             var scan0 = data.Scan0;
             unsafe
             {
                 var p = (byte*)(void*)scan0;
-                var nOffset = stride - bitmap.Width * 3;
-                var nWidth = bitmap.Width * 3;
-                for (var y = 0; y < bitmap.Height; ++y)
+                
+                for (var y = 0; y < nHeight; ++y)
                 {
                     for (var x = 0; x < nWidth; ++x)
                     {
-                        // inverted[x+(y*) = (byte)(255 - *p);
+                        *p = (byte)(255 - *p);
                         ++p;
                     }
                     p += nOffset;
@@ -51,7 +52,8 @@ namespace Disibox.Processing.Tools
             
             bitmap.UnlockBits(data);
 
-            var invertedStream = new MemoryStream(inverted);
+            var invertedStream = new MemoryStream();
+            bitmap.Save(invertedStream, ImageFormat.Bmp);
             return new ProcessingOutput(invertedStream, fileContentType);
         }
     }
