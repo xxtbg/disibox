@@ -34,7 +34,7 @@
                         </ListView.View>
                     </ListView>
                     <Button Content="Delete" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonDeleteFile" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonDeleteFile_Click" TabIndex="3" />
-                    <Button Content="Download" HorizontalAlignment="Left" Margin="90,0,0,6" Name="buttonDownloadFile" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonDownloadFile_Click" TabIndex="4" Grid.ColumnSpan="2" />
+                    <Button Content="Download" HorizontalAlignment="Right" Margin="0,0,308,6" Name="buttonDownloadFile" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonDownloadFile_Click" TabIndex="4" />
                 </Grid>
             </TabItem>
             <TabItem Header="List Users" Name="tabItemUsers">

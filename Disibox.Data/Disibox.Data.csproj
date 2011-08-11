@@ -69,6 +69,7 @@
     <Compile Include="DataSource.cs" />
     <Compile Include="Entities\Entry.cs" />
     <Compile Include="Entities\User.cs" />
+    <Compile Include="Exceptions\DeletingNotOwnedFileException.cs" />
     <Compile Include="Exceptions\LoggedInUserRequiredException.cs" />
     <Compile Include="Exceptions\AdminUserRequiredException.cs" />
     <Compile Include="FileAndMime.cs" />
