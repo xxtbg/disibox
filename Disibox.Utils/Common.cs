@@ -79,5 +79,15 @@ namespace Disibox.Utils
         {
             return Encoding.UTF8.GetBytes(input);
         }
+
+        /// <summary>
+        /// Converts the given number of bytes into kilobytes
+        /// </summary>
+        /// <param name="bytes">Number to convert</param>
+        /// <returns>number converted into kilobytes</returns>
+        public static double ConvertBytesToKilobytes(long bytes)
+        {
+            return bytes / 1024f;
+        }
     }
 }

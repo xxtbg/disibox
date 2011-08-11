@@ -122,6 +122,35 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="fileContent"></param>
+        /// <param name="overwrite">If it is true then the file on the cloud will be overwritten with <paramref name="fileName"/></param>
+        /// <returns></returns>
+        /// <exception cref="FileAlreadyExistingException">If the current user already have a file with the name <paramref name="fileName"/></exception>
+        public string AddFile(string fileName, Stream fileContent, bool overwrite = false)
+        {
+            if (overwrite)
+                return AddFile(fileName, fileContent);
+
+            var fileToAdd = _loggedUserId + "/" + fileName;
+            var filesOfUser = GetFilesMetadata();
+
+            foreach (var fileAndMime in filesOfUser)
+            {
+                string tempFileName = fileAndMime.Filename;
+                if (!_loggedUserIsAdmin)
+                    tempFileName = _loggedUserId + "/" + tempFileName;
+
+                if (tempFileName.Equals(fileToAdd))
+                    throw new FileAlreadyExistingException();
+            }
+
+            return AddFile(fileName, fileContent);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="fileContent"></param>
         /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
         /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         public string AddFile(string fileName, Stream fileContent)
@@ -191,19 +220,24 @@ namespace Disibox.Data
 
             if (!_loggedUserIsAdmin)
                 return (from blob in blobs
-                        select blob.Uri.ToString()
-                        into uri
+                        select blob.Uri.ToString() into uri
+
+                        // not work, dunno why
+                        let size = _filesContainer.GetBlobReference(uri).Properties.Length
                         let controlUserFiles = prefix + "" + _loggedUserId
                         let prefixStart = uri.IndexOf(controlUserFiles)
                         let fileName = uri.Substring(prefixStart + prefixLength + _loggedUserId.Length + 1)
                         where uri.IndexOf(controlUserFiles) != -1
-                        select new FileAndMime(fileName, Common.GetContentType(fileName), uri)).ToList();
+                        select new FileAndMime(fileName, Common.GetContentType(fileName), uri, size)).ToList();
 
             return (from blob in blobs 
-                    select blob.Uri.ToString() into uri 
+                    select blob.Uri.ToString() into uri
+
+                    // not work, dunno why
+                    let size = _filesContainer.GetBlobReference(uri).Properties.Length
                     let prefixStart = uri.IndexOf(prefix)
                     let fileName = uri.Substring(prefixStart + prefixLength + 1)
-                    select new FileAndMime(fileName, Common.GetContentType(fileName), uri)).ToList();
+                    select new FileAndMime(fileName, Common.GetContentType(fileName), uri, size)).ToList();
         }
 
         public IList<string> GetFilesNames()
@@ -348,6 +382,10 @@ namespace Disibox.Data
         /// Deletes user corresponding to given email address.
         /// </summary>
         /// <param name="userEmail">The email address of the user that should be deleted.</param>
+        /// <exception cref="CannotDeleteUserException"></exception>
+        /// <exception cref="UserNotExistingException"></exception>
+        /// <exception cref="AdminUserRequiredException"></exception>
+        /// <exception cref="LoggedInUserRequiredException"></exception>
         public void DeleteUser(string userEmail)
         {
             // Requirements
