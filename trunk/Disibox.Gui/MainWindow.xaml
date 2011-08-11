@@ -29,7 +29,8 @@
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="File Mime" Width="100" DisplayMemberBinding="{Binding Mime}"/>
-                                <GridViewColumn Header="File Name" Width="350" DisplayMemberBinding="{Binding Filename}"  />
+                                <GridViewColumn Header="File Name" Width="250" DisplayMemberBinding="{Binding Filename}"  />
+                                <GridViewColumn Header="Size in Kbytes" Width="100" DisplayMemberBinding="{Binding Size}"  />
                             </GridView>
                         </ListView.View>
                     </ListView>

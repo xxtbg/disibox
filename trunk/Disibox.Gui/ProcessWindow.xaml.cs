@@ -132,7 +132,7 @@ namespace Disibox.Gui
                 {
                     MessageBox.Show("Error during the download of the file", "Downloading file");
 
-                    //delete the file fileblob
+                    _ds.DeleteOutput(processedFile);
 
                     Close();
                     return;
@@ -145,7 +145,8 @@ namespace Disibox.Gui
 
             }
 
-            //delete the file fileblob
+            _ds.DeleteOutput(processedFile);
+
             Close();
         }
 
