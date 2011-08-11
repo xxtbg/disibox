@@ -61,6 +61,7 @@ namespace Disibox.Data
         public void EnqueueProcessingRequest(ProcessingMessage procReq)
         {
             // Requirements
+            RequireNotNull(procReq, "procReq");
             RequireLoggedInUser();
 
             EnqueueProcessingMessage(procReq, _processingRequests);
@@ -135,12 +136,19 @@ namespace Disibox.Data
             return UploadBlob(cloudFileName, fileContentType, fileContent);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileUri"></param>
+        /// <returns>True if file has been really deleted, false otherwise.</returns>
+        /// <exception cref="DeletingNotOwnedFileException">If a common user is trying to delete another user's file.</exception>
         public bool DeleteFile(string fileUri)
         {
-            // TODO RequireLoggedInUser();
-            // TODO può cancellare solo i suoi files...
-
+            // Requirements
             RequireNotNull(fileUri, "fileUri");
+            RequireLoggedInUser();
+            
+            // Administrators can delete every file.
             if (_loggedUserIsAdmin)
                 return DeleteBlob(fileUri, _filesContainer);
 
@@ -150,9 +158,13 @@ namespace Disibox.Data
                 throw new DeletingNotOwnedFileException();
 
             return DeleteBlob(fileUri, _filesContainer);
-
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileUri"></param>
+        /// <returns></returns>
         public Stream GetFile(string fileUri)
         {
             // Requirements
@@ -230,6 +242,11 @@ namespace Disibox.Data
 
             var outputName = GenerateOutputName(toolName);
             return UploadBlob(outputName, outputContentType, outputContent);
+        }
+
+        public bool DeleteOutput(string outputUri)
+        {
+            return DeleteBlob(outputUri, _outputsContainer);
         }
 
         public Stream GetOutput(string outputUri)
