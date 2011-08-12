@@ -56,7 +56,8 @@ namespace Disibox.Processing
 
         public override string ToString()
         {
-            const string format = "\"{0}\",\"{1}\",\"{2}\"";
+//            const string format = "\"{0}\",\"{1}\",\"{2}\""; bro... if it is not good for you tell me!
+            const string format = "{0}, {1}, {2}";
             return string.Format(format, Name, BriefDescription, LongDescription);
         }
     }

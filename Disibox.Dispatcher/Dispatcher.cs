@@ -129,7 +129,7 @@ namespace Disibox.Dispatcher
             try
             {
                 for (var i = 0; i < numberOfTools; ++i)
-                    writer.WriteLine(processingTools[i].Name);
+                        writer.WriteLine(processingTools[i].ToString());
             } catch(Exception)
             {
                 Trace.WriteLine("Error sending the tools to processed file (connection: " + clientId + "). Closing comunication.", "Information");
