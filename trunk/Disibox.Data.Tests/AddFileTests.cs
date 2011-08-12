@@ -1,46 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using Disibox.Data.Exceptions;
 using Disibox.Utils;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests
 {
-    public class AddFileTests : BaseDataTests
+    public class AddFileTests : BaseFileTests
     {
-        private const int FileCount = 3;
-        private const int FileNameLength = 5;
-
-        private readonly IList<string> _fileNames = new List<string>();
-        private readonly IList<Stream> _files = new List<Stream>();
-
-        private const string CommonUserName = "common";
-        private const string CommonUserPwd = "common";
-
         [SetUp]
         protected override void SetUp()
         {
             base.SetUp();
-
-            for (var i = 0; i < FileCount; ++i)
-            {
-                var currChar = (char)('a' + i);
-                
-                var fileName = new string(currChar, FileNameLength);
-                _fileNames.Add(fileName + ".txt");
-                
-                var file = new MemoryStream(Common.StringToByteArray(fileName));
-                _files.Add(file);
-            }
         }
 
         [TearDown]
         protected override void TearDown()
         {
-            _fileNames.Clear();
-            _files.Clear();
-
             base.TearDown();
         }
 
@@ -48,13 +23,13 @@ namespace Disibox.Data.Tests
         public void AddOneFileAsAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            var fileUri = DataSource.AddFile(_fileNames[0], _files[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
 
-            var fileNames = DataSource.GetFilesNames();
-            Assert.True(fileNames.Contains(_fileNames[0]));
+            var fileNames = DataSource.GetFileNames();
+            Assert.True(fileNames.Contains(FileNames[0]));
 
             var file = DataSource.GetFile(fileUri);
-            Assert.True(Common.StreamsAreEqual(file, _files[0]));
+            Assert.True(Common.StreamsAreEqual(file, Files[0]));
         }
 
         [Test]
@@ -64,14 +39,14 @@ namespace Disibox.Data.Tests
 
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < FileCount; ++i)
-                uris[i] = DataSource.AddFile(_fileNames[i], _files[i]);
+                uris[i] = DataSource.AddFile(FileNames[i], Files[i]);
 
-            var fileNames = DataSource.GetFilesNames();
+            var fileNames = DataSource.GetFileNames();
             for (var i = 0; i < FileCount; ++i)
             {
-                Assert.True(fileNames.Contains(_fileNames[i]));
+                Assert.True(fileNames.Contains(FileNames[i]));
                 var file = DataSource.GetFile(uris[i]);
-                Assert.True(Common.StreamsAreEqual(file, _files[i]));
+                Assert.True(Common.StreamsAreEqual(file, Files[i]));
             }
                 
         }
@@ -80,24 +55,24 @@ namespace Disibox.Data.Tests
         public void AddOneFileAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserName, CommonUserPwd, false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
             DataSource.Logout();
 
-            DataSource.Login(CommonUserName, CommonUserPwd);
-            var fileUri = DataSource.AddFile(_fileNames[0], _files[0]);
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
 
-            var fileNames = DataSource.GetFilesNames();
-            Assert.True(fileNames.Contains(_fileNames[0]));
+            var fileNames = DataSource.GetFileNames();
+            Assert.True(fileNames.Contains(FileNames[0]));
 
             var file = DataSource.GetFile(fileUri);
-            Assert.True(Common.StreamsAreEqual(file, _files[0]));
+            Assert.True(Common.StreamsAreEqual(file, Files[0]));
         }
 
         [Test]
         [ExpectedException(typeof(LoggedInUserRequiredException))]
         public void AddOneFileWithoutLoggingIn()
         {
-            DataSource.AddFile(_fileNames[0], _files[0]);
+            DataSource.AddFile(FileNames[0], Files[0]);
         }
 
         [Test]
@@ -105,7 +80,7 @@ namespace Disibox.Data.Tests
         public void NullFileNameArgument()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddFile(null, _files[0]);
+            DataSource.AddFile(null, Files[0]);
         }
 
         [Test]
@@ -113,7 +88,7 @@ namespace Disibox.Data.Tests
         public void NullFileContentArgument()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddFile(_fileNames[0], null);
+            DataSource.AddFile(FileNames[0], null);
         }
     }
 }

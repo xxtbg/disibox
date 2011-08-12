@@ -52,6 +52,7 @@
     <Compile Include="AddFileTests.cs" />
     <Compile Include="AddUserTests.cs" />
     <Compile Include="BaseDataTests.cs" />
+    <Compile Include="BaseFileTests.cs" />
     <Compile Include="BaseUserTests.cs" />
     <Compile Include="DeleteFileTests.cs" />
     <Compile Include="DeleteUserTests.cs" />

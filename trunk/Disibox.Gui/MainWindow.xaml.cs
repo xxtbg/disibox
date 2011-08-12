@@ -140,7 +140,7 @@ namespace Disibox.Gui {
 
             try
             {
-                names = _dataSource.GetFilesMetadata();
+                names = _dataSource.GetFileMetadata();
             } catch (Exception)
             {
                 MessageBox.Show("Cannot refresh the file list", "Refreshing file list");

@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Disibox.Data.Tests
 {
-    public class BaseUserTests : BaseDataTests
+    public abstract class BaseUserTests : BaseDataTests
     {
         protected const int AdminUserCount = 5;
         protected const int CommonUserCount = 5;
