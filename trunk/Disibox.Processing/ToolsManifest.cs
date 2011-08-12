@@ -17,12 +17,12 @@ namespace Disibox.Processing
         /// <summary>
         /// Contains the tools that work with all content types.
         /// </summary>
-        private static readonly IList<BaseTool> MultiPurposeTools = new List<BaseTool>();
+        private static readonly ISet<BaseTool> MultiPurposeTools = new HashSet<BaseTool>();
 
         /// <summary>
         /// The key is the content type, the value is the tool.
         /// </summary>
-        private static ILookup<string, BaseTool> _specificTools;
+        private static readonly ISet<Pair<string, BaseTool>> SpecificTools = new HashSet<Pair<string, BaseTool>>();
 
         static ToolsManifest()
         {
@@ -46,12 +46,8 @@ namespace Disibox.Processing
             Console.WriteLine();
 
             Console.WriteLine("Specific tools:");
-            foreach (var entry in _specificTools)
-            {
-                Console.WriteLine("# " + entry.Key + ":");
-                foreach (var tool in entry)
-                    Console.WriteLine(" * " + tool.Name);
-            }
+            foreach (var entry in SpecificTools)
+                Console.WriteLine(string.Format("* {0} ({1})", entry.Second.Name, entry.First));
             
             // Empty line
             Console.WriteLine();
@@ -62,7 +58,7 @@ namespace Disibox.Processing
 
         public static IList<BaseTool> GetAvailableTools(string fileContentType)
         {
-            var availableTools = _specificTools[fileContentType];
+            var availableTools = SpecificTools.Where(e => e.First == fileContentType).Select(e => e.Second);
             return MultiPurposeTools.Concat(availableTools).ToList();
         }
 
@@ -80,16 +76,15 @@ namespace Disibox.Processing
 
         private static void InitTools()
         {
-            var tmpAvailableTools = new List<Pair<string, BaseTool>>();
+            var toolTypes = LoadToolsAssembly();
 
-            var toolsAssemblyPath = Properties.Settings.Default.ToolsAssemblyPath;
-            var procAssembly = Assembly.LoadFile(toolsAssemblyPath);
-            var procTypes = procAssembly.GetTypes();
-
-            foreach (var toolType in procTypes)
+            foreach (var toolType in toolTypes)
             {
                 // We require the tool to implement BaseTool abstract class.
                 if (!toolType.IsSubclassOf(typeof(BaseTool))) continue;
+
+                // We need a concrete class in order to create an instance of it.
+                if (toolType.IsAbstract) continue;
 
                 var tool = (BaseTool) Activator.CreateInstance(toolType);
 
@@ -103,12 +98,17 @@ namespace Disibox.Processing
 
                 foreach (var contentType in tool.ProcessableTypes)
                 {
-                    var tmpPair = new Pair<string, BaseTool>(contentType, tool);
-                    tmpAvailableTools.Add(tmpPair);
+                    var entry = new Pair<string, BaseTool>(contentType, tool);
+                    SpecificTools.Add(entry);
                 }
             }
+        }
 
-            _specificTools = tmpAvailableTools.ToLookup(p => p.First, p => p.Second);
+        private static IEnumerable<Type> LoadToolsAssembly()
+        {
+            var toolsAssemblyPath = Properties.Settings.Default.ToolsAssemblyPath;
+            var procAssembly = Assembly.LoadFile(toolsAssemblyPath);
+            return procAssembly.GetTypes();
         }
     }
 }
