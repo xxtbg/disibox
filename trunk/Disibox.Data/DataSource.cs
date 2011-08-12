@@ -129,7 +129,7 @@ namespace Disibox.Data
                 return AddFile(fileName, fileContent);
 
             var fileToAdd = _loggedUserId + "/" + fileName;
-            var filesOfUser = GetFilesMetadata();
+            var filesOfUser = GetFileMetadata();
 
             foreach (var fileAndMime in filesOfUser)
             {
