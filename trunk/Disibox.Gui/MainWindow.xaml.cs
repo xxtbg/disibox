@@ -371,5 +371,14 @@ namespace Disibox.Gui {
 
         #endregion
 
+        private void tabControl1_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (e.Source is TabControl) {
+                if (tabItemFiles.IsSelected)
+                    PerformClick(buttonRefreshFiles);
+                else if (tabItemUsers.IsSelected)
+                    PerformClick(buttonRefreshUsers);
+            }
+        }
+
     }
 }
