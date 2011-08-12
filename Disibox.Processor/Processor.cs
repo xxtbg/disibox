@@ -1,9 +1,33 @@
-﻿using System;
+﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the <organization> nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using Disibox.Data;
 using Disibox.Processing;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -12,7 +36,10 @@ namespace Disibox.Processor
 {
     public class Processor : RoleEntryPoint
     {
-        private DataSource _dataSource;
+        private readonly DataSource _dataSource = new DataSource();
+
+        private readonly string _defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
+        private readonly string _defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
 
         public override void Run()
         {
@@ -21,11 +48,15 @@ namespace Disibox.Processor
 
             while (true)
             {
-                Trace.WriteLine("Working", "Information");
+                Trace.WriteLine("Waiting for a processing request...", "Information");
 
-                var procReq = DataSource.DequeueProcessingRequest();
-                if (procReq != null)
-                    ProcessRequest(procReq);
+                _dataSource.Login(_defaultAdminEmail, _defaultAdminPwd);
+                var procReq = _dataSource.DequeueProcessingRequest();
+                _dataSource.Logout();
+
+                ProcessRequest(procReq);
+
+                Trace.WriteLine("Processing completed.", "Information");
             }
         }
 
@@ -33,8 +64,6 @@ namespace Disibox.Processor
         {
             // Set the maximum number of concurrent connections 
             ServicePointManager.DefaultConnectionLimit = 12;
-
-            _dataSource = new DataSource();
 
             return base.OnStart();
         }
@@ -49,13 +78,16 @@ namespace Disibox.Processor
             if (tool == null)
                 throw new ArgumentException(procReq.ToolName + " does not exist.", "procReq");
 
+            _dataSource.Login(_defaultAdminEmail, _defaultAdminPwd);
+            
             var file = _dataSource.GetFile(procReq.FileUri);
             var output = tool.ProcessFile(file, procReq.FileContentType);
-
             var outputUri = _dataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
-
+    
             var procCompl = new ProcessingMessage(outputUri, output.ContentType, procReq.ToolName);
             _dataSource.EnqueueProcessingCompletion(procCompl);
+            
+            _dataSource.Logout();
         }
     }
 }
