@@ -29,6 +29,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace Disibox.Processing.Tools
 {
@@ -48,8 +49,8 @@ namespace Disibox.Processing.Tools
 
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
-            var image = Image.FromStream(file);
-            var bitmap = (Bitmap) (new Bitmap(image)).Clone();
+            var format = GetFormatFromContentType(fileContentType);
+            var bitmap = GetBitmapFromStream(file, format);
 
             var area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             var data = bitmap.LockBits(area, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
@@ -78,9 +79,38 @@ namespace Disibox.Processing.Tools
             bitmap.UnlockBits(data);
 
             var invertedStream = new MemoryStream();
-            var invertedFormat = GetFormatFromContentType(fileContentType);
-            bitmap.Save(invertedStream, invertedFormat);
+            
+            bitmap.Save(invertedStream, format);
             return new ProcessingOutput(invertedStream, fileContentType);
+        }
+
+        private static Bitmap GetBitmapFromSource(BitmapSource source)
+        {
+            Bitmap bitmap;
+            using (var outStream = new MemoryStream())
+            {
+                // from System.Media.BitmapImage to System.Drawing.Bitmap 
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(source));
+                enc.Save(outStream);
+                bitmap = new Bitmap(outStream);
+            }
+            return bitmap;
+        }
+
+        private static Bitmap GetBitmapFromStream(Stream input, ImageFormat format)
+        {
+            BitmapDecoder decoder;
+            
+            if (format == ImageFormat.Bmp)
+                decoder = new BmpBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+            else if (format == ImageFormat.Png)
+                decoder = new PngBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+            else // Jpeg and other formats...
+                decoder = new JpegBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+
+            var source = decoder.Frames[0];
+            return GetBitmapFromSource(source);
         }
 
         private static ImageFormat GetFormatFromContentType(string imageContentType)
@@ -96,6 +126,6 @@ namespace Disibox.Processing.Tools
                 default:
                     throw new ArgumentException("Content type not supported.", "imageContentType");
             }
-        }
+        } 
     }
 }
