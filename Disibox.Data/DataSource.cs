@@ -17,8 +17,6 @@ namespace Disibox.Data
         private static CloudBlobClient _blobClient;
         private static CloudBlobContainer _filesContainer;
         private static CloudBlobContainer _outputsContainer;
-        private static string _filesBlobName;
-        private static string _outputsBlobName;
 
         private static CloudQueue _processingRequests;
         private static CloudQueue _processingCompletions;
@@ -181,7 +179,7 @@ namespace Disibox.Data
             if (_loggedUserIsAdmin)
                 return DeleteBlob(fileUri, _filesContainer);
 
-            var prefix = _filesContainer + "/" + _loggedUserId;
+            var prefix = _filesContainer.Name + "/" + _loggedUserId;
 
             if (fileUri.IndexOf(prefix) == -1 )
                 throw new DeletingNotOwnedFileException();
@@ -206,13 +204,13 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <returns></returns>
-        public IList<FileAndMime> GetFilesMetadata()
+        public IList<FileAndMime> GetFileMetadata()
         {
             // Requirements
             RequireLoggedInUser();
 
             var blobs = ListBlobs(_filesContainer);
-            var prefix = _filesBlobName + "/";
+            var prefix = _filesContainer.Name + "/";
             var prefixLength = prefix.Length;
 
             if (_loggedUserIsAdmin)
@@ -240,7 +238,7 @@ namespace Disibox.Data
                     select new FileAndMime(fileName, Common.GetContentType(fileName), uri, size)).ToList();
         }
 
-        public IList<string> GetFilesNames()
+        public IList<string> GetFileNames()
         {
             // Requirements
             RequireLoggedInUser();
@@ -248,7 +246,7 @@ namespace Disibox.Data
             var blobs = ListBlobs(_filesContainer);
             var names = new List<string>();
 
-            var prefix = _filesBlobName + "/" + _loggedUserId;
+            var prefix = _filesContainer.Name + "/" + _loggedUserId;
             var prefixLength = prefix.Length;
 
             foreach (var blob in blobs)
@@ -264,7 +262,7 @@ namespace Disibox.Data
 
         private static string GenerateFileName(string userId, string fileName)
         {
-            return _filesBlobName + "/" + userId + "/" + fileName;
+            return _filesContainer.Name + "/" + userId + "/" + fileName;
         }
 
         public string AddOutput(string toolName, string outputContentType, Stream outputContent)
@@ -293,7 +291,7 @@ namespace Disibox.Data
 
         private static string GenerateOutputName(string toolName)
         {
-            return _outputsBlobName + "/" + toolName + Guid.NewGuid();
+            return _outputsContainer.Name + "/" + toolName + Guid.NewGuid();
         }
 
         /// <summary>
@@ -521,11 +519,11 @@ namespace Disibox.Data
         {
             _blobClient = storageAccount.CreateCloudBlobClient();
             
-            _filesBlobName = Properties.Settings.Default.FilesBlobName;
-            _filesContainer = _blobClient.GetContainerReference(_filesBlobName);
+            var filesBlobName = Properties.Settings.Default.FilesBlobName;
+            _filesContainer = _blobClient.GetContainerReference(filesBlobName);
 
-            _outputsBlobName = Properties.Settings.Default.OutputsBlobName;
-            _outputsContainer = _blobClient.GetContainerReference(_outputsBlobName);
+            var outputsBlobName = Properties.Settings.Default.OutputsBlobName;
+            _outputsContainer = _blobClient.GetContainerReference(outputsBlobName);
 
             // Next instructions are dedicated to initial setup.
             if (!doInitialSetup) return;
