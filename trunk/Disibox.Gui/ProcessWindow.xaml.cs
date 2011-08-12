@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Disibox.Data;
+using Disibox.Gui.Util;
 using Microsoft.Win32;
 
 namespace Disibox.Gui
@@ -74,17 +75,20 @@ namespace Disibox.Gui
 
             for(var i=0; i<numberOfProcessingTools; ++i)
             {
-                string listItem = null;
+                string[] info = null;
                 try
                 {
-                    listItem = _reader.ReadLine();   
+                    info = _reader.ReadLine().Split(',');
+                    if (info.Length!=3) 
+                        throw new Exception();
                 } catch (Exception)
                 {
                     MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
                     _erroFillingList = true;
                     return;
                 }
-                listView.Items.Add(listItem);
+
+                listView.Items.Add(new ProcessingToolInformation(info[0].Trim(), info[1].Trim(), info[2].Trim()));
             }
         }
 

@@ -203,6 +203,7 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
+        /// <exception cref="LoggedInUserRequiredException"></exception>
         /// <returns></returns>
         public IList<FileMetadata> GetFileMetadata()
         {
@@ -219,10 +220,8 @@ namespace Disibox.Data
             if (!_loggedUserIsAdmin)
                 return (from blob in blobs
                         select (CloudBlob) blob into file
-
-                        // not work, dunno why
                         let uri = file.Uri.ToString()
-                        let size = file.Properties.Length
+                        let size = Common.ConvertBytesToKilobytes(file.Properties.Length)
                         let controlUserFiles = prefix + "" + _loggedUserId
                         let prefixStart = uri.IndexOf(controlUserFiles)
                         let fileName = uri.Substring(prefixStart + prefixLength + _loggedUserId.Length + 1)
@@ -231,14 +230,18 @@ namespace Disibox.Data
 
             return (from blob in blobs
                     select (CloudBlob) blob into file
-
                     let uri = file.Uri.ToString()
-                    let size = file.Properties.Length
+                    let size = Common.ConvertBytesToKilobytes(file.Properties.Length)
                     let prefixStart = uri.IndexOf(prefix)
                     let fileName = uri.Substring(prefixStart + prefixLength + 1)
                     select new FileMetadata(fileName, Common.GetContentType(fileName), uri, size)).ToList();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="LoggedInUserRequiredException"></exception>
+        /// <returns></returns>
         public IList<string> GetFileNames()
         {
             // Requirements
@@ -266,6 +269,14 @@ namespace Disibox.Data
             return _filesContainer.Name + "/" + userId + "/" + fileName;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="toolName"></param>
+        /// <param name="outputContentType"></param>
+        /// <param name="outputContent"></param>
+        /// <returns></returns>
         public string AddOutput(string toolName, string outputContentType, Stream outputContent)
         {
             // Requirements
@@ -342,9 +353,7 @@ namespace Disibox.Data
         /// <returns></returns>
         private static IEnumerable<IListBlobItem> ListBlobs(CloudBlobContainer blobContainer)
         {
-            var options = new BlobRequestOptions();
-            options.UseFlatBlobListing = true;
-
+            var options = new BlobRequestOptions {UseFlatBlobListing = true};
             return  blobContainer.ListBlobs(options);
         }
 
