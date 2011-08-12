@@ -9,17 +9,20 @@ namespace Disibox.Processing
 {
     public static class ToolsManifest
     {
-        private static IDictionary<string, ITool> _procTools;
+        /// <summary>
+        /// 
+        /// </summary>
+        private static readonly IDictionary<string, BaseTool> ProcTools = new Dictionary<string, BaseTool>();
 
         /// <summary>
-        /// Contains the names of the tools that work with all content types.
+        /// Contains the tools that work with all content types.
         /// </summary>
-        private static IList<string> _multiPurposeTools;
+        private static readonly IList<BaseTool> MultiPurposeTools = new List<BaseTool>();
 
         /// <summary>
-        /// The key is the content type, the value is the tool name.
+        /// The key is the content type, the value is the tool.
         /// </summary>
-        private static ILookup<string, string> _availableTools;
+        private static ILookup<string, BaseTool> _specificTools;
 
         static ToolsManifest()
         {
@@ -29,23 +32,27 @@ namespace Disibox.Processing
         public static void Main()
         {
             Console.WriteLine("Available tools:");
-            foreach (var entry in _procTools)
+            foreach (var entry in ProcTools)
                 Console.WriteLine("* " + entry.Key);
 
             // Empty line
             Console.WriteLine();
 
             Console.WriteLine("Multipurpose tools:");
-            foreach (var toolName in _multiPurposeTools)
-                Console.WriteLine("* " + toolName);
+            foreach (var tool in MultiPurposeTools)
+                Console.WriteLine("* " + tool.Name);
 
             // Empty line
             Console.WriteLine();
 
             Console.WriteLine("Specific tools:");
-            foreach (var entry in _availableTools)
-                Console.WriteLine("* " + entry.Key);
-
+            foreach (var entry in _specificTools)
+            {
+                Console.WriteLine("# " + entry.Key + ":");
+                foreach (var tool in entry)
+                    Console.WriteLine(" * " + tool.Name);
+            }
+            
             // Empty line
             Console.WriteLine();
 
@@ -53,10 +60,10 @@ namespace Disibox.Processing
             Console.Read();
         }
 
-        public static IList<string> GetAvailableTools(string fileContentType)
+        public static IList<BaseTool> GetAvailableTools(string fileContentType)
         {
-            var availableTools = _availableTools[fileContentType];
-            return _multiPurposeTools.Concat(availableTools).ToList();
+            var availableTools = _specificTools[fileContentType];
+            return MultiPurposeTools.Concat(availableTools).ToList();
         }
 
         /// <summary>
@@ -64,50 +71,44 @@ namespace Disibox.Processing
         /// </summary>
         /// <param name="toolName"></param>
         /// <returns></returns>
-        public static ITool GetTool(string toolName)
+        public static BaseTool GetTool(string toolName)
         {
-            ITool tool;
-            if (_procTools.TryGetValue(toolName, out tool)) return tool;
+            BaseTool tool;
+            if (ProcTools.TryGetValue(toolName, out tool)) return tool;
             throw new ToolNotExistingException();
         }
 
         private static void InitTools()
         {
-            _procTools = new Dictionary<string, ITool>();
-            _multiPurposeTools = new List<string>();
-            var tmpAvailableTools = new List<Pair<string, string>>();
+            var tmpAvailableTools = new List<Pair<string, BaseTool>>();
 
             var toolsAssemblyPath = Properties.Settings.Default.ToolsAssemblyPath;
             var procAssembly = Assembly.LoadFile(toolsAssemblyPath);
             var procTypes = procAssembly.GetTypes();
 
-            var iToolType = Type.GetType("Disibox.Processing.ITool");
-
             foreach (var toolType in procTypes)
             {
-                // We require the tool to implement the ITool interface.
-                var interfaces = toolType.GetInterfaces();
-                if (!toolType.GetInterfaces().Contains(iToolType)) continue;
+                // We require the tool to implement BaseTool abstract class.
+                if (!toolType.IsSubclassOf(typeof(BaseTool))) continue;
 
-                var tool = (ITool) Activator.CreateInstance(toolType);
-                var toolId = toolType.ToString();
+                var tool = (BaseTool) Activator.CreateInstance(toolType);
 
-                _procTools.Add(toolId, tool);
+                ProcTools.Add(tool.Name, tool);
 
-                if (tool.ProcessableTypes.Count() == 0)
+                if (tool.ProcessableTypes.Count() == 0) // True for a multi purpose tool
                 {
-                    _multiPurposeTools.Add(toolId);
+                    MultiPurposeTools.Add(tool);
                     continue;
                 }
 
                 foreach (var contentType in tool.ProcessableTypes)
                 {
-                    var tmpPair = new Pair<string, string>(contentType, toolId);
+                    var tmpPair = new Pair<string, BaseTool>(contentType, tool);
                     tmpAvailableTools.Add(tmpPair);
                 }
             }
 
-            _availableTools = tmpAvailableTools.ToLookup(p => p.First, p => p.Second);
+            _specificTools = tmpAvailableTools.ToLookup(p => p.First, p => p.Second);
         }
     }
 }

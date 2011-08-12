@@ -1,24 +1,14 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Disibox.Utils;
 
 namespace Disibox.Processing.Tools
 {
     public class MD5Calculator : BaseTool
     {
-        public override string Name
+        public MD5Calculator()
+            : base("MD5 calculator", "Calculates MD5 hash of given file.", "")
         {
-            get { return "MD5 Calculator"; }
-        }
-
-        public override string BriefDescription
-        {
-            get { return "Calculates MD5 hash of given file."; }
-        }
-
-        public override string LongDescription
-        {
-            get { throw new NotImplementedException(); }
+            // Empty
         }
 
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)

@@ -62,7 +62,6 @@
   <ItemGroup>
     <Compile Include="BaseTool.cs" />
     <Compile Include="Exceptions\ToolNotExistingException.cs" />
-    <Compile Include="ITool.cs" />
     <Compile Include="ProcessingOutput.cs" />
     <Compile Include="ToolsManifest.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
