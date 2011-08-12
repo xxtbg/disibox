@@ -48,7 +48,8 @@ namespace Disibox.Processing.Tools
 
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
-            var bitmap = (Bitmap) (new Bitmap(file)).Clone();
+            var image = Image.FromStream(file);
+            var bitmap = (Bitmap) (new Bitmap(image)).Clone();
 
             var area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             var data = bitmap.LockBits(area, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);

@@ -118,27 +118,14 @@ namespace Disibox.Data
 
         private static ProcessingMessage DequeueProcessingMessage(CloudQueue procQueue)
         {
-            while ((_dequeuedMsg = procQueue.GetMessage()) == null)
+            CloudQueueMessage dequeuedMsg;
+            while ((dequeuedMsg = procQueue.GetMessage()) == null)
                 Thread.Sleep(1000);
 
-            //procQueue.BeginGetMessage(AsyncGetMessage, procQueue);
-            //ProcQueueHandler.WaitOne();
-
-            var procMsg = ProcessingMessage.FromString(_dequeuedMsg.AsString);
-            procQueue.DeleteMessage(_dequeuedMsg);
+            var procMsg = ProcessingMessage.FromString(dequeuedMsg.AsString);
+            procQueue.DeleteMessage(dequeuedMsg);
 
             return procMsg;
-        }
-
-        private static readonly AutoResetEvent ProcQueueHandler = new AutoResetEvent(false);
-        private static CloudQueueMessage _dequeuedMsg;
-
-        private static void AsyncGetMessage(IAsyncResult result) 
-        {
-            var procQueue = (CloudQueue) result.AsyncState;
-            _dequeuedMsg = procQueue.EndGetMessage(result);
-
-            ProcQueueHandler.Set();
         }
 
         private static void EnqueueProcessingMessage(ProcessingMessage procMsg, CloudQueue procQueue)
@@ -236,7 +223,8 @@ namespace Disibox.Data
         public Stream GetFile(string fileUri)
         {
             // Requirements
-            // TODO RequireLoggedInUser();
+            RequireNotNull(fileUri, "fileUri");
+            RequireLoggedInUser();
 
             return DownloadBlob(fileUri, _filesContainer);
         }
@@ -324,6 +312,8 @@ namespace Disibox.Data
             RequireNotNull(toolName, "toolName");
             RequireNotNull(outputContentType, "outputContentType");
             RequireNotNull(outputContent, "outputContent");
+            RequireLoggedInUser();
+            RequireAdminUser();
 
             var outputName = GenerateOutputName(toolName);
             return UploadBlob(outputName, outputContentType, outputContent);
@@ -331,13 +321,20 @@ namespace Disibox.Data
 
         public bool DeleteOutput(string outputUri)
         {
+            // Requirements
+            RequireNotNull(outputUri, "outputUri");
+            RequireLoggedInUser();
+            RequireAdminUser();
+
             return DeleteBlob(outputUri, _outputsContainer);
         }
 
         public Stream GetOutput(string outputUri)
         {
             // Requirements
-            // TODO RequireLoggedInUser();
+            RequireNotNull(outputUri, "outputUri");
+            RequireLoggedInUser();
+            RequireAdminUser();
 
             return DownloadBlob(outputUri, _outputsContainer);
         }
