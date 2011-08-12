@@ -12,25 +12,11 @@ namespace Disibox.Processing.Tools
         private const string PngContentType = "image/png";
 
         public ColorInverter()
+            : base("Color inverter", "Inverts image colors!", "")
         {
             ProcessableTypes.Add(BmpContentType);
             ProcessableTypes.Add(JpegContentType);
             ProcessableTypes.Add(PngContentType);
-        }
-
-        public override string Name
-        {
-            get { return "Color inverter"; }
-        }
-
-        public override string BriefDescription
-        {
-            get { return "Inverts image colors!"; }
-        }
-
-        public override string LongDescription
-        {
-            get { throw new NotImplementedException(); }
         }
 
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)

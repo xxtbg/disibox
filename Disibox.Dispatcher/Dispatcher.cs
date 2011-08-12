@@ -12,7 +12,8 @@ using Microsoft.WindowsAzure.ServiceRuntime;
 
 namespace Disibox.Dispatcher
 {
-    public class Dispatcher : RoleEntryPoint {
+    public class Dispatcher : RoleEntryPoint 
+    {
         private readonly AutoResetEvent _connectionHandler = new AutoResetEvent(false);
 
         public override void Run()
@@ -33,7 +34,7 @@ namespace Disibox.Dispatcher
             Trace.WriteLine("Disibox.Dispatcher waiting for connections on port 2345", "Information");
 
             while (true) {
-                var result = tcpListener.BeginAcceptTcpClient(HandleAssincConnection, tcpListener);
+                tcpListener.BeginAcceptTcpClient(HandleAssincConnection, tcpListener);
                 _connectionHandler.WaitOne();
 
                 Trace.WriteLine("Working", "Information");
@@ -43,8 +44,7 @@ namespace Disibox.Dispatcher
         private void HandleAssincConnection(IAsyncResult result) {
             StreamReader reader;
             StreamWriter writer;
-            string user = null, password = null, mime = null, uriFile = null;
-            DataSource datasource;
+            string user, password, mime, uriFile;
 
             // accepted connection
             var listener = (TcpListener) result.AsyncState;
@@ -61,7 +61,7 @@ namespace Disibox.Dispatcher
             } catch(Exception)
             {
                 Trace.WriteLine("An error during initialization of reader and writer of connection: " + clientId + ". Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
@@ -74,14 +74,14 @@ namespace Disibox.Dispatcher
             } catch(Exception)
             {
                 Trace.WriteLine("An error reading user, password, mime and uro file of connection: " + clientId + ". Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
             if (user == null || password == null || mime == null || uriFile == null)
             {
                 Trace.WriteLine("User or password or mime or uri file are null (connection: " + clientId + "). Closing comunication.", "Information");
-                client.Close(); ;
+                client.Close();
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace Disibox.Dispatcher
             Trace.WriteLine("mime: " + mime, "Information");
             Trace.WriteLine("uri file: " + uriFile, "Information");
 
-            datasource = new DataSource();
+            var datasource = new DataSource();
 
             try
             {
@@ -103,7 +103,7 @@ namespace Disibox.Dispatcher
 
             writer.WriteLine("OK");
 
-            IList<string> processingTools = null;
+            IList<BaseTool> processingTools = null;
             var numberOfTools = 0;
             try
             {
@@ -129,7 +129,7 @@ namespace Disibox.Dispatcher
             try
             {
                 for (var i = 0; i < numberOfTools; ++i)
-                    writer.WriteLine(processingTools[i]);
+                    writer.WriteLine(processingTools[i].Name);
             } catch(Exception)
             {
                 Trace.WriteLine("Error sending the tools to processed file (connection: " + clientId + "). Closing comunication.", "Information");
