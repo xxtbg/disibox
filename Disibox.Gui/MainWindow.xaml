@@ -14,7 +14,7 @@
                
             </MenuItem>
         </Menu>
-        <TabControl Margin="10,10,10,10" Name="tabControl1">
+        <TabControl Margin="10,10,10,10" Name="tabControl1" SelectionChanged="tabControl1_SelectionChanged">
             <TabItem Header="Upload Files" Name="tabItemUpload">
                 <Grid>
                     <Button Content="Browse" Height="23" Margin="0,18,10,0" Name="buttonBrowse" VerticalAlignment="Top" Click="buttonBrowse_Click" HorizontalAlignment="Right" Width="100" TabIndex="1" />
@@ -25,7 +25,7 @@
             <TabItem Header="List Files" Name="tabItemFiles">
                 <Grid>
                     <Button Content="Refresh" Margin="0,0,6,6" Name="buttonRefreshFiles" Click="buttonRefreshFiles_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" TabIndex="2" IsDefault="True" Grid.Column="1" />
-                    <ListView ItemsSource="{Binding FileAndMime}" Margin="6,6,6,35" Name="listView_Files" TabIndex="1" Grid.ColumnSpan="2">
+                    <ListView SelectionMode="Single" ItemsSource="{Binding FileAndMime}" Margin="6,6,6,35" Name="listView_Files" TabIndex="1" Grid.ColumnSpan="2">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="File Mime" Width="100" DisplayMemberBinding="{Binding Mime}"/>
@@ -41,7 +41,7 @@
             <TabItem Header="List Users" Name="tabItemUsers">
                 <Grid>
                     <Button Content="Refresh" Margin="0,0,6,6" Name="buttonRefreshUsers" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="buttonRefreshUsers_Click"  TabIndex="2" IsDefault="True"/>
-                    <ListView Margin="6,6,6,35" Name="listView_Users" TabIndex="1" ItemsSource="{Binding UserAndType}">
+                    <ListView SelectionMode="Single" Margin="6,6,6,35" Name="listView_Users" TabIndex="1" ItemsSource="{Binding UserAndType}">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="User" Width="200" DisplayMemberBinding="{Binding User}"/>

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Process File" Height="300" Width="400" WindowStartupLocation="CenterScreen">
     <Grid>
-        <ListView ItemsSource="{Binding ProcessingToolsInformation}" Margin="12,30,12,45" Name="listView" TabIndex="1">
+        <ListView SelectionMode="Single" ItemsSource="{Binding ProcessingToolsInformation}" Margin="12,30,12,45" Name="listView" TabIndex="1">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" Width="150">
