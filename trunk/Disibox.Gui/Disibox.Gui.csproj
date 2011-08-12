@@ -96,7 +96,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Settings.cs" />
     <Compile Include="Util\ProcessingToolInformation.cs" />
     <Compile Include="Util\UserAndType.cs" />
     <Page Include="AddUserWindow.xaml">
