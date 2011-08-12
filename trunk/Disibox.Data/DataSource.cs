@@ -204,7 +204,7 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <returns></returns>
-        public IList<FileAndMime> GetFileMetadata()
+        public IList<FileMetadata> GetFileMetadata()
         {
             // Requirements
             RequireLoggedInUser();
@@ -218,24 +218,25 @@ namespace Disibox.Data
 
             if (!_loggedUserIsAdmin)
                 return (from blob in blobs
-                        select blob.Uri.ToString() into uri
+                        select (CloudBlob) blob into file
 
                         // not work, dunno why
-                        let size = _filesContainer.GetBlobReference(uri).Properties.Length
+                        let uri = file.Uri.ToString()
+                        let size = file.Properties.Length
                         let controlUserFiles = prefix + "" + _loggedUserId
                         let prefixStart = uri.IndexOf(controlUserFiles)
                         let fileName = uri.Substring(prefixStart + prefixLength + _loggedUserId.Length + 1)
                         where uri.IndexOf(controlUserFiles) != -1
-                        select new FileAndMime(fileName, Common.GetContentType(fileName), uri, size)).ToList();
+                        select new FileMetadata(fileName, Common.GetContentType(fileName), uri, size)).ToList();
 
-            return (from blob in blobs 
-                    select blob.Uri.ToString() into uri
+            return (from blob in blobs
+                    select (CloudBlob) blob into file
 
-                    // not work, dunno why
-                    let size = _filesContainer.GetBlobReference(uri).Properties.Length
+                    let uri = file.Uri.ToString()
+                    let size = file.Properties.Length
                     let prefixStart = uri.IndexOf(prefix)
                     let fileName = uri.Substring(prefixStart + prefixLength + 1)
-                    select new FileAndMime(fileName, Common.GetContentType(fileName), uri, size)).ToList();
+                    select new FileMetadata(fileName, Common.GetContentType(fileName), uri, size)).ToList();
         }
 
         public IList<string> GetFileNames()

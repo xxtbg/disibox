@@ -1,8 +1,8 @@
 ﻿namespace Disibox.Data 
 {
-    public class FileAndMime 
+    public class FileMetadata 
     {
-        public FileAndMime(string filename, string mime, string uri, double size) 
+        public FileMetadata(string filename, string mime, string uri, double size) 
         {
             Filename = filename;
             Mime = mime;

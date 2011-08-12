@@ -136,7 +136,7 @@ namespace Disibox.Gui {
 
         private void buttonRefreshFiles_Click(object sender, RoutedEventArgs e)
         {
-            IList<FileAndMime> names = null;
+            IList<FileMetadata> names = null;
 
             try
             {
@@ -167,7 +167,7 @@ namespace Disibox.Gui {
         }
 
         private void buttonDeleteFile_Click(object sender, RoutedEventArgs e) {
-            var selectedItem = (FileAndMime)listView_Files.SelectedItem;
+            var selectedItem = (FileMetadata)listView_Files.SelectedItem;
 
             if (selectedItem == null) return;
 
@@ -192,7 +192,7 @@ namespace Disibox.Gui {
         }
 
         private void buttonDownloadFile_Click(object sender, RoutedEventArgs e) {
-            var selectedItem = (FileAndMime)listView_Files.SelectedItem;
+            var selectedItem = (FileMetadata)listView_Files.SelectedItem;
             var saveDialog = new SaveFileDialog();
             FileStream destinationFile;
 
@@ -224,7 +224,7 @@ namespace Disibox.Gui {
         }
 
         private void processFile(object sender, RoutedEventArgs e) {
-            var selectedItem = (FileAndMime)listView_Files.SelectedItem;
+            var selectedItem = (FileMetadata)listView_Files.SelectedItem;
 
             if (selectedItem == null)
             {
