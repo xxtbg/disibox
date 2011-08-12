@@ -25,9 +25,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
+
 namespace Disibox.Utils
 {
-    public class Pair<TFirst, TSecond>
+    public class Pair<TFirst, TSecond> : IEquatable<Pair<TFirst, TSecond>>
     {
         public Pair(TFirst first, TSecond second)
         {
@@ -38,5 +40,38 @@ namespace Disibox.Utils
         public TFirst First { get; set; }
 
         public TSecond Second { get; set; }
+
+        public bool Equals(Pair<TFirst, TSecond> other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(other.First, First) && Equals(other.Second, Second);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (Pair<TFirst, TSecond>)) return false;
+            return Equals((Pair<TFirst, TSecond>) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (First.GetHashCode()*397) ^ Second.GetHashCode();
+            }
+        }
+
+        public static bool operator ==(Pair<TFirst, TSecond> left, Pair<TFirst, TSecond> right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(Pair<TFirst, TSecond> left, Pair<TFirst, TSecond> right)
+        {
+            return !Equals(left, right);
+        }
     }
 }
