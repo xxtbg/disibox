@@ -32,26 +32,26 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="mime"></param>
-        /// <param name="uri"></param>
-        /// <param name="size">the size of the <paramref name="filename"/> in kilobytes</param>
-        public FileMetadata(string filename, string mime, string uri, double size) 
+        /// <param name="fileName"></param>
+        /// <param name="fileContentType"></param>
+        /// <param name="fileUri"></param>
+        /// <param name="fileSize">The size of the file in kilobytes.</param>
+        public FileMetadata(string fileName, string fileContentType, string fileUri, double fileSize) 
         {
-            Filename = filename;
-            Mime = mime;
-            Uri = uri;
-            Size = size;
+            Name = fileName;
+            ContentType = fileContentType;
+            Uri = fileUri;
+            Size = fileSize;
         }
 
-        public string Filename { get; private set; }
+        public string Name { get; private set; }
 
-        public string Mime { get; private set; }
+        public string ContentType { get; private set; }
 
-        public string Uri{ get; private set; }
+        public string Uri { get; private set; }
 
         /// <summary>
-        /// returns the size of the filename in kilobytes
+        /// The size of the file in kilobytes.
         /// </summary>
         public double Size { get; private set; }
     }

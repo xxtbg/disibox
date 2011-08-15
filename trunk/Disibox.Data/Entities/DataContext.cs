@@ -25,12 +25,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
+using System.Linq;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
 
-namespace Disibox.Data.Exceptions
+namespace Disibox.Data.Entities
 {
-    public class LoggedInUserRequiredException : Exception
+    internal class DataContext<T> : TableServiceContext
     {
-        // Empty
+        private readonly string _tableName;
+
+        public DataContext(string tableName, string tableServiceUri, StorageCredentials credentials)
+            : base(tableServiceUri, credentials)
+        {
+            _tableName = tableName;
+        }
+
+        public new IQueryable<T> Entities
+        {
+            get { return CreateQuery<T>(_tableName); }
+        }
+
+        public void AddEntity(T entity)
+        {
+            AddObject(_tableName, entity);
+        }
+
+        public void DeleteEntity(T entity)
+        {
+            DeleteObject(entity);
+        }
+
+        public void UpdateEntity(T entity)
+        {
+            UpdateObject(entity);
+        }
     }
 }

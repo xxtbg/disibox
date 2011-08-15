@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.Services.Client;
 using System.Linq;
 using System.IO;
 using System.Threading;
@@ -41,12 +40,14 @@ namespace Disibox.Data
 {
     public class DataSource
     {
-        private static CloudBlobClient _blobClient;
         private static CloudBlobContainer _filesContainer;
         private static CloudBlobContainer _outputsContainer;
 
         private static CloudQueue _processingRequests;
         private static CloudQueue _processingCompletions;
+
+        private static DataContext<Entry> _entriesTableCtx;
+        private static DataContext<User> _usersTableCtx;
 
         private static CloudTableClient _tableClient;
 
@@ -59,19 +60,12 @@ namespace Disibox.Data
         /// </summary>
         public DataSource()
         {
-            var connectionString = Properties.Settings.Default.DataConnectionString;
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
-
-            // We do not have to setup everything up every time,
-            // that's why we pass "false" as parameter to next three calls.
-            InitBlobs(storageAccount, false);
-            InitQueues(storageAccount, false);
-            InitTables(storageAccount, false);
+            Setup(false);
         }
 
         public static void Main()
         {
-            Setup();
+            Setup(true);
         }
 
         /*=============================================================================
@@ -161,7 +155,7 @@ namespace Disibox.Data
 
             foreach (var fileAndMime in filesOfUser)
             {
-                string tempFileName = fileAndMime.Filename;
+                string tempFileName = fileAndMime.Name;
                 if (!_loggedUserIsAdmin)
                     tempFileName = _loggedUserId + "/" + tempFileName;
 
@@ -188,7 +182,7 @@ namespace Disibox.Data
 
             var cloudFileName = GenerateFileName(_loggedUserId, fileName);
             var fileContentType = Common.GetContentType(fileName);
-            return UploadBlob(cloudFileName, fileContentType, fileContent);
+            return UploadBlob(cloudFileName, fileContentType, fileContent, _filesContainer);
         }
 
         /// <summary>
@@ -295,7 +289,7 @@ namespace Disibox.Data
 
         private static string GenerateFileName(string userId, string fileName)
         {
-            return _filesContainer.Name + "/" + userId + "/" + fileName;
+            return userId + "/" + fileName;
         }
 
         /// <summary>
@@ -316,7 +310,7 @@ namespace Disibox.Data
             RequireAdminUser();
 
             var outputName = GenerateOutputName(toolName);
-            return UploadBlob(outputName, outputContentType, outputContent);
+            return UploadBlob(outputName, outputContentType, outputContent, _outputsContainer);
         }
 
         public bool DeleteOutput(string outputUri)
@@ -341,7 +335,7 @@ namespace Disibox.Data
 
         private static string GenerateOutputName(string toolName)
         {
-            return _outputsContainer.Name + "/" + toolName + Guid.NewGuid();
+            return toolName + Guid.NewGuid();
         }
 
         /// <summary>
@@ -352,7 +346,7 @@ namespace Disibox.Data
         /// <returns></returns>
         private static Stream DownloadBlob(string blobUri, CloudBlobContainer blobContainer)
         {
-            var blob = blobContainer.GetBlobReference(blobUri);
+            var blob = blobContainer.GetBlockBlobReference(blobUri);
             return blob.OpenRead();
         }
 
@@ -362,11 +356,12 @@ namespace Disibox.Data
         /// <param name="blobName"></param>
         /// <param name="blobContentType"></param>
         /// <param name="blobContent"></param>
+        /// <param name="blobContainer"></param>
         /// <returns></returns>
-        private static string UploadBlob(string blobName, string blobContentType, Stream blobContent)
+        private static string UploadBlob(string blobName, string blobContentType, Stream blobContent, CloudBlobContainer blobContainer)
         {
             blobContent.Seek(0, SeekOrigin.Begin);
-            var blob = _blobClient.GetBlockBlobReference(blobName);
+            var blob = blobContainer.GetBlockBlobReference(blobName);
             blob.Properties.ContentType = blobContentType;
             blob.UploadFromStream(blobContent);
             return blob.Uri.ToString();
@@ -376,11 +371,11 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <param name="blobUri"></param>
-        /// <param name="blobContaner"></param>
+        /// <param name="blobContainer"></param>
         /// <returns></returns>
-        private static bool DeleteBlob(string blobUri, CloudBlobContainer blobContaner)
+        private static bool DeleteBlob(string blobUri, CloudBlobContainer blobContainer)
         {
-            var blob = blobContaner.GetBlobReference(blobUri);
+            var blob = blobContainer.GetBlobReference(blobUri);
             return blob.DeleteIfExists();
         }
 
@@ -441,17 +436,15 @@ namespace Disibox.Data
 
             if (userEmail == Properties.Settings.Default.DefaultAdminEmail)
                 throw new CannotDeleteUserException();
-
-            var ctx = _tableClient.GetDataServiceContext();
             
             // Added a call to ToList() to avoid an error on Count() call.
-            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.Email == userEmail).ToList();
+            var q = _usersTableCtx.Entities.Where(u => u.Email == userEmail).ToList();
             if (q.Count() == 0)
-                throw new UserNotExistingException();
+                throw new UserNotExistingException(userEmail);
             var user = q.First();
-            
-            ctx.DeleteObject(user);
-            ctx.SaveChanges();
+
+            _usersTableCtx.DeleteEntity(user);
+            _usersTableCtx.SaveChanges();
         }
 
         /// <summary>
@@ -459,12 +452,22 @@ namespace Disibox.Data
         /// </summary>
         public static void Clear()
         {
+            // There seems to be no way to check if a container really exists...
+            _filesContainer.CreateIfNotExist();
             _filesContainer.Delete();
+            _outputsContainer.CreateIfNotExist();
+            _outputsContainer.Delete();
+
+            // Same problem for the queues...
+            _processingRequests.CreateIfNotExist();
             _processingRequests.Delete();
+            _processingCompletions.CreateIfNotExist();
+            _processingCompletions.Delete();
+
             _tableClient.DeleteTableIfExist(Entry.EntryPartitionKey);
             _tableClient.DeleteTableIfExist(User.UserPartitionKey);
 
-            Setup();
+            Setup(true);
         }
 
         /// <summary>
@@ -479,9 +482,8 @@ namespace Disibox.Data
             RequireLoggedInUser();
             RequireAdminUser();
 
-            var ctx = _tableClient.GetDataServiceContext();
-            var adminUsers = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.IsAdmin).ToList();
-            return adminUsers.Select(u => u.Email).ToList();
+            var users = _usersTableCtx.Entities.ToList();
+            return users.Where(u => u.IsAdmin).Select(u => u.Email).ToList();
         }
 
         /// <summary>
@@ -496,9 +498,8 @@ namespace Disibox.Data
             RequireLoggedInUser();
             RequireAdminUser();
 
-            var ctx = _tableClient.GetDataServiceContext();
-            var commonUsers = GetTable<User>(ctx, User.UserPartitionKey).Where(u => !u.IsAdmin).ToList();
-            return commonUsers.Select(u => u.Email).ToList();
+            var users = _usersTableCtx.Entities.ToList();
+            return users.Where(u => !u.IsAdmin).Select(u => u.Email).ToList();
         }
 
         /// <summary>
@@ -509,13 +510,11 @@ namespace Disibox.Data
         /// <exception cref="UserNotExistingException"></exception>
         public void Login(string userEmail, string userPwd)
         {
-            var ctx = _tableClient.GetDataServiceContext();
-
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
-            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(predicate);
+            var q = _usersTableCtx.Entities.Where(predicate);
             if (q.Count() != 1)
-                throw new UserNotExistingException();
+                throw new UserNotExistingException(userEmail);
             var user = q.First();
 
             lock (this)
@@ -539,9 +538,7 @@ namespace Disibox.Data
 
         private static string GenerateUserId(bool userIsAdmin)
         {
-            var ctx = _tableClient.GetDataServiceContext();
-
-            var q = GetTable<Entry>(ctx, Entry.EntryPartitionKey).Where(e => e.RowKey == "NextUserId");
+            var q = _entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId");
             var nextUserIdEntry = q.First();
             var nextUserId = int.Parse(nextUserIdEntry.Value);
 
@@ -552,26 +549,21 @@ namespace Disibox.Data
             nextUserIdEntry.Value = nextUserId.ToString();
             
             // Next method must be called in order to save the update.
-            ctx.UpdateObject(nextUserIdEntry);
-            ctx.SaveChanges();
+            _entriesTableCtx.UpdateEntity(nextUserIdEntry);
+            _entriesTableCtx.SaveChanges();
 
             return userId;
         }
 
-        private static IQueryable<T> GetTable<T>(DataServiceContext ctx, string tableName) where T : TableServiceEntity
-        {
-            return ctx.CreateQuery<T>(tableName).Where(e => e.PartitionKey == tableName);
-        }
-
         private static void InitBlobs(CloudStorageAccount storageAccount, bool doInitialSetup)
         {
-            _blobClient = storageAccount.CreateCloudBlobClient();
+            var blobClient = storageAccount.CreateCloudBlobClient();
             
             var filesBlobName = Properties.Settings.Default.FilesBlobName;
-            _filesContainer = _blobClient.GetContainerReference(filesBlobName);
+            _filesContainer = blobClient.GetContainerReference(filesBlobName);
 
             var outputsBlobName = Properties.Settings.Default.OutputsBlobName;
-            _outputsContainer = _blobClient.GetContainerReference(outputsBlobName);
+            _outputsContainer = blobClient.GetContainerReference(outputsBlobName);
 
             // Next instructions are dedicated to initial setup.
             if (!doInitialSetup) return;
@@ -610,49 +602,49 @@ namespace Disibox.Data
             // Next instructions are dedicated to initial setup.
             if (!doInitialSetup) return;
 
-            InitEntriesTable();
-            InitUsersTable();
+            InitEntriesTable(storageAccount.Credentials);
+            InitUsersTable(storageAccount.Credentials);
         }
 
-        private static void InitEntriesTable()
+        private static void InitEntriesTable(StorageCredentials credentials)
         {
             _tableClient.CreateTableIfNotExist(Entry.EntryPartitionKey);
 
-            var ctx = _tableClient.GetDataServiceContext();
+            _entriesTableCtx = new DataContext<Entry>(Entry.EntryPartitionKey, _tableClient.BaseUri.ToString(), credentials);
 
-            var q = GetTable<Entry>(ctx, Entry.EntryPartitionKey).Where(e => e.RowKey == "NextUserId");
+            var q = _entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId");
             if (Enumerable.Any(q)) return;
 
             var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
-            ctx.AddObject(Entry.EntryPartitionKey, nextUserIdEntry);
-            ctx.SaveChanges();
+            _entriesTableCtx.AddEntity(nextUserIdEntry);
+            _entriesTableCtx.SaveChanges();
         }
 
-        private static void InitUsersTable()
+        private static void InitUsersTable(StorageCredentials credentials)
         {
             _tableClient.CreateTableIfNotExist(User.UserPartitionKey);
 
-            var ctx = _tableClient.GetDataServiceContext();
+            _usersTableCtx = new DataContext<User>(User.UserPartitionKey, _tableClient.BaseUri.ToString(), credentials);
 
-            var q = GetTable<User>(ctx, User.UserPartitionKey).Where(u => u.RowKey == "a0");
+            var q = _usersTableCtx.Entities.Where(u => u.RowKey == "a0");
             if (Enumerable.Any(q)) return;
 
             var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
             var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
             var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, true);
 
-            ctx.AddObject(User.UserPartitionKey, defaultAdminUser);
-            ctx.SaveChanges();
+            _usersTableCtx.AddEntity(defaultAdminUser);
+            _usersTableCtx.SaveChanges();
         }
 
-        private static void Setup()
+        private static void Setup(bool createIfNotExist)
         {
             var connectionString = Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-            InitBlobs(storageAccount, true);
-            InitQueues(storageAccount, true);
-            InitTables(storageAccount, true);
+            InitBlobs(storageAccount, createIfNotExist);
+            InitQueues(storageAccount, createIfNotExist);
+            InitTables(storageAccount, createIfNotExist);
         }
 
         /*=============================================================================
