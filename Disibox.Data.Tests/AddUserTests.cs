@@ -45,16 +45,6 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        public void AddOneCommonUser()
-        {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-
-            var commonUsersEmails = DataSource.GetCommonUsersEmails();
-            Assert.True(commonUsersEmails.Contains(CommonUserEmails[0]));
-        }
-
-        [Test]
         public void AddManyCommonUsers()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
@@ -67,6 +57,16 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
+        public void AddOneCommonUser()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+
+            var commonUsersEmails = DataSource.GetCommonUsersEmails();
+            Assert.True(commonUsersEmails.Contains(CommonUserEmails[0]));
+        }
+
+        [Test]
         [ExpectedException(typeof(LoggedInUserRequiredException))]
         public void AddOneCommonUserWithoutLoggingIn()
         {
@@ -75,7 +75,7 @@ namespace Disibox.Data.Tests
 
         [Test]
         [ExpectedException(typeof(AdminUserRequiredException))]
-        public void AddOneCommonUserLoggingInAsCommonUser()
+        public void AddOneCommonUserAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
@@ -116,7 +116,7 @@ namespace Disibox.Data.Tests
 
         [Test]
         [ExpectedException(typeof(AdminUserRequiredException))]
-        public void AddOneAdminUserLoggingInAsCommonUser()
+        public void AddOneAdminUserAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);

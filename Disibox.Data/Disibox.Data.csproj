@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataSource.cs" />
+    <Compile Include="Entities\DataContext.cs" />
     <Compile Include="Entities\Entry.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Exceptions\CannotDeleteUserException.cs" />

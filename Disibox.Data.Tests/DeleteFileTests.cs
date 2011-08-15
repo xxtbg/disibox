@@ -45,7 +45,7 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        public void DeleteOneCommonUserFileLoggingInAsAdminUser()
+        public void DeleteOneCommonUserFileAsAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
@@ -64,7 +64,7 @@ namespace Disibox.Data.Tests
 
         [Test]
         [ExpectedException(typeof(DeletingNotOwnedFileException))]
-        public void DeleteOneCommonUserFileLoggingInAsOtherCommonUser()
+        public void DeleteOneCommonUserFileAsOtherCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
@@ -80,7 +80,7 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        public void DeleteOneCommonUserFileLoggingInAsProprietaryUser()
+        public void DeleteOneCommonUserFileAsProprietaryUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
