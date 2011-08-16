@@ -27,28 +27,25 @@
 
 using System;
 using Disibox.Utils;
-using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
 {
-    internal sealed class User : TableServiceEntity
+    /// <summary>
+    /// Table entity representing a user.
+    /// </summary>
+    internal sealed class User : BaseEntity
     {
-        public const string UserPartitionKey = "users";
-
         /// <summary>
-        /// 
+        /// Creates a User entity according to given parameters.
+        /// In particular, it takes care of storing the hashed password.
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="userEmail"></param>
-        /// <param name="userPwd"></param>
-        /// <param name="userIsAdmin"></param>
+        /// <param name="userId">User unique identifier.</param>
+        /// <param name="userEmail">User email address.</param>
+        /// <param name="userPwd">User password (NOT hashed).</param>
+        /// <param name="userIsAdmin">Whether user will be or not be administrator.</param>
         public User(string userId, string userEmail, string userPwd, bool userIsAdmin)
+            : base(userId, Properties.Settings.Default.UsersTableName)
         {
-            // TableServiceEntity properties
-            PartitionKey = UserPartitionKey;
-            RowKey = userId;
-            
-            // Custom properties
             Email = userEmail;
             HashedPassword = Hash.ComputeMD5(userPwd);
             IsAdmin = userIsAdmin;
@@ -59,10 +56,9 @@ namespace Disibox.Data.Entities
         /// </summary>
         [Obsolete]
         public User()
+            : base(Properties.Settings.Default.UsersTableName)
         {
-            // TableServiceEntity properties
-            PartitionKey = UserPartitionKey;
-            RowKey = UserPartitionKey;
+            // Empty
         }
 
         /// <summary>
@@ -76,7 +72,7 @@ namespace Disibox.Data.Entities
         public string HashedPassword { get; set; }
 
         /// <summary>
-        /// 
+        /// Indicates whether user is administrator.
         /// </summary>
         public bool IsAdmin { get; set; }
     }

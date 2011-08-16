@@ -464,8 +464,8 @@ namespace Disibox.Data
             _processingCompletions.CreateIfNotExist();
             _processingCompletions.Delete();
 
-            _tableClient.DeleteTableIfExist(Entry.EntryPartitionKey);
-            _tableClient.DeleteTableIfExist(User.UserPartitionKey);
+            _tableClient.DeleteTableIfExist(Properties.Settings.Default.EntriesTableName);
+            _tableClient.DeleteTableIfExist(Properties.Settings.Default.UsersTableName);
 
             Setup(true);
         }
@@ -559,10 +559,10 @@ namespace Disibox.Data
         {
             var blobClient = storageAccount.CreateCloudBlobClient();
             
-            var filesBlobName = Properties.Settings.Default.FilesBlobName;
+            var filesBlobName = Properties.Settings.Default.FilesContainerName;
             _filesContainer = blobClient.GetContainerReference(filesBlobName);
 
-            var outputsBlobName = Properties.Settings.Default.OutputsBlobName;
+            var outputsBlobName = Properties.Settings.Default.OutputsContainerName;
             _outputsContainer = blobClient.GetContainerReference(outputsBlobName);
 
             // Next instructions are dedicated to initial setup.
@@ -581,10 +581,10 @@ namespace Disibox.Data
         {
             var queueClient = storageAccount.CreateCloudQueueClient();
             
-            var processingRequestsName = Properties.Settings.Default.ProcessingRequestsName;
+            var processingRequestsName = Properties.Settings.Default.ProcReqQueueName;
             _processingRequests = queueClient.GetQueueReference(processingRequestsName);
 
-            var processingCompletionsName = Properties.Settings.Default.ProcessingCompletionsName;
+            var processingCompletionsName = Properties.Settings.Default.ProcComplQueueName;
             _processingCompletions = queueClient.GetQueueReference(processingCompletionsName);
 
             // Next instructions are dedicated to initial setup.)
@@ -608,9 +608,10 @@ namespace Disibox.Data
 
         private static void InitEntriesTable(StorageCredentials credentials)
         {
-            _tableClient.CreateTableIfNotExist(Entry.EntryPartitionKey);
+            var entriesTableName = Properties.Settings.Default.EntriesTableName;
+            _tableClient.CreateTableIfNotExist(entriesTableName);
 
-            _entriesTableCtx = new DataContext<Entry>(Entry.EntryPartitionKey, _tableClient.BaseUri.ToString(), credentials);
+            _entriesTableCtx = new DataContext<Entry>(entriesTableName, _tableClient.BaseUri.ToString(), credentials);
 
             var q = _entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId");
             if (Enumerable.Any(q)) return;
@@ -622,9 +623,10 @@ namespace Disibox.Data
 
         private static void InitUsersTable(StorageCredentials credentials)
         {
-            _tableClient.CreateTableIfNotExist(User.UserPartitionKey);
+            var usersTableName = Properties.Settings.Default.UsersTableName;
+            _tableClient.CreateTableIfNotExist(usersTableName);
 
-            _usersTableCtx = new DataContext<User>(User.UserPartitionKey, _tableClient.BaseUri.ToString(), credentials);
+            _usersTableCtx = new DataContext<User>(usersTableName, _tableClient.BaseUri.ToString(), credentials);
 
             var q = _usersTableCtx.Entities.Where(u => u.RowKey == "a0");
             if (Enumerable.Any(q)) return;
