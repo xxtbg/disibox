@@ -11,17 +11,23 @@
     <Setting Name="DefaultAdminPwd" Type="System.String" Scope="Application">
       <Value Profile="(Default)">admin</Value>
     </Setting>
-    <Setting Name="FilesBlobName" Type="System.String" Scope="Application">
+    <Setting Name="FilesContainerName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">files</Value>
     </Setting>
-    <Setting Name="ProcessingRequestsName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">processingrequests</Value>
+    <Setting Name="ProcReqQueueName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">procreq</Value>
     </Setting>
-    <Setting Name="ProcessingCompletionsName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">processingcompletions</Value>
+    <Setting Name="ProcComplQueueName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">proccompl</Value>
     </Setting>
-    <Setting Name="OutputsBlobName" Type="System.String" Scope="Application">
+    <Setting Name="OutputsContainerName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">outputs</Value>
+    </Setting>
+    <Setting Name="EntriesTableName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">entries</Value>
+    </Setting>
+    <Setting Name="UsersTableName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">users</Value>
     </Setting>
   </Settings>
 </SettingsFile>

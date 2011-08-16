@@ -31,7 +31,7 @@ using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
 {
-    internal class DataContext<T> : TableServiceContext
+    internal class DataContext<TEntity> : TableServiceContext where TEntity : BaseEntity
     {
         private readonly string _tableName;
 
@@ -41,22 +41,22 @@ namespace Disibox.Data.Entities
             _tableName = tableName;
         }
 
-        public new IQueryable<T> Entities
+        public new IQueryable<TEntity> Entities
         {
-            get { return CreateQuery<T>(_tableName); }
+            get { return CreateQuery<TEntity>(_tableName); }
         }
 
-        public void AddEntity(T entity)
+        public void AddEntity(TEntity entity)
         {
             AddObject(_tableName, entity);
         }
 
-        public void DeleteEntity(T entity)
+        public void DeleteEntity(TEntity entity)
         {
             DeleteObject(entity);
         }
 
-        public void UpdateEntity(T entity)
+        public void UpdateEntity(TEntity entity)
         {
             UpdateObject(entity);
         }
