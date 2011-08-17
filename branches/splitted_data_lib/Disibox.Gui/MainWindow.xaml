@@ -1,0 +1,58 @@
+﻿<Window x:Class="Disibox.Gui.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525" WindowStartupLocation="CenterScreen">
+    <DockPanel Width="Auto" Height="Auto" LastChildFill="True">
+        <Menu Width="Auto" Height="22" DockPanel.Dock="Top">
+            <MenuItem Header="System">
+                <MenuItem Header="Log out" Click="Logout"/>
+                <Separator />
+                <MenuItem Header="Exit" Click="ExitProgram"/>
+            </MenuItem>
+            <MenuItem Header="Process">
+                <MenuItem Header="Process selected File" Click="processFile"/>
+               
+            </MenuItem>
+        </Menu>
+        <TabControl Margin="10,10,10,10" Name="tabControl1" SelectionChanged="tabControl1_SelectionChanged">
+            <TabItem Header="Upload Files" Name="tabItemUpload">
+                <Grid>
+                    <Button Content="Browse" Height="23" Margin="0,18,10,0" Name="buttonBrowse" VerticalAlignment="Top" Click="buttonBrowse_Click" HorizontalAlignment="Right" Width="100" TabIndex="1" />
+                    <TextBox Height="23" Margin="10,18,120,0" Name="textBoxFileToUpload" VerticalAlignment="Top" IsReadOnly="True" />
+                    <Button Content="Upload to Cloud" Height="23" HorizontalAlignment="Right" Margin="0,56,10,0" Name="buttonUpload" VerticalAlignment="Top" Width="100" Click="buttonUpload_Click" IsDefault="True" TabIndex="2"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="List Files" Name="tabItemFiles">
+                <Grid>
+                    <Button Content="Refresh" Margin="0,0,6,6" Name="buttonRefreshFiles" Click="buttonRefreshFiles_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" TabIndex="2" IsDefault="True" Grid.Column="1" />
+                    <ListView SelectionMode="Single" ItemsSource="{Binding FileAndMime}" Margin="6,6,6,35" Name="listView_Files" TabIndex="1" Grid.ColumnSpan="2">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="File Mime" Width="100" DisplayMemberBinding="{Binding Mime}"/>
+                                <GridViewColumn Header="File Name" Width="250" DisplayMemberBinding="{Binding Filename}"  />
+                                <GridViewColumn Header="Size in Kbytes" Width="100" DisplayMemberBinding="{Binding Size}"  />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Delete" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonDeleteFile" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonDeleteFile_Click" TabIndex="3" />
+                    <Button Content="Download" HorizontalAlignment="Right" Margin="0,0,308,6" Name="buttonDownloadFile" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonDownloadFile_Click" TabIndex="4" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="List Users" Name="tabItemUsers">
+                <Grid>
+                    <Button Content="Refresh" Margin="0,0,6,6" Name="buttonRefreshUsers" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="buttonRefreshUsers_Click"  TabIndex="2" IsDefault="True"/>
+                    <ListView SelectionMode="Single" Margin="6,6,6,35" Name="listView_Users" TabIndex="1" ItemsSource="{Binding UserAndType}">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="User" Width="200" DisplayMemberBinding="{Binding User}"/>
+                                <GridViewColumn Header="Type" Width="200" DisplayMemberBinding="{Binding Type}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Add" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonAddUser" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonAddUser_Click"  TabIndex="3"/>
+                    <Button Content="Delete" HorizontalAlignment="Left" Margin="90,0,0,6" Name="buttonDeleteUser" Width="75" Height="23" VerticalAlignment="Bottom" Click="buttonDeleteUser_Click"  TabIndex="4"/>
+                </Grid>
+            </TabItem>
+        </TabControl>       
+    </DockPanel>
+</Window>
