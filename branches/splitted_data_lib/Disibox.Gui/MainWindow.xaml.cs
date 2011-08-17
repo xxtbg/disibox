@@ -34,8 +34,8 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
-using Disibox.Data;
-using Disibox.Data.Exceptions;
+using Disibox.Data.Client;
+using Disibox.Data.Client.Exceptions;
 using Disibox.Gui.Util;
 using Microsoft.Win32;
 using Path = System.IO.Path;
@@ -47,7 +47,7 @@ namespace Disibox.Gui {
     public partial class MainWindow : Window {
         private string _user;
         private string _password;
-        private DataSource _dataSource;
+        private ClientDataSource _dataSource;
 
         //for accessing the server
         private readonly string _serverString;
@@ -73,7 +73,7 @@ namespace Disibox.Gui {
             set { _password = value; }
         }
 
-        public DataSource Datasource {
+        public ClientDataSource Datasource {
             get { return _dataSource; }
             set { _dataSource = value; }
         }

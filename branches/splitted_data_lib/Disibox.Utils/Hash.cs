@@ -59,7 +59,7 @@ namespace Disibox.Utils
         private static string ComputeHash(string input, HashAlgorithm hashAlg)
         {
             // Converts the input string to a byte array and computes the hash.
-            var data = hashAlg.ComputeHash(Common.StringToByteArray(input));
+            var data = hashAlg.ComputeHash(Shared.StringToByteArray(input));
 
             return HashToString(data);
         }

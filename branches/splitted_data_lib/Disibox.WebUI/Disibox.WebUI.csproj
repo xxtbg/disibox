@@ -139,9 +139,9 @@
     <Content Include="Site.Master" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
-      <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
-      <Name>Disibox.Data</Name>
+    <ProjectReference Include="..\Disibox.Data.Client\Disibox.Data.Client.csproj">
+      <Project>{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}</Project>
+      <Name>Disibox.Data.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

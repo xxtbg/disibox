@@ -26,7 +26,7 @@
 //
 
 using System;
-using Disibox.Data.Exceptions;
+using Disibox.Data.Client.Exceptions;
 using Disibox.Utils;
 using NUnit.Framework;
 
@@ -56,7 +56,7 @@ namespace Disibox.Data.Tests
             Assert.True(fileNames.Contains(FileNames[0]));
 
             var file = DataSource.GetFile(fileUri);
-            Assert.True(Common.StreamsAreEqual(file, Files[0]));
+            Assert.True(Shared.StreamsAreEqual(file, Files[0]));
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace Disibox.Data.Tests
             {
                 Assert.True(fileNames.Contains(FileNames[i]));
                 var file = DataSource.GetFile(uris[i]);
-                Assert.True(Common.StreamsAreEqual(file, Files[i]));
+                Assert.True(Shared.StreamsAreEqual(file, Files[i]));
             }
                 
         }
@@ -92,7 +92,7 @@ namespace Disibox.Data.Tests
             Assert.True(fileNames.Contains(FileNames[0]));
 
             var file = DataSource.GetFile(fileUri);
-            Assert.True(Common.StreamsAreEqual(file, Files[0]));
+            Assert.True(Shared.StreamsAreEqual(file, Files[0]));
         }
 
         [Test]

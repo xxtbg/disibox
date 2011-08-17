@@ -25,40 +25,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System.Linq;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
+using System;
 
-namespace Disibox.Data.Entities
+namespace Disibox.Data.Client.Exceptions
 {
-    internal class DataContext<TEntity> : TableServiceContext where TEntity : BaseEntity
+    public class FileAlreadyExistingException : Exception
     {
-        private readonly string _tableName;
-
-        public DataContext(string tableName, string tableServiceUri, StorageCredentials credentials)
-            : base(tableServiceUri, credentials)
-        {
-            _tableName = tableName;
-        }
-
-        public new IQueryable<TEntity> Entities
-        {
-            get { return CreateQuery<TEntity>(_tableName); }
-        }
-
-        public void AddEntity(TEntity entity)
-        {
-            AddObject(_tableName, entity);
-        }
-
-        public void DeleteEntity(TEntity entity)
-        {
-            DeleteObject(entity);
-        }
-
-        public void UpdateEntity(TEntity entity)
-        {
-            UpdateObject(entity);
-        }
+        //Empty
     }
 }

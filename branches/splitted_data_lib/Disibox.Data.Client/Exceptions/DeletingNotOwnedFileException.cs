@@ -25,34 +25,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace Disibox.Data 
+using System;
+
+namespace Disibox.Data.Client.Exceptions
 {
-    public class FileMetadata 
+    public class DeletingNotOwnedFileException : Exception
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="fileContentType"></param>
-        /// <param name="fileUri"></param>
-        /// <param name="fileSize">The size of the file in kilobytes.</param>
-        public FileMetadata(string fileName, string fileContentType, string fileUri, double fileSize) 
-        {
-            Name = fileName;
-            ContentType = fileContentType;
-            Uri = fileUri;
-            Size = fileSize;
-        }
-
-        public string Name { get; private set; }
-
-        public string ContentType { get; private set; }
-
-        public string Uri { get; private set; }
-
-        /// <summary>
-        /// The size of the file in kilobytes.
-        /// </summary>
-        public double Size { get; private set; }
+        //Empty
     }
 }

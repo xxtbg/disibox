@@ -1,55 +1,22 @@
-﻿//
-// Copyright (c) 2011, University of Genoa
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
-//     * Neither the name of the University of Genoa nor the
-//       names of its contributors may be used to endorse or promote products
-//       derived from this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF GENOA BE LIABLE FOR ANY
-// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using System.Threading;
-using Disibox.Data.Entities;
-using Disibox.Data.Exceptions;
+using System.Linq;
+using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Common;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
-namespace Disibox.Data
+namespace Disibox.Data.Client
 {
-    public class DataSource
+    public class ClientDataSource
     {
-        private static CloudBlobContainer _filesContainer;
-        private static CloudBlobContainer _outputsContainer;
+        private CloudBlobContainer _filesContainer;
+        private CloudBlobContainer _outputsContainer;
 
-        private static CloudQueue _processingRequests;
-        private static CloudQueue _processingCompletions;
-
-        private static DataContext<Entry> _entriesTableCtx;
-        private static DataContext<User> _usersTableCtx;
-
-        private static CloudTableClient _tableClient;
+        private DataContext<Entry> _entriesTableCtx;
+        private DataContext<User> _usersTableCtx;
 
         private string _loggedUserId;
         private bool _loggedUserIsAdmin;
@@ -58,79 +25,13 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
-        public DataSource()
+        public ClientDataSource()
         {
-            Setup(false);
-        }
+            var connectionString = Common.Properties.Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-        public static void Main()
-        {
-            Setup(true);
-        }
-
-        /*=============================================================================
-            Processing queues methods
-        =============================================================================*/
-
-        public ProcessingMessage DequeueProcessingRequest()
-        {
-            // Requirements
-            RequireLoggedInUser();
-            RequireAdminUser();
-
-            return DequeueProcessingMessage(_processingRequests);
-        }
-
-        public void EnqueueProcessingRequest(ProcessingMessage procReq)
-        {
-            // Requirements
-            RequireNotNull(procReq, "procReq");
-            RequireLoggedInUser();
-            RequireAdminUser();
-
-            EnqueueProcessingMessage(procReq, _processingRequests);
-        }
-
-        public ProcessingMessage DequeueProcessingCompletion()
-        {
-            // Requirements
-            RequireLoggedInUser();
-            RequireAdminUser();
-
-            return DequeueProcessingMessage(_processingCompletions);
-        }
-
-        public void EnqueueProcessingCompletion(ProcessingMessage procCompl)
-        {
-            // Requirements
-            RequireNotNull(procCompl, "procCompl");
-            RequireLoggedInUser();
-            RequireAdminUser();
-
-            EnqueueProcessingMessage(procCompl, _processingCompletions);
-        }
-
-        private static ProcessingMessage DequeueProcessingMessage(CloudQueue procQueue)
-        {
-            CloudQueueMessage dequeuedMsg;
-            while ((dequeuedMsg = procQueue.GetMessage()) == null)
-                Thread.Sleep(1000);
-
-            var procMsg = ProcessingMessage.FromString(dequeuedMsg.AsString);
-            procQueue.DeleteMessage(dequeuedMsg);
-
-            return procMsg;
-        }
-
-        private static void EnqueueProcessingMessage(ProcessingMessage procMsg, CloudQueue procQueue)
-        {
-            var msg = new CloudQueueMessage(procMsg.ToString());
-
-            lock (procQueue)
-            {
-                procQueue.AddMessage(msg);
-                Monitor.PulseAll(procQueue);
-            }
+            InitContainers(storageAccount);
+            InitContexts(storageAccount);
         }
 
         /*=============================================================================
@@ -155,7 +56,7 @@ namespace Disibox.Data
 
             foreach (var fileAndMime in filesOfUser)
             {
-                string tempFileName = fileAndMime.Name;
+                var tempFileName = fileAndMime.Name;
                 if (!_loggedUserIsAdmin)
                     tempFileName = _loggedUserId + "/" + tempFileName;
 
@@ -176,12 +77,12 @@ namespace Disibox.Data
         public string AddFile(string fileName, Stream fileContent)
         {
             // Requirements
-            RequireNotNull(fileName, "fileName");
-            RequireNotNull(fileContent, "fileContent");
+            Require.NotNull(fileName, "fileName");
+            Require.NotNull(fileContent, "fileContent");
             RequireLoggedInUser();
 
             var cloudFileName = GenerateFileName(_loggedUserId, fileName);
-            var fileContentType = Common.GetContentType(fileName);
+            var fileContentType = Shared.GetContentType(fileName);
             return UploadBlob(cloudFileName, fileContentType, fileContent, _filesContainer);
         }
 
@@ -194,7 +95,7 @@ namespace Disibox.Data
         public bool DeleteFile(string fileUri)
         {
             // Requirements
-            RequireNotNull(fileUri, "fileUri");
+            Require.NotNull(fileUri, "fileUri");
             RequireLoggedInUser();
             
             // Administrators can delete every file.
@@ -217,7 +118,7 @@ namespace Disibox.Data
         public Stream GetFile(string fileUri)
         {
             // Requirements
-            RequireNotNull(fileUri, "fileUri");
+            Require.NotNull(fileUri, "fileUri");
             RequireLoggedInUser();
 
             return DownloadBlob(fileUri, _filesContainer);
@@ -244,20 +145,20 @@ namespace Disibox.Data
                 return (from blob in blobs
                         select (CloudBlob) blob into file
                         let uri = file.Uri.ToString()
-                        let size = Common.ConvertBytesToKilobytes(file.Properties.Length)
+                        let size = Shared.ConvertBytesToKilobytes(file.Properties.Length)
                         let controlUserFiles = prefix + "" + _loggedUserId
                         let prefixStart = uri.IndexOf(controlUserFiles)
                         let fileName = uri.Substring(prefixStart + prefixLength + _loggedUserId.Length + 1)
                         where uri.IndexOf(controlUserFiles) != -1
-                        select new FileMetadata(fileName, Common.GetContentType(fileName), uri, size)).ToList();
+                        select new FileMetadata(fileName, Shared.GetContentType(fileName), uri, size)).ToList();
 
             return (from blob in blobs
                     select (CloudBlob) blob into file
                     let uri = file.Uri.ToString()
-                    let size = Common.ConvertBytesToKilobytes(file.Properties.Length)
+                    let size = Shared.ConvertBytesToKilobytes(file.Properties.Length)
                     let prefixStart = uri.IndexOf(prefix)
                     let fileName = uri.Substring(prefixStart + prefixLength + 1)
-                    select new FileMetadata(fileName, Common.GetContentType(fileName), uri, size)).ToList();
+                    select new FileMetadata(fileName, Shared.GetContentType(fileName), uri, size)).ToList();
         }
 
         /// <summary>
@@ -303,9 +204,9 @@ namespace Disibox.Data
         public string AddOutput(string toolName, string outputContentType, Stream outputContent)
         {
             // Requirements
-            RequireNotNull(toolName, "toolName");
-            RequireNotNull(outputContentType, "outputContentType");
-            RequireNotNull(outputContent, "outputContent");
+            Require.NotNull(toolName, "toolName");
+            Require.NotNull(outputContentType, "outputContentType");
+            Require.NotNull(outputContent, "outputContent");
             RequireLoggedInUser();
             RequireAdminUser();
 
@@ -316,7 +217,7 @@ namespace Disibox.Data
         public bool DeleteOutput(string outputUri)
         {
             // Requirements
-            RequireNotNull(outputUri, "outputUri");
+            Require.NotNull(outputUri, "outputUri");
             RequireLoggedInUser();
             RequireAdminUser();
 
@@ -326,7 +227,7 @@ namespace Disibox.Data
         public Stream GetOutput(string outputUri)
         {
             // Requirements
-            RequireNotNull(outputUri, "outputUri");
+            Require.NotNull(outputUri, "outputUri");
             RequireLoggedInUser();
             RequireAdminUser();
 
@@ -406,17 +307,16 @@ namespace Disibox.Data
         public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
             // Requirements
-            RequireNotNull(userEmail, "userEmail");
-            RequireNotNull(userPwd, "userPwd");
+            Require.NotNull(userEmail, "userEmail");
+            Require.NotNull(userPwd, "userPwd");
             RequireLoggedInUser();
             RequireAdminUser();
 
             var userId = GenerateUserId(userIsAdmin);
             var user = new User(userId, userEmail, userPwd, userIsAdmin);
             
-            var ctx = _tableClient.GetDataServiceContext();
-            ctx.AddObject(user.PartitionKey, user);
-            ctx.SaveChanges();
+            _usersTableCtx.AddEntity(user);
+            _usersTableCtx.SaveChanges();
         }
 
         /// <summary>
@@ -430,12 +330,9 @@ namespace Disibox.Data
         public void DeleteUser(string userEmail)
         {
             // Requirements
-            RequireNotNull(userEmail, "userEmail");
+            Require.NotNull(userEmail, "userEmail");
             RequireLoggedInUser();
             RequireAdminUser();
-
-            if (userEmail == Properties.Settings.Default.DefaultAdminEmail)
-                throw new CannotDeleteUserException();
             
             // Added a call to ToList() to avoid an error on Count() call.
             var q = _usersTableCtx.Entities.Where(u => u.Email == userEmail).ToList();
@@ -445,29 +342,6 @@ namespace Disibox.Data
 
             _usersTableCtx.DeleteEntity(user);
             _usersTableCtx.SaveChanges();
-        }
-
-        /// <summary>
-        /// Completely clears the storage and sets it up to the initial state.
-        /// </summary>
-        public static void Clear()
-        {
-            // There seems to be no way to check if a container really exists...
-            _filesContainer.CreateIfNotExist();
-            _filesContainer.Delete();
-            _outputsContainer.CreateIfNotExist();
-            _outputsContainer.Delete();
-
-            // Same problem for the queues...
-            _processingRequests.CreateIfNotExist();
-            _processingRequests.Delete();
-            _processingCompletions.CreateIfNotExist();
-            _processingCompletions.Delete();
-
-            _tableClient.DeleteTableIfExist(Properties.Settings.Default.EntriesTableName);
-            _tableClient.DeleteTableIfExist(Properties.Settings.Default.UsersTableName);
-
-            Setup(true);
         }
 
         /// <summary>
@@ -512,7 +386,7 @@ namespace Disibox.Data
         {
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
-            var q = _usersTableCtx.Entities.Where(predicate);
+            var q = _usersTableCtx.Entities.Where(predicate).ToList();
             if (q.Count() != 1)
                 throw new UserNotExistingException(userEmail);
             var user = q.First();
@@ -536,7 +410,7 @@ namespace Disibox.Data
             }
         }
 
-        private static string GenerateUserId(bool userIsAdmin)
+        private string GenerateUserId(bool userIsAdmin)
         {
             var q = _entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId");
             var nextUserIdEntry = q.First();
@@ -555,98 +429,34 @@ namespace Disibox.Data
             return userId;
         }
 
-        private static void InitBlobs(CloudStorageAccount storageAccount, bool doInitialSetup)
+        /*=============================================================================
+            Init methods
+        =============================================================================*/
+
+        private void InitContainers(CloudStorageAccount storageAccount)
         {
-            var blobClient = storageAccount.CreateCloudBlobClient();
-            
-            var filesBlobName = Properties.Settings.Default.FilesContainerName;
-            _filesContainer = blobClient.GetContainerReference(filesBlobName);
+            var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
+            var credentials = storageAccount.Credentials;
 
-            var outputsBlobName = Properties.Settings.Default.OutputsContainerName;
-            _outputsContainer = blobClient.GetContainerReference(outputsBlobName);
+            var filesContainerName = Common.Properties.Settings.Default.FilesContainerName;
+            var filesContainerUri = blobEndpointUri + "/" + filesContainerName;
+            _filesContainer = new CloudBlobContainer(filesContainerUri, credentials);
 
-            // Next instructions are dedicated to initial setup.
-            if (!doInitialSetup) return;
-
-            _filesContainer.CreateIfNotExist();
-            _outputsContainer.CreateIfNotExist();
-
-            var permissions = _filesContainer.GetPermissions();
-            permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-            _filesContainer.SetPermissions(permissions);
-            _outputsContainer.SetPermissions(permissions);
+            var outputsContainerName = Common.Properties.Settings.Default.OutputsContainerName;
+            var outputsContainerUri = blobEndpointUri + "/" + outputsContainerName;
+            _outputsContainer = new CloudBlobContainer(outputsContainerUri, credentials);
         }
 
-        private static void InitQueues(CloudStorageAccount storageAccount, bool doInitialSetup)
+        private void InitContexts(CloudStorageAccount storageAccount)
         {
-            var queueClient = storageAccount.CreateCloudQueueClient();
-            
-            var processingRequestsName = Properties.Settings.Default.ProcReqQueueName;
-            _processingRequests = queueClient.GetQueueReference(processingRequestsName);
+            var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
+            var credentials = storageAccount.Credentials;
 
-            var processingCompletionsName = Properties.Settings.Default.ProcComplQueueName;
-            _processingCompletions = queueClient.GetQueueReference(processingCompletionsName);
+            var entriesTableName = Common.Properties.Settings.Default.EntriesTableName;
+            _entriesTableCtx = new DataContext<Entry>(entriesTableName, tableEndpointUri, credentials);
 
-            // Next instructions are dedicated to initial setup.)
-            if (!doInitialSetup) return;
-
-            _processingRequests.CreateIfNotExist();
-            _processingCompletions.CreateIfNotExist();
-        }
-
-        private static void InitTables(CloudStorageAccount storageAccount, bool doInitialSetup)
-        {
-            _tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
-            _tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-
-            // Next instructions are dedicated to initial setup.
-            if (!doInitialSetup) return;
-
-            InitEntriesTable(storageAccount.Credentials);
-            InitUsersTable(storageAccount.Credentials);
-        }
-
-        private static void InitEntriesTable(StorageCredentials credentials)
-        {
-            var entriesTableName = Properties.Settings.Default.EntriesTableName;
-            _tableClient.CreateTableIfNotExist(entriesTableName);
-
-            _entriesTableCtx = new DataContext<Entry>(entriesTableName, _tableClient.BaseUri.ToString(), credentials);
-
-            var q = _entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId");
-            if (Enumerable.Any(q)) return;
-
-            var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
-            _entriesTableCtx.AddEntity(nextUserIdEntry);
-            _entriesTableCtx.SaveChanges();
-        }
-
-        private static void InitUsersTable(StorageCredentials credentials)
-        {
-            var usersTableName = Properties.Settings.Default.UsersTableName;
-            _tableClient.CreateTableIfNotExist(usersTableName);
-
-            _usersTableCtx = new DataContext<User>(usersTableName, _tableClient.BaseUri.ToString(), credentials);
-
-            var q = _usersTableCtx.Entities.Where(u => u.RowKey == "a0");
-            if (Enumerable.Any(q)) return;
-
-            var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
-            var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
-            var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, true);
-
-            _usersTableCtx.AddEntity(defaultAdminUser);
-            _usersTableCtx.SaveChanges();
-        }
-
-        private static void Setup(bool createIfNotExist)
-        {
-            var connectionString = Properties.Settings.Default.DataConnectionString;
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
-
-            InitBlobs(storageAccount, createIfNotExist);
-            InitQueues(storageAccount, createIfNotExist);
-            InitTables(storageAccount, createIfNotExist);
+            var usersTableName = Common.Properties.Settings.Default.UsersTableName;
+            _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
         }
 
         /*=============================================================================
@@ -672,18 +482,6 @@ namespace Disibox.Data
         {
             if (_userIsLoggedIn) return;
             throw new LoggedInUserRequiredException();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="paramName"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        private static void RequireNotNull(object obj, string paramName)
-        {
-            if (obj != null) return;
-            throw new ArgumentNullException(paramName);
         }
     }
 }

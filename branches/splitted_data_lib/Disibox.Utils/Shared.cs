@@ -34,7 +34,7 @@ namespace Disibox.Utils
     /// <summary>
     /// Contains useful and heterogeneous functions used throughout the code.
     /// </summary>
-    public static class Common
+    public static class Shared
     {
         /// <summary>
         /// Returns the corresponding mime type to the file on given path;

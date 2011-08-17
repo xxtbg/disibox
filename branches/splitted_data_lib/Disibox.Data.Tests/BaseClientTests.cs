@@ -25,39 +25,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
+using Disibox.Data.Client;
+using Disibox.Data.Setup;
+using NUnit.Framework;
 
-namespace Disibox.Data.Entities
+namespace Disibox.Data.Tests
 {
-    /// <summary>
-    /// Table entity representing an entry, that is, a (name, value) pair.
-    /// </summary>
-    internal sealed class Entry : BaseEntity
+    [TestFixture]
+    public abstract class BaseClientTests
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entryName"></param>
-        /// <param name="entryValue"></param>
-        public Entry(string entryName, string entryValue)
-            : base(entryName, Properties.Settings.Default.EntriesTableName)
+        [SetUp]
+        protected virtual void SetUp()
         {
-            Value = entryValue;
+            StorageSetup.CleanupStorage();
+            DataSource = new ClientDataSource();
         }
 
-        /// <summary>
-        /// Seems to be required for serialization sake.
-        /// </summary>
-        [Obsolete]
-        public Entry()
-            : base(Properties.Settings.Default.EntriesTableName)
+        [TearDown]
+        protected virtual void TearDown()
         {
-            // Empty
+            DataSource = null;
         }
 
-        /// <summary>
-        /// The value of given entry.
-        /// </summary>
-        public string Value { get; set; }
+        protected ClientDataSource DataSource { get; private set; }
+
+        protected static string DefaultAdminEmail
+        {
+            get { return Properties.Settings.Default.DefaultAdminEmail; }
+        }
+
+        protected static string DefaultAdminPwd
+        {
+            get { return Properties.Settings.Default.DefaultAdminPwd; }
+        }
     }
 }

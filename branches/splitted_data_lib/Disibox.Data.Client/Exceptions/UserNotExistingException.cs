@@ -25,37 +25,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace Disibox.Data
+using System;
+
+namespace Disibox.Data.Client.Exceptions
 {
-    public class ProcessingMessage
+    public class UserNotExistingException : Exception
     {
-        public ProcessingMessage(string fileUri, string fileContentType, string processingToolName)
+        public UserNotExistingException(string userEmail) : base(userEmail)
         {
-            FileUri = fileUri;
-            FileContentType = fileContentType;
-            ToolName = processingToolName;
-        }
-
-        public string FileUri { get; private set; }
-
-        public string FileContentType { get; private set; }
-
-        public string ToolName { get; private set; }
-
-        public static ProcessingMessage FromString(string req)
-        {
-            var reqParts = req.Split(new[] { ',' });
-
-            var fileUri = reqParts[0];
-            var fileContentType = reqParts[1];
-            var toolName = reqParts[2];
-
-            return new ProcessingMessage(fileUri, fileContentType, toolName);
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0},{1},{2}", FileUri, FileContentType, ToolName);
+            // Empty
         }
     }
 }

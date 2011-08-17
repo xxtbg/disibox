@@ -55,7 +55,7 @@ namespace Disibox.Data.Tests
                 var fileName = new string(currChar, FileNameLength);
                 FileNames.Add(fileName + ".txt");
 
-                var file = new MemoryStream(Common.StringToByteArray(fileName));
+                var file = new MemoryStream(Shared.StringToByteArray(fileName));
                 Files.Add(file);
             }
         }

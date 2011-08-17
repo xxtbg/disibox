@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using Disibox.Data;
+using Disibox.Data.Client;
 
 namespace Disibox.WebUI
 {
@@ -18,7 +12,7 @@ namespace Disibox.WebUI
 
         protected void UploadButton_Click(object sender, EventArgs e)
         {
-            var ds = new DataSource();
+            var ds = new ClientDataSource();
 
             ds.AddFile(FileUpload.FileName, FileUpload.FileContent);
         }
