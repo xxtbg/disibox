@@ -25,15 +25,34 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
-
-namespace Disibox.Data.Exceptions
+namespace Disibox.Data.Client 
 {
-    public class UserNotExistingException : Exception
+    public class FileMetadata 
     {
-        public UserNotExistingException(string userEmail) : base(userEmail)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="fileContentType"></param>
+        /// <param name="fileUri"></param>
+        /// <param name="fileSize">The size of the file in kilobytes.</param>
+        public FileMetadata(string fileName, string fileContentType, string fileUri, double fileSize) 
         {
-            // Empty
+            Name = fileName;
+            ContentType = fileContentType;
+            Uri = fileUri;
+            Size = fileSize;
         }
+
+        public string Name { get; private set; }
+
+        public string ContentType { get; private set; }
+
+        public string Uri { get; private set; }
+
+        /// <summary>
+        /// The size of the file in kilobytes.
+        /// </summary>
+        public double Size { get; private set; }
     }
 }

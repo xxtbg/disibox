@@ -28,7 +28,8 @@
 using System;
 using System.Diagnostics;
 using System.Net;
-using Disibox.Data;
+using Disibox.Data.Client;
+using Disibox.Data.Server;
 using Disibox.Processing;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
@@ -36,7 +37,8 @@ namespace Disibox.Processor
 {
     public class Processor : RoleEntryPoint
     {
-        private readonly DataSource _dataSource = new DataSource();
+        private readonly ClientDataSource _clientDataSource = new ClientDataSource();
+        private readonly ServerDataSource _serverDataSource = new ServerDataSource();
 
         private readonly string _defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
         private readonly string _defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
@@ -50,10 +52,7 @@ namespace Disibox.Processor
             {
                 Trace.WriteLine("Waiting for a processing request...", "Information");
 
-                _dataSource.Login(_defaultAdminEmail, _defaultAdminPwd);
-                var procReq = _dataSource.DequeueProcessingRequest();
-                _dataSource.Logout();
-
+                var procReq = _serverDataSource.DequeueProcessingRequest();
                 ProcessRequest(procReq);
 
                 Trace.WriteLine("Processing completed.", "Information");
@@ -78,16 +77,16 @@ namespace Disibox.Processor
             if (tool == null)
                 throw new ArgumentException(procReq.ToolName + " does not exist.", "procReq");
 
-            _dataSource.Login(_defaultAdminEmail, _defaultAdminPwd);
-            
-            var file = _dataSource.GetFile(procReq.FileUri);
+            _clientDataSource.Login(_defaultAdminEmail, _defaultAdminPwd);
+
+            var file = _clientDataSource.GetFile(procReq.FileUri);
             var output = tool.ProcessFile(file, procReq.FileContentType);
-            var outputUri = _dataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
-    
+            var outputUri = _clientDataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
+
+            _clientDataSource.Logout();
+
             var procCompl = new ProcessingMessage(outputUri, output.ContentType, procReq.ToolName);
-            _dataSource.EnqueueProcessingCompletion(procCompl);
-            
-            _dataSource.Logout();
+            _serverDataSource.EnqueueProcessingCompletion(procCompl);
         }
     }
 }

@@ -25,7 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using Disibox.Data.Exceptions;
+using Disibox.Data.Client.Exceptions;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests

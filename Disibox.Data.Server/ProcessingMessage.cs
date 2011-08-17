@@ -25,36 +25,40 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using NUnit.Framework;
-
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Server
 {
-    [TestFixture]
-    public abstract class BaseDataTests
+    public class ProcessingMessage : BaseMessage
     {
-        [SetUp]
-        protected virtual void SetUp()
+        public ProcessingMessage()
         {
-            DataSource = new DataSource();
-            DataSource.Clear();
+            // Empty
         }
 
-        [TearDown]
-        protected virtual void TearDown()
+        public ProcessingMessage(string fileUri, string fileContentType, string processingToolName)
         {
-            DataSource = null;
+            FileUri = fileUri;
+            FileContentType = fileContentType;
+            ToolName = processingToolName;
         }
 
-        protected DataSource DataSource { get; private set; }
+        public string FileUri { get; private set; }
 
-        protected string DefaultAdminEmail
+        public string FileContentType { get; private set; }
+
+        public string ToolName { get; private set; }
+
+        public override void FromString(string req)
         {
-            get { return Properties.Settings.Default.DefaultAdminEmail; }
+            var reqParts = req.Split(new[] { ',' });
+
+            FileUri = reqParts[0];
+            FileContentType = reqParts[1];
+            ToolName = reqParts[2];
         }
 
-        protected string DefaultAdminPwd
+        public override string ToString()
         {
-            get { return Properties.Settings.Default.DefaultAdminPwd; }
+            return string.Format("{0},{1},{2}", FileUri, FileContentType, ToolName);
         }
     }
 }

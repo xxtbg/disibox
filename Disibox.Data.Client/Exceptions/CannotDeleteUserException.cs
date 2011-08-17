@@ -27,9 +27,9 @@
 
 using System;
 
-namespace Disibox.Data.Exceptions
+namespace Disibox.Data.Client.Exceptions
 {
-    public class AdminUserRequiredException : Exception
+    public class CannotDeleteUserException : Exception
     {
         // Empty
     }

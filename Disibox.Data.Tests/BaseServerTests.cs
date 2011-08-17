@@ -1,0 +1,35 @@
+﻿using Disibox.Data.Server;
+using Disibox.Data.Setup;
+using NUnit.Framework;
+
+namespace Disibox.Data.Tests
+{
+    [TestFixture]
+    public abstract class BaseServerTests
+    {
+        [SetUp]
+        protected virtual void SetUp()
+        {
+            StorageSetup.CleanupStorage();
+            DataSource = new ServerDataSource();
+        }
+
+        [TearDown]
+        protected virtual void TearDown()
+        {
+            DataSource = null;
+        }
+
+        protected ServerDataSource DataSource { get; private set; }
+
+        protected static string DefaultAdminEmail
+        {
+            get { return Properties.Settings.Default.DefaultAdminEmail; }
+        }
+
+        protected static string DefaultAdminPwd
+        {
+            get { return Properties.Settings.Default.DefaultAdminPwd; }
+        }
+    }
+}

@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Disibox.Data.Exceptions
+namespace Disibox.Data.Client.Exceptions
 {
     public class LoggedInUserRequiredException : Exception
     {
