@@ -35,7 +35,7 @@ namespace Disibox.Data.Setup
 {
     public static class CloudStorageSetup
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             SetupStorage(false, true);
         }
@@ -120,9 +120,12 @@ namespace Disibox.Data.Setup
             tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
 
             var entriesTableName = Common.Properties.Settings.Default.EntriesTableName;
+            PrintStep("Creating " + entriesTableName + " table...", printSteps);
             if (doReset)
                 tableClient.DeleteTableIfExist(entriesTableName);
             tableClient.CreateTableIfNotExist(entriesTableName);
+
+            PrintStep(" * Adding default entries", printSteps);
 
             var tableServiceUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
@@ -142,9 +145,12 @@ namespace Disibox.Data.Setup
             tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
 
             var usersTableName = Common.Properties.Settings.Default.UsersTableName;
+            PrintStep("Creating " + usersTableName + " table...", printSteps);
             if (doReset)
                 tableClient.DeleteTableIfExist(usersTableName);
             tableClient.CreateTableIfNotExist(usersTableName);
+
+            PrintStep(" * Adding default users", printSteps);
 
             var tableServiceUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
