@@ -1,4 +1,5 @@
 ﻿using System;
+using Disibox.Utils.Exceptions;
 
 namespace Disibox.Utils
 {
@@ -14,6 +15,16 @@ namespace Disibox.Utils
         {
             if (arg != null) return;
             throw new ArgumentNullException(argName);
+        }
+
+        /// <summary>
+        /// Checks if given string is a valid email address.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <exception cref="InvalidEmailException"></exception>
+        public static void ValidEmail(string email)
+        {
+            
         }
     }
 }

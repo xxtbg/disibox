@@ -24,12 +24,12 @@ namespace Disibox.Data.Tests
 
         protected static string DefaultAdminEmail
         {
-            get { return Properties.Settings.Default.DefaultAdminEmail; }
+            get { return Setup.Properties.Settings.Default.DefaultAdminEmail; }
         }
 
         protected static string DefaultAdminPwd
         {
-            get { return Properties.Settings.Default.DefaultAdminPwd; }
+            get { return Setup.Properties.Settings.Default.DefaultAdminPwd; }
         }
     }
 }
