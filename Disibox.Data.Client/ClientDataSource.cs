@@ -307,7 +307,7 @@ namespace Disibox.Data.Client
         public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
             // Requirements
-            Require.NotNull(userEmail, "userEmail");
+            Require.ValidEmail(userEmail, "userEmail");
             Require.NotNull(userPwd, "userPwd");
             RequireLoggedInUser();
             RequireAdminUser();
