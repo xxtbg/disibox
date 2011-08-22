@@ -65,5 +65,18 @@ namespace Disibox.Utils
             if (regex.IsMatch(email)) return;
             throw new InvalidEmailException(email);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="argName"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidFileNameException"></exception>
+        public static void ValidFileName(string fileName, string argName)
+        {
+            // Requirements
+            NotNull(fileName, argName);
+        }
     }
 }

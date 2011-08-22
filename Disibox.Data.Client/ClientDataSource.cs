@@ -5,6 +5,7 @@ using System.Linq;
 using Disibox.Data.Client.Exceptions;
 using Disibox.Data.Common;
 using Disibox.Utils;
+using Disibox.Utils.Exceptions;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -73,11 +74,12 @@ namespace Disibox.Data.Client
         /// <param name="fileName"></param>
         /// <param name="fileContent"></param>
         /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
+        /// <exception cref="InvalidFileNameException"></exception>
         /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         public string AddFile(string fileName, Stream fileContent)
         {
             // Requirements
-            Require.NotNull(fileName, "fileName");
+            Require.ValidFileName(fileName, "fileName");
             Require.NotNull(fileContent, "fileContent");
             RequireLoggedInUser();
 
