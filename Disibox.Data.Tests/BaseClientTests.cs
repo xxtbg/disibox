@@ -37,7 +37,7 @@ namespace Disibox.Data.Tests
         [SetUp]
         protected virtual void SetUp()
         {
-            StorageSetup.CleanupStorage();
+            CloudStorageSetup.ResetStorage();
             DataSource = new ClientDataSource();
         }
 

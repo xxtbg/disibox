@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AF07F114-277E-4FE8-819C-5E3B43C7B532}</ProjectGuid>
+    <ProjectGuid>{68F0666F-E2EF-414F-A424-68584CDB048A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Disibox.Data.Tests</RootNamespace>
-    <AssemblyName>Disibox.Data.Tests</AssemblyName>
+    <RootNamespace>Disibox.Data.Setup</RootNamespace>
+    <AssemblyName>Disibox.Data.Setup</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,17 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.mocks, Version=2.5.10.11092, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.mocks.dll</HintPath>
-    </Reference>
-    <Reference Include="pnunit.framework, Version=1.0.4109.34242, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.2.5.10.11092\lib\pnunit.framework.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.StorageClient, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,14 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddFileTests.cs" />
-    <Compile Include="AddUserTests.cs" />
-    <Compile Include="BaseClientTests.cs" />
-    <Compile Include="BaseFileTests.cs" />
-    <Compile Include="BaseServerTests.cs" />
-    <Compile Include="BaseUserTests.cs" />
-    <Compile Include="DeleteFileTests.cs" />
-    <Compile Include="DeleteUserTests.cs" />
+    <Compile Include="CloudStorageSetup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -65,34 +51,21 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Disibox.Data.Client\Disibox.Data.Client.csproj">
-      <Project>{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}</Project>
-      <Name>Disibox.Data.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Disibox.Data.Server\Disibox.Data.Server.csproj">
-      <Project>{12B985FA-4D02-4AEF-B988-6A59D615E3F1}</Project>
-      <Name>Disibox.Data.Server</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Disibox.Data.Setup\Disibox.Data.Setup.csproj">
-      <Project>{68F0666F-E2EF-414F-A424-68584CDB048A}</Project>
-      <Name>Disibox.Data.Setup</Name>
+    <ProjectReference Include="..\Disibox.Data.Common\Disibox.Data.Common.csproj">
+      <Project>{8921D6CB-EBE0-481D-86E3-649F518CAA8C}</Project>
+      <Name>Disibox.Data.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
       <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
       <Name>Disibox.Data</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Disibox.Utils\Disibox.Utils.csproj">
-      <Project>{5885EA43-7F42-4C18-ACFB-DE788F25EF6A}</Project>
-      <Name>Disibox.Utils</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
