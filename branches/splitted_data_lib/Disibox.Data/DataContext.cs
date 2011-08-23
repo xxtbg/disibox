@@ -26,6 +26,7 @@
 //
 
 using System.Linq;
+using Disibox.Data.Entities;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;

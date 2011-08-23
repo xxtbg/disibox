@@ -30,9 +30,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Disibox.Data.Client.Exceptions;
-using Disibox.Data.Common;
+using Disibox.Data.Entities;
+using Disibox.Data.Exceptions;
 using Disibox.Utils;
-using Disibox.Utils.Exceptions;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -55,7 +55,7 @@ namespace Disibox.Data.Client
         /// </summary>
         public ClientDataSource()
         {
-            var connectionString = Common.Properties.Settings.Default.DataConnectionString;
+            var connectionString = Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
             InitContainers(storageAccount);
@@ -424,11 +424,11 @@ namespace Disibox.Data.Client
             var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
 
-            var filesContainerName = Common.Properties.Settings.Default.FilesContainerName;
+            var filesContainerName = Properties.Settings.Default.FilesContainerName;
             var filesContainerUri = blobEndpointUri + "/" + filesContainerName;
             _filesContainer = new CloudBlobContainer(filesContainerUri, credentials);
 
-            var outputsContainerName = Common.Properties.Settings.Default.OutputsContainerName;
+            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
             var outputsContainerUri = blobEndpointUri + "/" + outputsContainerName;
             _outputsContainer = new CloudBlobContainer(outputsContainerUri, credentials);
         }
@@ -438,10 +438,10 @@ namespace Disibox.Data.Client
             var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
 
-            var entriesTableName = Common.Properties.Settings.Default.EntriesTableName;
+            var entriesTableName = Properties.Settings.Default.EntriesTableName;
             _entriesTableCtx = new DataContext<Entry>(entriesTableName, tableEndpointUri, credentials);
 
-            var usersTableName = Common.Properties.Settings.Default.UsersTableName;
+            var usersTableName = Properties.Settings.Default.UsersTableName;
             _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
         }
 

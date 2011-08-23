@@ -26,54 +26,38 @@
 //
 
 using System;
-using Disibox.Utils;
 
-namespace Disibox.Data.Common
+namespace Disibox.Data.Entities
 {
     /// <summary>
-    /// Table entity representing a user.
+    /// Table entity representing an entry, that is, a (name, value) pair.
     /// </summary>
-    public sealed class User : BaseEntity
+    public sealed class Entry : BaseEntity
     {
         /// <summary>
-        /// Creates a User entity according to given parameters.
-        /// In particular, it takes care of storing the hashed password.
+        /// 
         /// </summary>
-        /// <param name="userId">User unique identifier.</param>
-        /// <param name="userEmail">User email address.</param>
-        /// <param name="userPwd">User password (NOT hashed).</param>
-        /// <param name="userIsAdmin">Whether user will be or not be administrator.</param>
-        public User(string userId, string userEmail, string userPwd, bool userIsAdmin)
-            : base(userId, Properties.Settings.Default.UsersTableName)
+        /// <param name="entryName"></param>
+        /// <param name="entryValue"></param>
+        public Entry(string entryName, string entryValue)
+            : base(entryName, Properties.Settings.Default.EntriesTableName)
         {
-            Email = userEmail;
-            HashedPassword = Hash.ComputeMD5(userPwd);
-            IsAdmin = userIsAdmin;
+            Value = entryValue;
         }
 
         /// <summary>
         /// Seems to be required for serialization sake.
         /// </summary>
         [Obsolete]
-        public User()
-            : base(Properties.Settings.Default.UsersTableName)
+        public Entry()
+            : base(Properties.Settings.Default.EntriesTableName)
         {
             // Empty
         }
 
         /// <summary>
-        /// User email address.
+        /// The value of given entry.
         /// </summary>
-        public string Email { get; set; }
-
-        /// <summary>
-        /// Hashed user password.
-        /// </summary>
-        public string HashedPassword { get; set; }
-
-        /// <summary>
-        /// Indicates whether user is administrator.
-        /// </summary>
-        public bool IsAdmin { get; set; }
+        public string Value { get; set; }
     }
 }

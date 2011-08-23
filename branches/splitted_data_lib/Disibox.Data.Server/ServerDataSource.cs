@@ -27,7 +27,7 @@
 
 using System;
 using System.Linq;
-using Disibox.Data.Common;
+using Disibox.Data.Entities;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
 
@@ -42,7 +42,7 @@ namespace Disibox.Data.Server
 
         public ServerDataSource()
         {
-            var connectionString = Common.Properties.Settings.Default.DataConnectionString;
+            var connectionString = Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
             var queueEndpointUri = storageAccount.QueueEndpoint.AbsoluteUri;
@@ -52,7 +52,7 @@ namespace Disibox.Data.Server
             _processingRequests = new MsgQueue<ProcessingMessage>(queueEndpointUri, credentials);
             _processingCompletions = new MsgQueue<ProcessingMessage>(queueEndpointUri, credentials);
 
-            var usersTableName = Common.Properties.Settings.Default.UsersTableName;
+            var usersTableName = Properties.Settings.Default.UsersTableName;
             _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
         }
 

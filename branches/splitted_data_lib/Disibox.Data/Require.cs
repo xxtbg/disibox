@@ -27,9 +27,9 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Disibox.Utils.Exceptions;
+using Disibox.Data.Exceptions;
 
-namespace Disibox.Utils
+namespace Disibox.Data
 {
     public static class Require
     {
@@ -55,7 +55,7 @@ namespace Disibox.Utils
         /// <param name="email"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidEmailException"></exception>
+        /// <exception cref="Disibox.Data.Exceptions.InvalidEmailException"></exception>
         public static void ValidEmail(string email, string argName)
         {
             // Requirements
@@ -72,7 +72,7 @@ namespace Disibox.Utils
         /// <param name="fileName"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidFileNameException"></exception>
+        /// <exception cref="Disibox.Data.Exceptions.InvalidFileNameException"></exception>
         public static void ValidFileName(string fileName, string argName)
         {
             // Requirements
@@ -85,7 +85,7 @@ namespace Disibox.Utils
         /// <param name="pwd"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidPasswordException"></exception>
+        /// <exception cref="Disibox.Data.Exceptions.InvalidPasswordException"></exception>
         public static void ValidPassword(string pwd, string argName)
         {
             // Requirements

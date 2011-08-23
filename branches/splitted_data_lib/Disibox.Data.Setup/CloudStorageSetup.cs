@@ -27,7 +27,7 @@
 
 using System;
 using System.Linq;
-using Disibox.Data.Common;
+using Disibox.Data.Entities;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -47,7 +47,7 @@ namespace Disibox.Data.Setup
 
         private static void SetupStorage(bool doReset, bool printSteps)
         {
-            var connectionString = Common.Properties.Settings.Default.DataConnectionString;
+            var connectionString = Data.Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
             SetupBlobContainers(storageAccount, doReset, printSteps);
@@ -64,10 +64,10 @@ namespace Disibox.Data.Setup
             PrintStep("Creating blob client...", printSteps);
             var blobClient = storageAccount.CreateCloudBlobClient();
 
-            var filesContainerName = Common.Properties.Settings.Default.FilesContainerName;
+            var filesContainerName = Data.Properties.Settings.Default.FilesContainerName;
             SetupBlobContainer(blobClient, filesContainerName, doReset, printSteps);
 
-            var outputsContainerName = Common.Properties.Settings.Default.OutputsContainerName;
+            var outputsContainerName = Data.Properties.Settings.Default.OutputsContainerName;
             SetupBlobContainer(blobClient, outputsContainerName, doReset, printSteps);
         }
 
@@ -95,10 +95,10 @@ namespace Disibox.Data.Setup
             PrintStep("Creating queue client...", printSteps);
             var queueClient = storageAccount.CreateCloudQueueClient();
 
-            var processingRequestsName = Common.Properties.Settings.Default.ProcReqQueueName;
+            var processingRequestsName = Data.Properties.Settings.Default.ProcReqQueueName;
             SetupProcessingQueue(queueClient, processingRequestsName, doReset, printSteps);
 
-            var processingCompletionsName = Common.Properties.Settings.Default.ProcComplQueueName;
+            var processingCompletionsName = Data.Properties.Settings.Default.ProcComplQueueName;
             SetupProcessingQueue(queueClient, processingCompletionsName, doReset, printSteps);
         }
 
@@ -119,7 +119,7 @@ namespace Disibox.Data.Setup
             var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
             tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
 
-            var entriesTableName = Common.Properties.Settings.Default.EntriesTableName;
+            var entriesTableName = Data.Properties.Settings.Default.EntriesTableName;
             PrintStep("Creating " + entriesTableName + " table...", printSteps);
             if (doReset)
                 tableClient.DeleteTableIfExist(entriesTableName);
@@ -144,7 +144,7 @@ namespace Disibox.Data.Setup
             var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
             tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
 
-            var usersTableName = Common.Properties.Settings.Default.UsersTableName;
+            var usersTableName = Data.Properties.Settings.Default.UsersTableName;
             PrintStep("Creating " + usersTableName + " table...", printSteps);
             if (doReset)
                 tableClient.DeleteTableIfExist(usersTableName);

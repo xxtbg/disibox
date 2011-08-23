@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Disibox.Utils.Exceptions
+namespace Disibox.Data.Exceptions
 {
     public class InvalidPasswordException : Exception
     {

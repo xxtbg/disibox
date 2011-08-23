@@ -27,11 +27,11 @@
 
 using System;
 
-namespace Disibox.Utils.Exceptions
+namespace Disibox.Data.Exceptions
 {
-    public class InvalidFileNameException : Exception
+    public class InvalidEmailException : Exception
     {
-        public InvalidFileNameException(string fileName) : base(fileName)
+        public InvalidEmailException(string invalidEmail) : base(invalidEmail)
         {
             // Empty
         }
