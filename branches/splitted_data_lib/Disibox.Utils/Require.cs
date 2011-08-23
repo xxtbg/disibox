@@ -78,5 +78,18 @@ namespace Disibox.Utils
             // Requirements
             NotNull(fileName, argName);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pwd"></param>
+        /// <param name="argName"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidPasswordException"></exception>
+        public static void ValidPassword(string pwd, string argName)
+        {
+            // Requirements
+            NotNull(pwd, argName);
+        }
     }
 }

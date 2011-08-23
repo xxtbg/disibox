@@ -1,4 +1,31 @@
-﻿using System;
+﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of the University of Genoa nor the
+//       names of its contributors may be used to endorse or promote products
+//       derived from this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+// ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF GENOA BE LIABLE FOR ANY
+// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+// LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+// ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -85,7 +112,7 @@ namespace Disibox.Data.Client
 
             var cloudFileName = GenerateFileName(_loggedUserId, fileName);
             var fileContentType = Shared.GetContentType(fileName);
-            return UploadBlob(cloudFileName, fileContentType, fileContent, _filesContainer);
+            return BlobUtils.AddBlob(cloudFileName, fileContentType, fileContent, _filesContainer);
         }
 
         /// <summary>
@@ -102,14 +129,14 @@ namespace Disibox.Data.Client
             
             // Administrators can delete every file.
             if (_loggedUserIsAdmin)
-                return DeleteBlob(fileUri, _filesContainer);
+                return BlobUtils.DeleteBlob(fileUri, _filesContainer);
 
             var prefix = _filesContainer.Name + "/" + _loggedUserId;
 
             if (fileUri.IndexOf(prefix) == -1 )
                 throw new DeletingNotOwnedFileException();
 
-            return DeleteBlob(fileUri, _filesContainer);
+            return BlobUtils.DeleteBlob(fileUri, _filesContainer);
         }
 
         /// <summary>
@@ -123,7 +150,7 @@ namespace Disibox.Data.Client
             Require.NotNull(fileUri, "fileUri");
             RequireLoggedInUser();
 
-            return DownloadBlob(fileUri, _filesContainer);
+            return BlobUtils.GetBlob(fileUri, _filesContainer);
         }
 
         /// <summary>
@@ -136,7 +163,7 @@ namespace Disibox.Data.Client
             // Requirements
             RequireLoggedInUser();
 
-            var blobs = ListBlobs(_filesContainer);
+            var blobs = BlobUtils.GetBlobs(_filesContainer);
             var prefix = _filesContainer.Name + "/";
             var prefixLength = prefix.Length;
 
@@ -173,7 +200,7 @@ namespace Disibox.Data.Client
             // Requirements
             RequireLoggedInUser();
 
-            var blobs = ListBlobs(_filesContainer);
+            var blobs = BlobUtils.GetBlobs(_filesContainer);
             var names = new List<string>();
 
             var prefix = _filesContainer.Name + "/" + _loggedUserId;
@@ -213,7 +240,7 @@ namespace Disibox.Data.Client
             RequireAdminUser();
 
             var outputName = GenerateOutputName(toolName);
-            return UploadBlob(outputName, outputContentType, outputContent, _outputsContainer);
+            return BlobUtils.AddBlob(outputName, outputContentType, outputContent, _outputsContainer);
         }
 
         public bool DeleteOutput(string outputUri)
@@ -223,7 +250,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            return DeleteBlob(outputUri, _outputsContainer);
+            return BlobUtils.DeleteBlob(outputUri, _outputsContainer);
         }
 
         public Stream GetOutput(string outputUri)
@@ -233,64 +260,12 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            return DownloadBlob(outputUri, _outputsContainer);
+            return BlobUtils.GetBlob(outputUri, _outputsContainer);
         }
 
         private static string GenerateOutputName(string toolName)
         {
             return toolName + Guid.NewGuid();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="blobUri"></param>
-        /// <param name="blobContainer"></param>
-        /// <returns></returns>
-        private static Stream DownloadBlob(string blobUri, CloudBlobContainer blobContainer)
-        {
-            var blob = blobContainer.GetBlockBlobReference(blobUri);
-            return blob.OpenRead();
-        }
-
-        /// <summary>
-        /// Uploads given stream to blob storage.
-        /// </summary>
-        /// <param name="blobName"></param>
-        /// <param name="blobContentType"></param>
-        /// <param name="blobContent"></param>
-        /// <param name="blobContainer"></param>
-        /// <returns></returns>
-        private static string UploadBlob(string blobName, string blobContentType, Stream blobContent, CloudBlobContainer blobContainer)
-        {
-            blobContent.Seek(0, SeekOrigin.Begin);
-            var blob = blobContainer.GetBlockBlobReference(blobName);
-            blob.Properties.ContentType = blobContentType;
-            blob.UploadFromStream(blobContent);
-            return blob.Uri.ToString();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="blobUri"></param>
-        /// <param name="blobContainer"></param>
-        /// <returns></returns>
-        private static bool DeleteBlob(string blobUri, CloudBlobContainer blobContainer)
-        {
-            var blob = blobContainer.GetBlobReference(blobUri);
-            return blob.DeleteIfExists();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="blobContainer"></param>
-        /// <returns></returns>
-        private static IEnumerable<IListBlobItem> ListBlobs(CloudBlobContainer blobContainer)
-        {
-            var options = new BlobRequestOptions {UseFlatBlobListing = true};
-            return  blobContainer.ListBlobs(options);
         }
 
         /*=============================================================================
@@ -305,12 +280,14 @@ namespace Disibox.Data.Client
         /// <param name="userIsAdmin"></param>
         /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidEmailException"></exception>
+        /// <exception cref="InvalidPasswordException"></exception>
         /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
         public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
             // Requirements
             Require.ValidEmail(userEmail, "userEmail");
-            Require.NotNull(userPwd, "userPwd");
+            Require.ValidPassword(userPwd, "userPwd");
             RequireLoggedInUser();
             RequireAdminUser();
 
@@ -332,7 +309,7 @@ namespace Disibox.Data.Client
         public void DeleteUser(string userEmail)
         {
             // Requirements
-            Require.NotNull(userEmail, "userEmail");
+            Require.ValidEmail(userEmail, "userEmail");
             RequireLoggedInUser();
             RequireAdminUser();
             
@@ -383,9 +360,16 @@ namespace Disibox.Data.Client
         /// </summary>
         /// <param name="userEmail"></param>
         /// <param name="userPwd"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidEmailException"></exception>
+        /// <exception cref="InvalidPasswordException"></exception>
         /// <exception cref="UserNotExistingException"></exception>
         public void Login(string userEmail, string userPwd)
         {
+            // Requirements
+            Require.ValidEmail(userEmail, "userEmail");
+            Require.ValidPassword(userPwd, "userPwd");
+
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
             var q = _usersTableCtx.Entities.Where(predicate).ToList();
