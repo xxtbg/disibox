@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseMessage.cs" />
+    <Compile Include="BlobUtils.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="MsgQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

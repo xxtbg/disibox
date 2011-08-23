@@ -25,44 +25,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System.Linq;
-using Disibox.Utils;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
+using System;
 
-namespace Disibox.Data
+namespace Disibox.Utils.Exceptions
 {
-    public class DataContext<TEntity> : TableServiceContext where TEntity : BaseEntity
+    public class InvalidPasswordException : Exception
     {
-        private readonly string _tableName;
-
-        public DataContext(string tableName, string tableServiceUri, StorageCredentials credentials)
-            : base(tableServiceUri, credentials)
+        public InvalidPasswordException(string invalidPwd) : base(invalidPwd)
         {
-            // Requirements
-            Require.NotNull(tableName, "tableName");
-
-            _tableName = tableName;
-        }
-
-        public new IQueryable<TEntity> Entities
-        {
-            get { return CreateQuery<TEntity>(_tableName); }
-        }
-
-        public void AddEntity(TEntity entity)
-        {
-            AddObject(_tableName, entity);
-        }
-
-        public void DeleteEntity(TEntity entity)
-        {
-            DeleteObject(entity);
-        }
-
-        public void UpdateEntity(TEntity entity)
-        {
-            UpdateObject(entity);
+            // Empty
         }
     }
 }
