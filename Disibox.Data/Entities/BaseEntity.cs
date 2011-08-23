@@ -1,7 +1,4 @@
 ﻿//
-// Copyright (c) 2011, University of Genoa
-// All rights reserved.
-//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -26,14 +23,42 @@
 //
 
 using System;
+using Disibox.Utils;
+using Microsoft.WindowsAzure.StorageClient;
 
-namespace Disibox.Utils.Exceptions
+namespace Disibox.Data.Entities
 {
-    public class InvalidEmailException : Exception
+    public abstract class BaseEntity : TableServiceEntity
     {
-        public InvalidEmailException(string invalidEmail) : base(invalidEmail)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rowKey"></param>
+        /// <param name="partitionKey"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        protected BaseEntity(string rowKey, string partitionKey)
         {
-            // Empty
+            // Requirements
+            Require.NotNull(rowKey, "rowKey");
+            Require.NotNull(partitionKey, "partitionKey");
+
+            RowKey = rowKey;
+            PartitionKey = partitionKey;
+        }
+
+        /// <summary>
+        /// Seems to be required for serialization sake.
+        /// </summary>
+        /// <param name="partitionKey"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        [Obsolete]
+        protected BaseEntity(string partitionKey)
+        {
+            // Requirements
+            Require.NotNull(partitionKey, "partitionKey");
+
+            RowKey = partitionKey;
+            PartitionKey = partitionKey;
         }
     }
 }

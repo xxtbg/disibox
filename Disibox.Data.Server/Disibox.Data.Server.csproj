@@ -47,10 +47,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Disibox.Data.Common\Disibox.Data.Common.csproj">
-      <Project>{8921D6CB-EBE0-481D-86E3-649F518CAA8C}</Project>
-      <Name>Disibox.Data.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
       <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
       <Name>Disibox.Data</Name>

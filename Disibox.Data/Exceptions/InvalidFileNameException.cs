@@ -27,37 +27,13 @@
 
 using System;
 
-namespace Disibox.Data.Common
+namespace Disibox.Data.Exceptions
 {
-    /// <summary>
-    /// Table entity representing an entry, that is, a (name, value) pair.
-    /// </summary>
-    public sealed class Entry : BaseEntity
+    public class InvalidFileNameException : Exception
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entryName"></param>
-        /// <param name="entryValue"></param>
-        public Entry(string entryName, string entryValue)
-            : base(entryName, Properties.Settings.Default.EntriesTableName)
-        {
-            Value = entryValue;
-        }
-
-        /// <summary>
-        /// Seems to be required for serialization sake.
-        /// </summary>
-        [Obsolete]
-        public Entry()
-            : base(Properties.Settings.Default.EntriesTableName)
+        public InvalidFileNameException(string fileName) : base(fileName)
         {
             // Empty
         }
-
-        /// <summary>
-        /// The value of given entry.
-        /// </summary>
-        public string Value { get; set; }
     }
 }

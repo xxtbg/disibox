@@ -57,13 +57,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Exceptions\InvalidEmailException.cs" />
-    <Compile Include="Exceptions\InvalidFileNameException.cs" />
-    <Compile Include="Exceptions\InvalidPasswordException.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="Pair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Require.cs" />
     <Compile Include="Shared.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +83,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
