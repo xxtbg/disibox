@@ -120,11 +120,13 @@ namespace Disibox.Data.Client
         /// </summary>
         /// <param name="fileUri"></param>
         /// <returns>True if file has been really deleted, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="DeletingNotOwnedFileException">If a common user is trying to delete another user's file.</exception>
+        /// <exception cref="InvalidFileUriException"></exception>
         public bool DeleteFile(string fileUri)
         {
             // Requirements
-            Require.NotNull(fileUri, "fileUri");
+            Require.ValidFileUri(fileUri, "fileUri");
             RequireLoggedInUser();
             
             // Administrators can delete every file.

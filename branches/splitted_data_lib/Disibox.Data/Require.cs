@@ -55,7 +55,7 @@ namespace Disibox.Data
         /// <param name="email"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="Disibox.Data.Exceptions.InvalidEmailException"></exception>
+        /// <exception cref="InvalidEmailException"></exception>
         public static void ValidEmail(string email, string argName)
         {
             // Requirements
@@ -72,7 +72,7 @@ namespace Disibox.Data
         /// <param name="fileName"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="Disibox.Data.Exceptions.InvalidFileNameException"></exception>
+        /// <exception cref="InvalidFileNameException"></exception>
         public static void ValidFileName(string fileName, string argName)
         {
             // Requirements
@@ -82,10 +82,27 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="fileUri"></param>
+        /// <param name="argName"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidFileUriException"></exception>
+        public static void ValidFileUri(string fileUri, string argName)
+        {
+            // Requirements
+            NotNull(fileUri, argName);
+
+            var filesContainerName = Properties.Settings.Default.FilesContainerName;
+            if (fileUri.Contains("/" + filesContainerName + "/")) return;
+            throw new InvalidFileUriException(fileUri);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="pwd"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="Disibox.Data.Exceptions.InvalidPasswordException"></exception>
+        /// <exception cref="InvalidPasswordException"></exception>
         public static void ValidPassword(string pwd, string argName)
         {
             // Requirements

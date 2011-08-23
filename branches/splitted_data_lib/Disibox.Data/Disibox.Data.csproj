@@ -75,6 +75,7 @@
     <Compile Include="Entities\User.cs" />
     <Compile Include="Exceptions\InvalidEmailException.cs" />
     <Compile Include="Exceptions\InvalidFileNameException.cs" />
+    <Compile Include="Exceptions\InvalidFileUriException.cs" />
     <Compile Include="Exceptions\InvalidPasswordException.cs" />
     <Compile Include="MsgQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
