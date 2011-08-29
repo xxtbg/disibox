@@ -1,4 +1,7 @@
 ﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -24,25 +27,30 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public static class BlobUtils
+    public class BlobContainer : CloudBlobContainer
     {
+        public BlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)
+            : base(blobEndpointUri + "/" + containerName, credentials)
+        {
+            // Empty
+        }
+
         /// <summary>
         /// Uploads given stream to blob storage.
         /// </summary>
         /// <param name="blobName"></param>
         /// <param name="blobContentType"></param>
         /// <param name="blobContent"></param>
-        /// <param name="blobContainer"></param>
         /// <returns></returns>
-        public static string AddBlob(string blobName, string blobContentType, Stream blobContent,
-                                      CloudBlobContainer blobContainer)
+        public string AddBlob(string blobName, string blobContentType, Stream blobContent)
         {
             blobContent.Seek(0, SeekOrigin.Begin);
-            var blob = blobContainer.GetBlockBlobReference(blobName);
+            var blob = GetBlockBlobReference(blobName);
             blob.Properties.ContentType = blobContentType;
             blob.UploadFromStream(blobContent);
             return blob.Uri.ToString();
@@ -52,11 +60,10 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <param name="blobUri"></param>
-        /// <param name="blobContainer"></param>
         /// <returns></returns>
-        public static bool DeleteBlob(string blobUri, CloudBlobContainer blobContainer)
+        public bool DeleteBlob(string blobUri)
         {
-            var blob = blobContainer.GetBlobReference(blobUri);
+            var blob = GetBlobReference(blobUri);
             return blob.DeleteIfExists();
         }
 
@@ -64,23 +71,21 @@ namespace Disibox.Data
         /// 
         /// </summary>
         /// <param name="blobUri"></param>
-        /// <param name="blobContainer"></param>
         /// <returns></returns>
-        public static Stream GetBlob(string blobUri, CloudBlobContainer blobContainer)
+        public Stream GetBlob(string blobUri)
         {
-            var blob = blobContainer.GetBlockBlobReference(blobUri);
+            var blob = GetBlockBlobReference(blobUri);
             return blob.OpenRead();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="blobContainer"></param>
         /// <returns></returns>
-        public static IEnumerable<IListBlobItem> GetBlobs(CloudBlobContainer blobContainer)
+        public IEnumerable<CloudBlob> GetBlobs()
         {
             var options = new BlobRequestOptions {UseFlatBlobListing = true};
-            return blobContainer.ListBlobs(options);
+            return (IEnumerable<CloudBlob>) ListBlobs(options);
         }
     }
 }

@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseMessage.cs" />
-    <Compile Include="BlobUtils.cs" />
+    <Compile Include="BlobContainer.cs" />
     <Compile Include="DataContext.cs" />
     <Compile Include="Entities\BaseEntity.cs" />
     <Compile Include="Entities\Entry.cs" />
