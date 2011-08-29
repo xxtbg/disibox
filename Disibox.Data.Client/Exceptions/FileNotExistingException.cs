@@ -29,8 +29,11 @@ using System;
 
 namespace Disibox.Data.Client.Exceptions
 {
-    public class FileAlreadyExistingException : Exception
+    public class FileNotExistingException : Exception
     {
-        //Empty
+        public FileNotExistingException(string fileName) : base(fileName)
+        {
+            // Empty
+        }
     }
 }

@@ -30,7 +30,7 @@ using NUnit.Framework;
 
 namespace Disibox.Data.Tests
 {
-    class DeleteFileTests : BaseFileTests
+    internal class DeleteFileTests : BaseFileTests
     {
         [SetUp]
         protected override void SetUp()
@@ -58,12 +58,12 @@ namespace Disibox.Data.Tests
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
             DataSource.DeleteFile(fileUri);
 
-            var fileNames = DataSource.GetFileNames();
-            Assert.True(fileNames.Count == 0);
+            var fileMetadata = DataSource.GetFileMetadata();
+            Assert.True(fileMetadata.Count == 0);
         }
 
         [Test]
-        [ExpectedException(typeof(DeletingNotOwnedFileException))]
+        [ExpectedException(typeof (FileNotOwnedException))]
         public void DeleteOneCommonUserFileAsOtherCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
@@ -90,8 +90,8 @@ namespace Disibox.Data.Tests
             var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
             DataSource.DeleteFile(fileUri);
 
-            var fileNames = DataSource.GetFileNames();
-            Assert.True(fileNames.Count == 0);
+            var fileMetadata = DataSource.GetFileMetadata();
+            Assert.True(fileMetadata.Count == 0);
         }
     }
 }

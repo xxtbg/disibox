@@ -51,7 +51,7 @@ namespace Disibox.Data.Tests
 
             for (var i = 0; i < AdminUserCount; ++i)
             {
-                var currChar = (char)('a' + i);
+                var currChar = (char) ('a' + i);
 
                 var email = new string(currChar, EmailLength);
                 AdminUserEmails.Add(email + "_admin");
@@ -62,7 +62,7 @@ namespace Disibox.Data.Tests
 
             for (var i = 0; i < CommonUserCount; ++i)
             {
-                var currChar = (char)('a' + i);
+                var currChar = (char) ('a' + i);
 
                 var email = new string(currChar, EmailLength);
                 CommonUserEmails.Add(email + "_common");

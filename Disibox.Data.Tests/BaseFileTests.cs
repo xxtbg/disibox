@@ -50,7 +50,7 @@ namespace Disibox.Data.Tests
 
             for (var i = 0; i < FileCount; ++i)
             {
-                var currChar = (char)('a' + i);
+                var currChar = (char) ('a' + i);
 
                 var fileName = new string(currChar, FileNameLength);
                 FileNames.Add(fileName + ".txt");

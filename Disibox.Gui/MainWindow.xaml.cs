@@ -111,7 +111,7 @@ namespace Disibox.Gui {
                 var result = MessageBoxResult.Cancel;
                 try {
                     _dataSource.AddFile(fileName, fileStream, false);
-                } catch (FileAlreadyExistingException) {
+                } catch (FileExistingException) {
                     result = MessageBox.Show("This file already exists on the cloud, " +
                                              "do you want to overwrite it?",
                                              "Uploading a file", MessageBoxButton.YesNo);
@@ -189,7 +189,7 @@ namespace Disibox.Gui {
                 ok = _dataSource.DeleteFile(selectedItem.Uri);
             } catch (LoggedInUserRequiredException) {
                 MessageBox.Show("Only a logged user can delete files that owns", "Deleting file");
-            } catch (DeletingNotOwnedFileException) {
+            } catch (FileNotOwnedException) {
                 MessageBox.Show("Error deleting not owned file", "Deleting file");
                 return;
             }
