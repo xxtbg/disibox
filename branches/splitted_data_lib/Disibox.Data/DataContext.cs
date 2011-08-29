@@ -37,8 +37,8 @@ namespace Disibox.Data
     {
         private readonly string _tableName;
 
-        public DataContext(string tableName, string tableServiceUri, StorageCredentials credentials)
-            : base(tableServiceUri, credentials)
+        public DataContext(string tableName, string tableEndpointUri, StorageCredentials credentials)
+            : base(tableEndpointUri, credentials)
         {
             // Requirements
             Require.NotNull(tableName, "tableName");
