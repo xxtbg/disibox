@@ -37,7 +37,7 @@ namespace Disibox.Data.Server
     {
         private readonly MsgQueue<ProcessingMessage> _processingRequests;
         private readonly MsgQueue<ProcessingMessage> _processingCompletions;
-        
+
         private readonly DataContext<User> _usersTableCtx;
 
         public ServerDataSource()

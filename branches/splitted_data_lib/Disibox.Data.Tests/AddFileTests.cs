@@ -26,6 +26,7 @@
 //
 
 using System;
+using System.Linq;
 using Disibox.Data.Client.Exceptions;
 using Disibox.Utils;
 using NUnit.Framework;
@@ -52,8 +53,8 @@ namespace Disibox.Data.Tests
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
 
-            var fileNames = DataSource.GetFileNames();
-            Assert.True(fileNames.Contains(FileNames[0]));
+            var fileMetadata = DataSource.GetFileMetadata();
+            Assert.True(fileMetadata.Count(m => m.Name == FileNames[0] && m.Owner == DefaultAdminEmail) == 1);
 
             var file = DataSource.GetFile(fileUri);
             Assert.True(Shared.StreamsAreEqual(file, Files[0]));
@@ -68,14 +69,14 @@ namespace Disibox.Data.Tests
             for (var i = 0; i < FileCount; ++i)
                 uris[i] = DataSource.AddFile(FileNames[i], Files[i]);
 
-            var fileNames = DataSource.GetFileNames();
+            var fileMetadata = DataSource.GetFileMetadata();
             for (var i = 0; i < FileCount; ++i)
             {
-                Assert.True(fileNames.Contains(FileNames[i]));
+                var currFileName = FileNames[i];
+                Assert.True(fileMetadata.Count(m => m.Name == currFileName && m.Owner == DefaultAdminEmail) == 1);
                 var file = DataSource.GetFile(uris[i]);
                 Assert.True(Shared.StreamsAreEqual(file, Files[i]));
             }
-                
         }
 
         [Test]
@@ -88,22 +89,22 @@ namespace Disibox.Data.Tests
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
             var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
 
-            var fileNames = DataSource.GetFileNames();
-            Assert.True(fileNames.Contains(FileNames[0]));
+            var fileMetadata = DataSource.GetFileMetadata();
+            Assert.True(fileMetadata.Count(m => m.Name == FileNames[0] && m.Owner == CommonUserEmails[0]) == 1);
 
             var file = DataSource.GetFile(fileUri);
             Assert.True(Shared.StreamsAreEqual(file, Files[0]));
         }
 
         [Test]
-        [ExpectedException(typeof(LoggedInUserRequiredException))]
+        [ExpectedException(typeof (LoggedInUserRequiredException))]
         public void AddOneFileWithoutLoggingIn()
         {
             DataSource.AddFile(FileNames[0], Files[0]);
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof (ArgumentNullException))]
         public void NullFileNameArgument()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
@@ -111,7 +112,7 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [ExpectedException(typeof (ArgumentNullException))]
         public void NullFileContentArgument()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);

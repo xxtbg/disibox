@@ -30,7 +30,7 @@ using NUnit.Framework;
 
 namespace Disibox.Data.Tests
 {
-    class DeleteUserTests : BaseUserTests
+    internal class DeleteUserTests : BaseUserTests
     {
         [SetUp]
         protected override void SetUp()
@@ -56,7 +56,7 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(AdminUserRequiredException))]
+        [ExpectedException(typeof (AdminUserRequiredException))]
         public void DeleteOneAdminUserLoggingInAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
@@ -69,7 +69,7 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(CannotDeleteUserException))]
+        [ExpectedException(typeof (CannotDeleteUserException))]
         public void DeleteDefaultAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);

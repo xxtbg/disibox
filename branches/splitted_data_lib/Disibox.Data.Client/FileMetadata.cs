@@ -25,9 +25,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace Disibox.Data.Client 
+namespace Disibox.Data.Client
 {
-    public class FileMetadata 
+    public class FileMetadata
     {
         /// <summary>
         /// 
@@ -35,12 +35,14 @@ namespace Disibox.Data.Client
         /// <param name="fileName"></param>
         /// <param name="fileContentType"></param>
         /// <param name="fileUri"></param>
+        /// <param name="fileOwner"></param>
         /// <param name="fileSize">The size of the file in kilobytes.</param>
-        public FileMetadata(string fileName, string fileContentType, string fileUri, double fileSize) 
+        public FileMetadata(string fileName, string fileContentType, string fileUri, string fileOwner, double fileSize)
         {
             Name = fileName;
             ContentType = fileContentType;
             Uri = fileUri;
+            Owner = fileOwner;
             Size = fileSize;
         }
 
@@ -49,6 +51,8 @@ namespace Disibox.Data.Client
         public string ContentType { get; private set; }
 
         public string Uri { get; private set; }
+
+        public string Owner { get; private set; }
 
         /// <summary>
         /// The size of the file in kilobytes.

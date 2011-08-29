@@ -34,17 +34,16 @@ using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Client
 {
     public class ClientDataSource
     {
-        private CloudBlobContainer _filesContainer;
-        private CloudBlobContainer _outputsContainer;
+        private readonly BlobContainer _filesContainer;
+        private readonly BlobContainer _outputsContainer;
 
-        private DataContext<Entry> _entriesTableCtx;
-        private DataContext<User> _usersTableCtx;
+        private readonly DataContext<Entry> _entriesTableCtx;
+        private readonly DataContext<User> _usersTableCtx;
 
         private string _loggedUserId;
         private bool _loggedUserIsAdmin;
@@ -58,61 +57,52 @@ namespace Disibox.Data.Client
             var connectionString = Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-            InitContainers(storageAccount);
-            InitContexts(storageAccount);
+            var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
+            var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
+            var credentials = storageAccount.Credentials;
+
+            var filesContainerName = Properties.Settings.Default.FilesContainerName;
+            _filesContainer = new BlobContainer(filesContainerName, blobEndpointUri, credentials);
+
+            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
+            _outputsContainer = new BlobContainer(outputsContainerName, blobEndpointUri, credentials);
+
+            var entriesTableName = Properties.Settings.Default.EntriesTableName;
+            _entriesTableCtx = new DataContext<Entry>(entriesTableName, tableEndpointUri, credentials);
+
+            var usersTableName = Properties.Settings.Default.UsersTableName;
+            _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
         }
 
         /*=============================================================================
-            File and output handling methods
+            File handling methods
         =============================================================================*/
 
         /// <summary>
-        /// 
+        /// Adds given file (in the form of a file name and stream carrying its content)
+        /// to the user's personal folder. If <paramref name="overwrite"/> is set to true,
+        /// if a file with given file name already exists in the folder it will be overwritten.
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="fileContent"></param>
+        /// <param name="fileName">The name of the file to add.</param>
+        /// <param name="fileContent">The content of the file to add.</param>
         /// <param name="overwrite">If it is true then the file on the cloud will be overwritten with <paramref name="fileName"/></param>
         /// <returns></returns>
-        /// <exception cref="FileAlreadyExistingException">If the current user already have a file with the name <paramref name="fileName"/></exception>
-        public string AddFile(string fileName, Stream fileContent, bool overwrite = false)
-        {
-            if (overwrite)
-                return AddFile(fileName, fileContent);
-
-            var fileToAdd = _loggedUserId + "/" + fileName;
-            var filesOfUser = GetFileMetadata();
-
-            foreach (var fileAndMime in filesOfUser)
-            {
-                var tempFileName = fileAndMime.Name;
-                if (!_loggedUserIsAdmin)
-                    tempFileName = _loggedUserId + "/" + tempFileName;
-
-                if (tempFileName.Equals(fileToAdd))
-                    throw new FileAlreadyExistingException();
-            }
-
-            return AddFile(fileName, fileContent);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="fileContent"></param>
         /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
+        /// <exception cref="FileExistingException">If the current user already have a file with the name <paramref name="fileName"/></exception>
         /// <exception cref="InvalidFileNameException"></exception>
         /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
-        public string AddFile(string fileName, Stream fileContent)
+        public string AddFile(string fileName, Stream fileContent, bool overwrite = false)
         {
             // Requirements
             Require.ValidFileName(fileName, "fileName");
             Require.NotNull(fileContent, "fileContent");
             RequireLoggedInUser();
+            if (!overwrite)
+                RequireFileNameAbsence(fileName);
 
             var cloudFileName = GenerateFileName(_loggedUserId, fileName);
             var fileContentType = Shared.GetContentType(fileName);
-            return BlobUtils.AddBlob(cloudFileName, fileContentType, fileContent, _filesContainer);
+            return _filesContainer.AddBlob(cloudFileName, fileContentType, fileContent);
         }
 
         /// <summary>
@@ -121,24 +111,17 @@ namespace Disibox.Data.Client
         /// <param name="fileUri"></param>
         /// <returns>True if file has been really deleted, false otherwise.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="DeletingNotOwnedFileException">If a common user is trying to delete another user's file.</exception>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="FileNotOwnedException">If a common user is trying to delete another user's file.</exception>
         /// <exception cref="InvalidFileUriException"></exception>
         public bool DeleteFile(string fileUri)
         {
             // Requirements
             Require.ValidFileUri(fileUri, "fileUri");
             RequireLoggedInUser();
-            
-            // Administrators can delete every file.
-            if (_loggedUserIsAdmin)
-                return BlobUtils.DeleteBlob(fileUri, _filesContainer);
+            RequireFileUriExistance(fileUri);
 
-            var prefix = _filesContainer.Name + "/" + _loggedUserId;
-
-            if (fileUri.IndexOf(prefix) == -1 )
-                throw new DeletingNotOwnedFileException();
-
-            return BlobUtils.DeleteBlob(fileUri, _filesContainer);
+            return _filesContainer.DeleteBlob(fileUri);
         }
 
         /// <summary>
@@ -151,78 +134,92 @@ namespace Disibox.Data.Client
             // Requirements
             Require.NotNull(fileUri, "fileUri");
             RequireLoggedInUser();
+            RequireFileUriExistance(fileUri);
 
-            return BlobUtils.GetBlob(fileUri, _filesContainer);
+            return _filesContainer.GetBlob(fileUri);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <exception cref="LoggedInUserRequiredException"></exception>
         /// <returns></returns>
         public IList<FileMetadata> GetFileMetadata()
         {
             // Requirements
             RequireLoggedInUser();
 
-            var blobs = BlobUtils.GetBlobs(_filesContainer);
-            var prefix = _filesContainer.Name + "/";
-            var prefixLength = prefix.Length;
-
             if (_loggedUserIsAdmin)
-                prefixLength--;
-
-            if (!_loggedUserIsAdmin)
-                return (from blob in blobs
-                        select (CloudBlob) blob into file
-                        let uri = file.Uri.ToString()
-                        let size = Shared.ConvertBytesToKilobytes(file.Properties.Length)
-                        let controlUserFiles = prefix + "" + _loggedUserId
-                        let prefixStart = uri.IndexOf(controlUserFiles)
-                        let fileName = uri.Substring(prefixStart + prefixLength + _loggedUserId.Length + 1)
-                        where uri.IndexOf(controlUserFiles) != -1
-                        select new FileMetadata(fileName, Shared.GetContentType(fileName), uri, size)).ToList();
-
-            return (from blob in blobs
-                    select (CloudBlob) blob into file
-                    let uri = file.Uri.ToString()
-                    let size = Shared.ConvertBytesToKilobytes(file.Properties.Length)
-                    let prefixStart = uri.IndexOf(prefix)
-                    let fileName = uri.Substring(prefixStart + prefixLength + 1)
-                    select new FileMetadata(fileName, Shared.GetContentType(fileName), uri, size)).ToList();
+                return GetFileMetadataForAdminUser();
+            return GetFileMetadataForCommonUser();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <exception cref="LoggedInUserRequiredException"></exception>
-        /// <returns></returns>
-        public IList<string> GetFileNames()
+        private bool FileNameExists(string fileName)
         {
-            // Requirements
-            RequireLoggedInUser();
-
-            var blobs = BlobUtils.GetBlobs(_filesContainer);
-            var names = new List<string>();
-
-            var prefix = _filesContainer.Name + "/" + _loggedUserId;
-            var prefixLength = prefix.Length;
-
-            foreach (var blob in blobs)
-            {
-                var uri = blob.Uri.ToString();
-                var prefixStart = uri.IndexOf(prefix);
-                var fileName = uri.Substring(prefixStart + prefixLength + 1);
-                names.Add(fileName);
-            }
-
-            return names;
+            return (GetFileMetadata().Where(m => m.Name == fileName).Count() > 0);
         }
 
         private static string GenerateFileName(string userId, string fileName)
         {
             return userId + "/" + fileName;
         }
+
+        private string GetFileNameFromUri(string fileUri)
+        {
+            var prefix = Properties.Settings.Default.FilesContainerName + "/";
+            if (!_loggedUserIsAdmin)
+                prefix += _loggedUserId + "/";
+
+            var index = fileUri.IndexOf(prefix);
+            if (index == -1)
+                throw new FileNotOwnedException();
+            return fileUri.Substring(index, prefix.Length);
+        }
+
+        public IList<FileMetadata> GetFileMetadataForAdminUser()
+        {
+            var files = _filesContainer.GetBlobs();
+            var filesPrefix = _filesContainer.Uri + "/";
+            var fileMetadata = new List<FileMetadata>();
+
+            foreach (var file in files)
+            {
+                var fileUri = file.Uri.ToString();
+                var filePath = fileUri.Substring(filesPrefix.Length);
+                var fileOwner = filePath.Substring(0, filePath.IndexOf('/'));
+                var fileName = filePath.Substring(fileOwner.Length);
+                var fileContentType = Shared.GetContentType(fileName);
+                var fileSize = Shared.ConvertBytesToKilobytes(file.Properties.Length);
+                var metadata = new FileMetadata(fileName, fileContentType, fileUri, fileOwner, fileSize);
+                fileMetadata.Add(metadata);
+            }
+
+            return fileMetadata;
+        }
+
+        private IList<FileMetadata> GetFileMetadataForCommonUser()
+        {
+            var files = _filesContainer.GetBlobs();
+            var filesPrefix = _filesContainer.Uri + "/" + _loggedUserId + "/";
+            var fileOwner = GetUserEmailByUserId(_loggedUserId);
+            var fileMetadata = new List<FileMetadata>();
+
+            foreach (var file in files)
+            {
+                var fileUri = file.Uri.ToString();
+                if (!fileUri.Contains(filesPrefix)) continue;
+                var fileName = fileUri.Substring(filesPrefix.Length);
+                var fileContentType = Shared.GetContentType(fileName);
+                var fileSize = Shared.ConvertBytesToKilobytes(file.Properties.Length);
+                var metadata = new FileMetadata(fileName, fileContentType, fileUri, fileOwner, fileSize);
+                fileMetadata.Add(metadata);
+            }
+
+            return fileMetadata;
+        }
+
+        /*=============================================================================
+            Output handling methods
+        =============================================================================*/
 
         /// <summary>
         /// 
@@ -242,7 +239,7 @@ namespace Disibox.Data.Client
             RequireAdminUser();
 
             var outputName = GenerateOutputName(toolName);
-            return BlobUtils.AddBlob(outputName, outputContentType, outputContent, _outputsContainer);
+            return _outputsContainer.AddBlob(outputName, outputContentType, outputContent);
         }
 
         public bool DeleteOutput(string outputUri)
@@ -252,7 +249,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            return BlobUtils.DeleteBlob(outputUri, _outputsContainer);
+            return _outputsContainer.DeleteBlob(outputUri);
         }
 
         public Stream GetOutput(string outputUri)
@@ -262,7 +259,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            return BlobUtils.GetBlob(outputUri, _outputsContainer);
+            return _outputsContainer.GetBlob(outputUri);
         }
 
         private static string GenerateOutputName(string toolName)
@@ -295,7 +292,7 @@ namespace Disibox.Data.Client
 
             var userId = GenerateUserId(userIsAdmin);
             var user = new User(userId, userEmail, userPwd, userIsAdmin);
-            
+
             _usersTableCtx.AddEntity(user);
             _usersTableCtx.SaveChanges();
         }
@@ -314,7 +311,7 @@ namespace Disibox.Data.Client
             Require.ValidEmail(userEmail, "userEmail");
             RequireLoggedInUser();
             RequireAdminUser();
-            
+
             // Added a call to ToList() to avoid an error on Count() call.
             var q = _usersTableCtx.Entities.Where(u => u.Email == userEmail).ToList();
             if (q.Count() == 0)
@@ -409,7 +406,7 @@ namespace Disibox.Data.Client
 
             nextUserId += 1;
             nextUserIdEntry.Value = nextUserId.ToString();
-            
+
             // Next method must be called in order to save the update.
             _entriesTableCtx.UpdateEntity(nextUserIdEntry);
             _entriesTableCtx.SaveChanges();
@@ -417,34 +414,10 @@ namespace Disibox.Data.Client
             return userId;
         }
 
-        /*=============================================================================
-            Init methods
-        =============================================================================*/
-
-        private void InitContainers(CloudStorageAccount storageAccount)
+        private string GetUserEmailByUserId(string userId)
         {
-            var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
-            var credentials = storageAccount.Credentials;
-
-            var filesContainerName = Properties.Settings.Default.FilesContainerName;
-            var filesContainerUri = blobEndpointUri + "/" + filesContainerName;
-            _filesContainer = new CloudBlobContainer(filesContainerUri, credentials);
-
-            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            var outputsContainerUri = blobEndpointUri + "/" + outputsContainerName;
-            _outputsContainer = new CloudBlobContainer(outputsContainerUri, credentials);
-        }
-
-        private void InitContexts(CloudStorageAccount storageAccount)
-        {
-            var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
-            var credentials = storageAccount.Credentials;
-
-            var entriesTableName = Properties.Settings.Default.EntriesTableName;
-            _entriesTableCtx = new DataContext<Entry>(entriesTableName, tableEndpointUri, credentials);
-
-            var usersTableName = Properties.Settings.Default.UsersTableName;
-            _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
+            var q = _usersTableCtx.Entities.Where(u => u.RowKey == userId);
+            return q.First().Email;
         }
 
         /*=============================================================================
@@ -460,6 +433,24 @@ namespace Disibox.Data.Client
         {
             if (_loggedUserIsAdmin) return;
             throw new AdminUserRequiredException();
+        }
+
+        private void RequireFileNameAbsence(string fileName)
+        {
+            if (!FileNameExists(fileName)) return;
+            throw new FileExistingException(fileName);
+        }
+
+        private void RequireFileNameExistance(string fileName)
+        {
+            if (FileNameExists(fileName)) return;
+            throw new FileNotFoundException(fileName);
+        }
+
+        private void RequireFileUriExistance(string fileUri)
+        {
+            var fileName = GetFileNameFromUri(fileUri);
+            RequireFileNameExistance(fileName);
         }
 
         /// <summary>
