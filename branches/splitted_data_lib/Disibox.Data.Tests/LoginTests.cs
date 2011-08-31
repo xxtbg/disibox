@@ -62,7 +62,7 @@ namespace Disibox.Data.Tests
         [Test]
         public void ValidAdminUserLogin()
         {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminEmail);
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.Logout();
         }
 
