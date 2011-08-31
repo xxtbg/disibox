@@ -57,6 +57,7 @@
     <Compile Include="BaseUserTests.cs" />
     <Compile Include="DeleteFileTests.cs" />
     <Compile Include="DeleteUserTests.cs" />
+    <Compile Include="LoginTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

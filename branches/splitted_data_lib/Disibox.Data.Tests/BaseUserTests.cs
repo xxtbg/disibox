@@ -54,7 +54,7 @@ namespace Disibox.Data.Tests
                 var currChar = (char) ('a' + i);
 
                 var email = new string(currChar, EmailLength);
-                AdminUserEmails.Add(email + "_admin");
+                AdminUserEmails.Add(email + "_admin@test.pino");
 
                 var pwd = new string(currChar, PwdLength);
                 AdminUserPwds.Add(pwd + "_pwd");
@@ -65,7 +65,7 @@ namespace Disibox.Data.Tests
                 var currChar = (char) ('a' + i);
 
                 var email = new string(currChar, EmailLength);
-                CommonUserEmails.Add(email + "_common");
+                CommonUserEmails.Add(email + "_common@test.pino");
 
                 var pwd = new string(currChar, EmailLength);
                 CommonUserPwds.Add(pwd + "_pwd");

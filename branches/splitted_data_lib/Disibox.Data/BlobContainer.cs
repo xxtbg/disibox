@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -85,7 +86,7 @@ namespace Disibox.Data
         public IEnumerable<CloudBlob> GetBlobs()
         {
             var options = new BlobRequestOptions {UseFlatBlobListing = true};
-            return (IEnumerable<CloudBlob>) ListBlobs(options);
+            return ListBlobs(options).Select(b => (CloudBlob)b).ToList();
         }
     }
 }
