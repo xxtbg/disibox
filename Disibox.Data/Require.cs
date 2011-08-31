@@ -37,6 +37,8 @@ namespace Disibox.Data
                                           @"\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\" +
                                           @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
 
+        private static readonly int MinPasswordLength = int.Parse(Properties.Settings.Default.MinPasswordLength);
+
         /// <summary>
         /// 
         /// </summary>
@@ -107,6 +109,9 @@ namespace Disibox.Data
         {
             // Requirements
             NotNull(pwd, argName);
+
+            if (pwd.Length >= MinPasswordLength) return;
+            throw new InvalidPasswordException(pwd);
         }
     }
 }

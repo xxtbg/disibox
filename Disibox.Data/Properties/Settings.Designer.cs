@@ -32,75 +32,66 @@ namespace Disibox.Data.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("users")]
         public string UsersTableName {
             get {
                 return ((string)(this["UsersTableName"]));
             }
-            set {
-                this["UsersTableName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("UseDevelopmentStorage=true")]
         public string DataConnectionString {
             get {
                 return ((string)(this["DataConnectionString"]));
             }
-            set {
-                this["DataConnectionString"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("files")]
         public string FilesContainerName {
             get {
                 return ((string)(this["FilesContainerName"]));
             }
-            set {
-                this["FilesContainerName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("outputs")]
         public string OutputsContainerName {
             get {
                 return ((string)(this["OutputsContainerName"]));
             }
-            set {
-                this["OutputsContainerName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("procreq")]
         public string ProcReqQueueName {
             get {
                 return ((string)(this["ProcReqQueueName"]));
             }
-            set {
-                this["ProcReqQueueName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("proccompl")]
         public string ProcComplQueueName {
             get {
                 return ((string)(this["ProcComplQueueName"]));
             }
-            set {
-                this["ProcComplQueueName"] = value;
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8")]
+        public string MinPasswordLength {
+            get {
+                return ((string)(this["MinPasswordLength"]));
             }
         }
     }
