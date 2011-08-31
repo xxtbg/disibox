@@ -25,7 +25,7 @@ namespace Disibox.Data.Setup.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("admin")]
+        [global::System.Configuration.DefaultSettingValueAttribute("admin@disibox.com")]
         public string DefaultAdminEmail {
             get {
                 return ((string)(this["DefaultAdminEmail"]));

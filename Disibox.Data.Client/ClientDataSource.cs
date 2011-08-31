@@ -165,17 +165,17 @@ namespace Disibox.Data.Client
 
         private string GetFileNameFromUri(string fileUri)
         {
-            var prefix = Properties.Settings.Default.FilesContainerName + "/";
-            if (!_loggedUserIsAdmin)
-                prefix += _loggedUserId + "/";
+            var prefix = _filesContainer.Uri + "/" + _loggedUserId + "/";
 
             var index = fileUri.IndexOf(prefix);
-            if (index == -1)
+            if (index == -1 && !_loggedUserIsAdmin)
                 throw new FileNotOwnedException();
-            return fileUri.Substring(index, prefix.Length);
+            if (index == -1)
+                throw new InvalidFileUriException(fileUri);
+            return fileUri.Substring(prefix.Length);
         }
 
-        public IList<FileMetadata> GetFileMetadataForAdminUser()
+        private IList<FileMetadata> GetFileMetadataForAdminUser()
         {
             var files = _filesContainer.GetBlobs();
             var filesPrefix = _filesContainer.Uri + "/";
@@ -185,8 +185,9 @@ namespace Disibox.Data.Client
             {
                 var fileUri = file.Uri.ToString();
                 var filePath = fileUri.Substring(filesPrefix.Length);
-                var fileOwner = filePath.Substring(0, filePath.IndexOf('/'));
-                var fileName = filePath.Substring(fileOwner.Length);
+                var fileOwnerId = filePath.Substring(0, filePath.IndexOf('/'));
+                var fileOwner = GetUserEmailByUserId(fileOwnerId);
+                var fileName = filePath.Substring(fileOwnerId.Length+1); // To avoid '/'
                 var fileContentType = Shared.GetContentType(fileName);
                 var fileSize = Shared.ConvertBytesToKilobytes(file.Properties.Length);
                 var metadata = new FileMetadata(fileName, fileContentType, fileUri, fileOwner, fileSize);
@@ -355,14 +356,14 @@ namespace Disibox.Data.Client
         }
 
         /// <summary>
-        /// 
+        /// Logs a user in, giving him the ability to use client operations.
         /// </summary>
-        /// <param name="userEmail"></param>
-        /// <param name="userPwd"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidEmailException"></exception>
-        /// <exception cref="InvalidPasswordException"></exception>
-        /// <exception cref="UserNotExistingException"></exception>
+        /// <param name="userEmail">User email.</param>
+        /// <param name="userPwd">User password.</param>
+        /// <exception cref="ArgumentNullException">At least one argument is null.</exception>
+        /// <exception cref="InvalidEmailException">Given email is not syntactically correct.</exception>
+        /// <exception cref="InvalidPasswordException">Given password is shorter than MinPasswordLength.</exception>
+        /// <exception cref="UserNotExistingException">A user with credentials does not exist.</exception>
         public void Login(string userEmail, string userPwd)
         {
             // Requirements
