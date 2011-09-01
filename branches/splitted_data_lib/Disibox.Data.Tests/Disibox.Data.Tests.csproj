@@ -58,6 +58,7 @@
     <Compile Include="Client\DeleteUserTests.cs" />
     <Compile Include="Client\LoginTests.cs" />
     <Compile Include="Mixed\BaseMixedTests.cs" />
+    <Compile Include="Mixed\UserExistsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server\AddOutputTests.cs" />
     <Compile Include="Server\BaseProcMsgTests.cs" />
