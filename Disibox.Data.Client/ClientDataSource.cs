@@ -106,14 +106,15 @@ namespace Disibox.Data.Client
         }
 
         /// <summary>
-        /// 
+        /// Deletes file pointed by given uri.
         /// </summary>
-        /// <param name="fileUri"></param>
+        /// <param name="fileUri">The uri pointing at the file that should be deleted.</param>
         /// <returns>True if file has been really deleted, false otherwise.</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="FileNotFoundException"></exception>
-        /// <exception cref="FileNotOwnedException">If a common user is trying to delete another user's file.</exception>
-        /// <exception cref="InvalidFileUriException"></exception>
+        /// <exception cref="ArgumentNullException">Given uri is null.</exception>
+        /// <exception cref="FileNotFoundException">Given uri points to a not existing file.</exception>
+        /// <exception cref="FileNotOwnedException">A common user is trying to delete another user's file.</exception>
+        /// <exception cref="InvalidFileUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         public bool DeleteFile(string fileUri)
         {
             // Requirements
@@ -125,14 +126,19 @@ namespace Disibox.Data.Client
         }
 
         /// <summary>
-        /// 
+        /// Returns the content of the file pointed by given uri.
         /// </summary>
-        /// <param name="fileUri"></param>
-        /// <returns></returns>
+        /// <param name="fileUri">The uri pointing at the file to download.</param>
+        /// <returns>The content of file pointed by given uri.</returns>
+        /// <exception cref="ArgumentNullException">Given uri is null.</exception>
+        /// <exception cref="FileNotFoundException">Given uri points to a not existing file.</exception>
+        /// <exception cref="FileNotOwnedException">A common user is trying to delete another user's file.</exception>
+        /// <exception cref="InvalidFileUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         public Stream GetFile(string fileUri)
         {
             // Requirements
-            Require.NotNull(fileUri, "fileUri");
+            Require.ValidFileUri(fileUri, "fileUri");
             RequireLoggedInUser();
             RequireExistingFileUri(fileUri);
 
@@ -140,9 +146,11 @@ namespace Disibox.Data.Client
         }
 
         /// <summary>
-        /// 
+        /// Returns all metadata associated to user's files. If logged in user is administrator,
+        /// metadata associated to all users' files are returned.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A list containing what specified above.</returns>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         public IList<FileMetadata> GetFileMetadata()
         {
             // Requirements
