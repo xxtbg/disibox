@@ -38,6 +38,7 @@ namespace Disibox.Data.Server
 {
     public class ServerDataSource
     {
+        private readonly BlobContainer _filesContainer;
         private readonly BlobContainer _outputsContainer;
 
         private readonly MsgQueue<ProcessingMessage> _processingRequests;
@@ -57,6 +58,9 @@ namespace Disibox.Data.Server
             var queueEndpointUri = storageAccount.QueueEndpoint.AbsoluteUri;
             var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
+
+            var filesContainerName = Properties.Settings.Default.FilesContainerName;
+            _filesContainer = new BlobContainer(filesContainerName, blobEndpointUri, credentials);
 
             var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
             _outputsContainer = new BlobContainer(outputsContainerName, blobEndpointUri, credentials);
@@ -167,8 +171,23 @@ namespace Disibox.Data.Server
         }
 
         /*=============================================================================
-            Output handling methods
+            Blob handling methods
         =============================================================================*/
+
+        /// <summary>
+        /// Returns the content of the file pointed by given uri.
+        /// </summary>
+        /// <param name="fileUri">The uri pointing at the file to download.</param>
+        /// <returns>The content of file pointed by given uri.</returns>
+        /// <exception cref="ArgumentNullException">Given uri is null.</exception>
+        /// <exception cref="InvalidFileUriException">Given uri has an invalid format.</exception>
+        public Stream GetFile(string fileUri)
+        {
+            // Requirements
+            Require.ValidFileUri(fileUri, "fileUri");
+
+            return _filesContainer.GetBlob(fileUri);
+        }
 
         /// <summary>
         /// Adds given processing output.
