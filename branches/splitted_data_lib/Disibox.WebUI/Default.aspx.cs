@@ -36,29 +36,64 @@ namespace Disibox.WebUI
     {
         public readonly ClientDataSource DataSource = new ClientDataSource();
 
+        private readonly string[] _filesTableHeader = {"Name", "ContentType", "Owner", "Size"};
+
+        private const string AdminEmail = "admin@disibox.com";
+        private const string AdminPwd = "roottoor";
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Generate rows and cells.           
-            int numrows = 3;
-            int numcells = 2;
-            for (int j = 0; j < numrows; j++)
-            {
-                var r = new TableRow();
-                for (int i = 0; i < numcells; i++)
-                {
-                    var c = new TableCell();
-                    c.Controls.Add(new LiteralControl("row " + j + ", cell " + i));
-                    r.Cells.Add(c);
-                }
-                FilesTable.Rows.Add(r);
-            }
+            FillFilesTable();
         }
 
         protected void UploadButton_Click(object sender, EventArgs e)
         {
-            var ds = new ClientDataSource();
+            DataSource.Login(AdminEmail, AdminPwd);
+            DataSource.AddFile(FileUpload.FileName, FileUpload.FileContent); 
+            DataSource.Logout();
 
-            ds.AddFile(FileUpload.FileName, FileUpload.FileContent);
+            FillFilesTable();
+        }
+
+        /*=============================================================================
+            Private methods
+        =============================================================================*/
+
+        private void FillFilesTable()
+        {
+            DataSource.Login(AdminEmail, AdminPwd);
+
+            FilesTable.Rows.Clear();
+
+            AddHeaderToFilesTable();
+
+            var metadata = DataSource.GetFileMetadata();
+            foreach (var fileMetadata in metadata)
+            {
+                var fileRow = new TableRow();
+                fileRow.Cells.Add(CreateTableCell(fileMetadata.Name));
+                fileRow.Cells.Add(CreateTableCell(fileMetadata.ContentType));
+                fileRow.Cells.Add(CreateTableCell(fileMetadata.Owner));
+                fileRow.Cells.Add(CreateTableCell(fileMetadata.Size.ToString()));
+                FilesTable.Rows.Add(fileRow);
+            }
+
+            DataSource.Logout();
+        }
+
+        private void AddHeaderToFilesTable()
+        {
+            var header = new TableRow();
+            foreach (var columnHeader in _filesTableHeader)
+                header.Cells.Add(CreateTableCell(columnHeader));
+            FilesTable.Rows.Add(header);
+        }
+
+        private static TableCell CreateTableCell(string text)
+        {
+            var cell = new TableCell();
+            cell.Controls.Add(new LiteralControl(text));
+            return cell;
         }
     }
 }
