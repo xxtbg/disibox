@@ -25,38 +25,14 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using Disibox.Data.Client;
-using Disibox.Data.Setup;
-using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Server
 {
-    [TestFixture]
-    public abstract class BaseClientTests
+    class AddOutputTests
     {
-        [SetUp]
-        protected virtual void SetUp()
-        {
-            CloudStorageSetup.ResetStorage();
-            DataSource = new ClientDataSource();
-        }
-
-        [TearDown]
-        protected virtual void TearDown()
-        {
-            DataSource = null;
-        }
-
-        protected ClientDataSource DataSource { get; private set; }
-
-        protected static string DefaultAdminEmail
-        {
-            get { return Setup.Properties.Settings.Default.DefaultAdminEmail; }
-        }
-
-        protected static string DefaultAdminPwd
-        {
-            get { return Setup.Properties.Settings.Default.DefaultAdminPwd; }
-        }
     }
 }

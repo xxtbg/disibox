@@ -25,9 +25,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
+
 namespace Disibox.Data.Server
 {
-    public class ProcessingMessage : BaseMessage
+    public class ProcessingMessage : BaseMessage, IEquatable<ProcessingMessage>
     {
         public ProcessingMessage()
         {
@@ -59,6 +61,42 @@ namespace Disibox.Data.Server
         public override string ToString()
         {
             return string.Format("{0},{1},{2}", FileUri, FileContentType, ToolName);
+        }
+
+        public bool Equals(ProcessingMessage other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(other.FileUri, FileUri) && Equals(other.FileContentType, FileContentType) && Equals(other.ToolName, ToolName);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (ProcessingMessage)) return false;
+            return Equals((ProcessingMessage) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int result = FileUri.GetHashCode();
+                result = (result*397) ^ FileContentType.GetHashCode();
+                result = (result*397) ^ ToolName.GetHashCode();
+                return result;
+            }
+        }
+
+        public static bool operator ==(ProcessingMessage left, ProcessingMessage right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(ProcessingMessage left, ProcessingMessage right)
+        {
+            return !Equals(left, right);
         }
     }
 }

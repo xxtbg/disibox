@@ -26,23 +26,12 @@
 //
 
 using System;
-using Disibox.Data.Exceptions;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Server
 {
-    public class LoginTests : BaseClientTests
+    public class EnqueueProcMsgTests : BaseProcMsgTests
     {
-        private const string InvalidEmail = "PINO";
-        private const string ValidEmail = "pino@gino.com";
-
-        private const string EmptyPwd = "";
-        private const string ShortPwd = "bau";
-        private const string SlightlyShortPwd = "carmela";
-        private const string RightPwd = "ottomane";
-        private const string SlightlyLongPwd = "pancrazio";
-        private const string LongPwd = "pinoginopinoginopinoginopinogino";
-
         [SetUp]
         protected override void SetUp()
         {
@@ -60,28 +49,27 @@ namespace Disibox.Data.Tests
         =============================================================================*/
 
         [Test]
-        public void ValidAdminUserLogin()
+        public void EnqueueOneRequest()
         {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.Logout();
+            EnqueueOneMessage(DataSource.EnqueueProcessingRequest, DataSource.PeekProcessingRequests);
         }
 
         [Test]
-        public void ValidCommonUserLoginWithRightPwd()
+        public void EnqueueOneCompletion()
         {
-            ValidAddAndLogCommonUser(ValidEmail, RightPwd);
+            EnqueueOneMessage(DataSource.EnqueueProcessingCompletion, DataSource.PeekProcessingCompletions);
         }
 
         [Test]
-        public void ValidCommonUserLoginWithSlightlyLongPwd()
+        public void EnqueueManyRequests()
         {
-            ValidAddAndLogCommonUser(ValidEmail, SlightlyLongPwd);
+            EnqueueManyMessages(DataSource.EnqueueProcessingRequest, DataSource.PeekProcessingRequests);
         }
 
         [Test]
-        public void ValidCommonUserLoginWithLongPwd()
+        public void EnqueueManyCompletions()
         {
-            ValidAddAndLogCommonUser(ValidEmail, LongPwd);
+            EnqueueManyMessages(DataSource.EnqueueProcessingCompletion, DataSource.PeekProcessingCompletions);
         }
 
         /*=============================================================================
@@ -90,66 +78,43 @@ namespace Disibox.Data.Tests
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void InvalidLoginWithNullEmail()
+        public void EnqueueNullRequest()
         {
-            DataSource.Login(null, RightPwd);
+            EnqueueNullMessage(DataSource.EnqueueProcessingRequest);
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void InvalidLoginWithNullPwd()
+        public void EnqueueNullCompletion()
         {
-            DataSource.Login(ValidEmail, null);
-        }
-
-        /*=============================================================================
-            InvalidEmailException
-        =============================================================================*/
-
-        [Test]
-        [ExpectedException(typeof(InvalidEmailException))]
-        public void InvalidLoginWithInvalidEmail()
-        {
-            DataSource.Login(InvalidEmail, RightPwd);
-        }
-
-        /*=============================================================================
-            InvalidPasswordException
-        =============================================================================*/
-
-        [Test]
-        [ExpectedException(typeof(InvalidPasswordException))]
-        public void InvalidLoginWithEmptyPwd()
-        {
-            DataSource.Login(ValidEmail, EmptyPwd);
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidPasswordException))]
-        public void InvalidLoginWithShortPwd()
-        {
-            DataSource.Login(ValidEmail, ShortPwd);
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidPasswordException))]
-        public void InvalidLoginWithSlightlyShortPwd()
-        {
-            DataSource.Login(ValidEmail, SlightlyShortPwd);
+            EnqueueNullMessage(DataSource.EnqueueProcessingCompletion);
         }
 
         /*=============================================================================
             Private methods
         =============================================================================*/
 
-        private void ValidAddAndLogCommonUser(string userEmail, string userPwd)
+        private void EnqueueOneMessage(EnqueueMethod enqueueMethod, PeekMethod peekMethod)
         {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(userEmail, userPwd, false);
-            DataSource.Logout();
+            enqueueMethod(Messages[0]);
+            var messages = peekMethod();
+            Assert.True(messages.Count == 1);
+            Assert.True(messages.Contains(Messages[0]));
+        }
 
-            DataSource.Login(userEmail, userPwd);
-            DataSource.Logout();
+        private void EnqueueManyMessages(EnqueueMethod enqueueMethod, PeekMethod peekMethod)
+        {
+            foreach (var message in Messages)
+                enqueueMethod(message);
+            var messages = peekMethod();
+            Assert.True(messages.Count == Messages.Count);
+            foreach (var message in Messages)
+                messages.Contains(message);
+        }
+
+        private static void EnqueueNullMessage(EnqueueMethod enqueueMethod)
+        {
+            enqueueMethod(null);
         }
     }
 }

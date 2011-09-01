@@ -26,6 +26,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Disibox.Data.Entities;
 using Disibox.Utils;
@@ -35,6 +37,8 @@ namespace Disibox.Data.Server
 {
     public class ServerDataSource
     {
+        private readonly BlobContainer _outputsContainer;
+
         private readonly MsgQueue<ProcessingMessage> _processingRequests;
         private readonly MsgQueue<ProcessingMessage> _processingCompletions;
 
@@ -45,12 +49,19 @@ namespace Disibox.Data.Server
             var connectionString = Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
+            var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
             var queueEndpointUri = storageAccount.QueueEndpoint.AbsoluteUri;
             var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
 
-            _processingRequests = new MsgQueue<ProcessingMessage>(queueEndpointUri, credentials);
-            _processingCompletions = new MsgQueue<ProcessingMessage>(queueEndpointUri, credentials);
+            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
+            _outputsContainer = new BlobContainer(outputsContainerName, blobEndpointUri, credentials);
+
+            var procReqName = Properties.Settings.Default.ProcReqQueueName;
+            _processingRequests = new MsgQueue<ProcessingMessage>(procReqName, queueEndpointUri, credentials);
+
+            var procComplName = Properties.Settings.Default.ProcComplQueueName;
+            _processingCompletions = new MsgQueue<ProcessingMessage>(procComplName, queueEndpointUri, credentials);
 
             var usersTableName = Properties.Settings.Default.UsersTableName;
             _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
@@ -68,11 +79,24 @@ namespace Disibox.Data.Server
             return (q.Count() == 1);
         }
 
+        /*=============================================================================
+            Requests handling methods
+        =============================================================================*/
+
+        /// <summary>
+        /// Dequeues a request from the queue in blocking mode.
+        /// </summary>
+        /// <returns>The request at the top of the queue.</returns>
         public ProcessingMessage DequeueProcessingRequest()
         {
             return _processingRequests.DequeueMessage();
         }
 
+        /// <summary>
+        /// Enqueues given request.
+        /// </summary>
+        /// <param name="procReq">The request to enqueue.</param>
+        /// <exception cref="ArgumentNullException">Request is null.</exception>
         public void EnqueueProcessingRequest(ProcessingMessage procReq)
         {
             // Requirements
@@ -81,17 +105,72 @@ namespace Disibox.Data.Server
             _processingRequests.EnqueueMessage(procReq);
         }
 
+        /// <summary>
+        /// Peeks a fixed number of requests from the top of the queue.
+        /// </summary>
+        /// <returns>A fixed number of requests from the top of the queue.</returns>
+        public IList<ProcessingMessage> PeekProcessingRequests()
+        {
+            return _processingRequests.PeekMessages();
+        }
+
+        /*=============================================================================
+            Completions handling methods
+        =============================================================================*/
+
+        /// <summary>
+        /// Dequeues a completion from the queue in blocking mode.
+        /// </summary>
+        /// <returns>The completion at the top of the queue.</returns>
         public ProcessingMessage DequeueProcessingCompletion()
         {
             return _processingCompletions.DequeueMessage();
         }
 
+        /// <summary>
+        /// Enqueues given completion.
+        /// </summary>
+        /// <param name="procCompl">The completion to enqueue.</param>
+        /// <exception cref="ArgumentNullException">Completion is null.</exception>
         public void EnqueueProcessingCompletion(ProcessingMessage procCompl)
         {
             // Requirements
             Require.NotNull(procCompl, "procCompl");
 
             _processingCompletions.EnqueueMessage(procCompl);
+        }
+
+        /// <summary>
+        /// Peeks a fixed number of completions from the top of the queue.
+        /// </summary>
+        /// <returns>A fixed number of completions from the top of the queue.</returns>
+        public IList<ProcessingMessage> PeekProcessingCompletions()
+        {
+            return _processingCompletions.PeekMessages();
+        }
+
+        /*=============================================================================
+            Output handling methods
+        =============================================================================*/
+
+        /// <summary>
+        /// Adds given processing output.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="toolName">The tool that produced the output.</param>
+        /// <param name="outputContentType">The content type of the output.</param>
+        /// <param name="outputContent">The content of the output.</param>
+        /// <returns>The output uri.</returns>
+        /// <exception cref="ArgumentNullException">One of the arguments is null.</exception>
+        public string AddOutput(string toolName, string outputContentType, Stream outputContent)
+        {
+            // Requirements
+            Require.NotNull(toolName, "toolName");
+            Require.NotNull(outputContentType, "outputContentType");
+            Require.NotNull(outputContent, "outputContent");
+
+            var outputName = toolName + Guid.NewGuid();
+            return _outputsContainer.AddBlob(outputName, outputContentType, outputContent);
         }
     }
 }

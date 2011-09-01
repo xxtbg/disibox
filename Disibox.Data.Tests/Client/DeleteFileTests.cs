@@ -28,9 +28,9 @@
 using Disibox.Data.Client.Exceptions;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Client
 {
-    internal class DeleteUserTests : BaseUserTests
+    internal class DeleteFileTests : BaseFileTests
     {
         [SetUp]
         protected override void SetUp()
@@ -45,35 +45,53 @@ namespace Disibox.Data.Tests
         }
 
         [Test]
-        public void DeleteOneCommonUser()
-        {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-            DataSource.DeleteUser(CommonUserEmails[0]);
-
-            var commonUserEmails = DataSource.GetCommonUsersEmails();
-            Assert.True(commonUserEmails.Count == 0);
-        }
-
-        [Test]
-        [ExpectedException(typeof (AdminUserRequiredException))]
-        public void DeleteOneAdminUserLoggingInAsCommonUser()
+        public void DeleteOneCommonUserFileAsAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
-            DataSource.DeleteUser(AdminUserEmails[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
+            DataSource.Logout();
+
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            DataSource.DeleteFile(fileUri);
+
+            var fileMetadata = DataSource.GetFileMetadata();
+            Assert.True(fileMetadata.Count == 0);
         }
 
         [Test]
-        [ExpectedException(typeof (CannotDeleteUserException))]
-        public void DeleteDefaultAdminUser()
+        [ExpectedException(typeof (FileNotOwnedException))]
+        public void DeleteOneCommonUserFileAsOtherCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.DeleteUser(DefaultAdminEmail);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], false);
+            DataSource.Logout();
+
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
+            DataSource.Logout();
+
+            DataSource.Login(CommonUserEmails[1], CommonUserPwds[1]);
+            DataSource.DeleteFile(fileUri);
+        }
+
+        [Test]
+        public void DeleteOneCommonUserFileAsProprietaryUser()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.Logout();
+
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
+            DataSource.DeleteFile(fileUri);
+
+            var fileMetadata = DataSource.GetFileMetadata();
+            Assert.True(fileMetadata.Count == 0);
         }
     }
 }

@@ -26,60 +26,44 @@
 //
 
 using System.Collections.Generic;
+using Disibox.Data.Server;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Server
 {
-    public abstract class BaseUserTests : BaseClientTests
+    public abstract class BaseProcMsgTests : BaseServerTests
     {
-        protected const int AdminUserCount = 5;
-        protected const int CommonUserCount = 5;
+        private const int MessageCount = 5;
+        private const int SuffixLength = 5;
 
-        protected const int EmailLength = 7;
-        protected const int PwdLength = 9;
+        protected readonly IList<ProcessingMessage> Messages = new List<ProcessingMessage>();
 
-        protected readonly IList<string> AdminUserEmails = new List<string>();
-        protected readonly IList<string> AdminUserPwds = new List<string>();
+        protected delegate ProcessingMessage DequeueMethod();
 
-        protected readonly IList<string> CommonUserEmails = new List<string>();
-        protected readonly IList<string> CommonUserPwds = new List<string>();
+        protected delegate void EnqueueMethod(ProcessingMessage msg);
+
+        protected delegate IList<ProcessingMessage> PeekMethod();
 
         [SetUp]
         protected override void SetUp()
         {
             base.SetUp();
 
-            for (var i = 0; i < AdminUserCount; ++i)
+            const string baseUri = "uri-";
+            const string baseCType = "ctype-";
+            const string baseTName = "tname-";
+
+            for (var i = 0; i < MessageCount; ++i)
             {
-                var currChar = (char) ('a' + i);
-
-                var email = new string(currChar, EmailLength);
-                AdminUserEmails.Add(email + "_admin@test.pino");
-
-                var pwd = new string(currChar, PwdLength);
-                AdminUserPwds.Add(pwd + "_pwd");
-            }
-
-            for (var i = 0; i < CommonUserCount; ++i)
-            {
-                var currChar = (char) ('a' + i);
-
-                var email = new string(currChar, EmailLength);
-                CommonUserEmails.Add(email + "_common@test.pino");
-
-                var pwd = new string(currChar, EmailLength);
-                CommonUserPwds.Add(pwd + "_pwd");
+                var tmpSuffix = new string((char)('a'+i), SuffixLength);
+                Messages.Add(new ProcessingMessage(baseUri + tmpSuffix, baseCType + tmpSuffix, baseTName + tmpSuffix));
             }
         }
 
         [TearDown]
         protected override void TearDown()
         {
-            AdminUserEmails.Clear();
-            AdminUserPwds.Clear();
-
-            CommonUserEmails.Clear();
-            CommonUserPwds.Clear();
+            Messages.Clear();
 
             base.TearDown();
         }

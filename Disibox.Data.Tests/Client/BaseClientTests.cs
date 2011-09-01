@@ -1,4 +1,7 @@
 ﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -22,59 +25,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System.Collections.Generic;
-using System.Threading;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
+using Disibox.Data.Client;
+using Disibox.Data.Setup;
+using NUnit.Framework;
 
-namespace Disibox.Data
+namespace Disibox.Data.Tests.Client
 {
-    public class MsgQueue<TMsg> where TMsg : BaseMessage, new()
+    [TestFixture]
+    public abstract class BaseClientTests
     {
-        private const int PeekCount = 32;
-
-        private readonly CloudQueue _queue;
-
-        public MsgQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        [SetUp]
+        protected virtual void SetUp()
         {
-            _queue = new CloudQueue(queueEndpointUri + "/" + queueName, credentials);
+            CloudStorageSetup.ResetStorage();
+            DataSource = new ClientDataSource();
         }
 
-        public TMsg DequeueMessage()
+        [TearDown]
+        protected virtual void TearDown()
         {
-            CloudQueueMessage queueMsg;
-            while ((queueMsg = _queue.GetMessage()) == null)
-                Thread.Sleep(1000);
-
-            var msg = new TMsg();
-            msg.FromString(queueMsg.AsString);
-            _queue.DeleteMessage(queueMsg);
-
-            return msg;
+            DataSource = null;
         }
 
-        public void EnqueueMessage(TMsg msg)
-        {
-            // Requirements
-            Require.NotNull(msg, "msg");
+        protected ClientDataSource DataSource { get; private set; }
 
-            var queueMsg = new CloudQueueMessage(msg.ToString());
-            _queue.AddMessage(queueMsg);
+        protected static string DefaultAdminEmail
+        {
+            get { return Setup.Properties.Settings.Default.DefaultAdminEmail; }
         }
 
-        public IList<TMsg> PeekMessages()
+        protected static string DefaultAdminPwd
         {
-            var queueMessages = _queue.PeekMessages(PeekCount);
-            var messages = new List<TMsg>();
-
-            foreach (var queueMessage in queueMessages)
-            {
-                var message = new TMsg();
-                message.FromString(queueMessage.AsString);
-                messages.Add(message);
-            }
-
-            return messages;
+            get { return Setup.Properties.Settings.Default.DefaultAdminPwd; }
         }
     }
 }

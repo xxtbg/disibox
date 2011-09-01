@@ -26,45 +26,60 @@
 //
 
 using System.Collections.Generic;
-using System.IO;
-using Disibox.Utils;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Client
 {
-    public abstract class BaseFileTests : BaseUserTests
+    public abstract class BaseUserTests : BaseClientTests
     {
-        protected const int FileCount = 3;
-        protected const int FileNameLength = 5;
+        protected const int AdminUserCount = 5;
+        protected const int CommonUserCount = 5;
 
-        protected readonly IList<string> FileNames = new List<string>();
-        protected readonly IList<Stream> Files = new List<Stream>();
+        protected const int EmailLength = 7;
+        protected const int PwdLength = 9;
 
-        //protected const string CommonUserName = "common";
-        //protected const string CommonUserPwd = "common";
+        protected readonly IList<string> AdminUserEmails = new List<string>();
+        protected readonly IList<string> AdminUserPwds = new List<string>();
+
+        protected readonly IList<string> CommonUserEmails = new List<string>();
+        protected readonly IList<string> CommonUserPwds = new List<string>();
 
         [SetUp]
         protected override void SetUp()
         {
             base.SetUp();
 
-            for (var i = 0; i < FileCount; ++i)
+            for (var i = 0; i < AdminUserCount; ++i)
             {
                 var currChar = (char) ('a' + i);
 
-                var fileName = new string(currChar, FileNameLength);
-                FileNames.Add(fileName + ".txt");
+                var email = new string(currChar, EmailLength);
+                AdminUserEmails.Add(email + "_admin@test.pino");
 
-                var file = new MemoryStream(Shared.StringToByteArray(fileName));
-                Files.Add(file);
+                var pwd = new string(currChar, PwdLength);
+                AdminUserPwds.Add(pwd + "_pwd");
+            }
+
+            for (var i = 0; i < CommonUserCount; ++i)
+            {
+                var currChar = (char) ('a' + i);
+
+                var email = new string(currChar, EmailLength);
+                CommonUserEmails.Add(email + "_common@test.pino");
+
+                var pwd = new string(currChar, EmailLength);
+                CommonUserPwds.Add(pwd + "_pwd");
             }
         }
 
         [TearDown]
         protected override void TearDown()
         {
-            FileNames.Clear();
-            Files.Clear();
+            AdminUserEmails.Clear();
+            AdminUserPwds.Clear();
+
+            CommonUserEmails.Clear();
+            CommonUserPwds.Clear();
 
             base.TearDown();
         }

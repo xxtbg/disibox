@@ -1,4 +1,7 @@
 ﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -23,58 +26,47 @@
 //
 
 using System.Collections.Generic;
-using System.Threading;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.StorageClient;
+using System.IO;
+using Disibox.Utils;
+using NUnit.Framework;
 
-namespace Disibox.Data
+namespace Disibox.Data.Tests.Client
 {
-    public class MsgQueue<TMsg> where TMsg : BaseMessage, new()
+    public abstract class BaseFileTests : BaseUserTests
     {
-        private const int PeekCount = 32;
+        protected const int FileCount = 3;
+        protected const int FileNameLength = 5;
 
-        private readonly CloudQueue _queue;
+        protected readonly IList<string> FileNames = new List<string>();
+        protected readonly IList<Stream> Files = new List<Stream>();
 
-        public MsgQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        //protected const string CommonUserName = "common";
+        //protected const string CommonUserPwd = "common";
+
+        [SetUp]
+        protected override void SetUp()
         {
-            _queue = new CloudQueue(queueEndpointUri + "/" + queueName, credentials);
-        }
+            base.SetUp();
 
-        public TMsg DequeueMessage()
-        {
-            CloudQueueMessage queueMsg;
-            while ((queueMsg = _queue.GetMessage()) == null)
-                Thread.Sleep(1000);
-
-            var msg = new TMsg();
-            msg.FromString(queueMsg.AsString);
-            _queue.DeleteMessage(queueMsg);
-
-            return msg;
-        }
-
-        public void EnqueueMessage(TMsg msg)
-        {
-            // Requirements
-            Require.NotNull(msg, "msg");
-
-            var queueMsg = new CloudQueueMessage(msg.ToString());
-            _queue.AddMessage(queueMsg);
-        }
-
-        public IList<TMsg> PeekMessages()
-        {
-            var queueMessages = _queue.PeekMessages(PeekCount);
-            var messages = new List<TMsg>();
-
-            foreach (var queueMessage in queueMessages)
+            for (var i = 0; i < FileCount; ++i)
             {
-                var message = new TMsg();
-                message.FromString(queueMessage.AsString);
-                messages.Add(message);
-            }
+                var currChar = (char) ('a' + i);
 
-            return messages;
+                var fileName = new string(currChar, FileNameLength);
+                FileNames.Add(fileName + ".txt");
+
+                var file = new MemoryStream(Shared.StringToByteArray(fileName));
+                Files.Add(file);
+            }
+        }
+
+        [TearDown]
+        protected override void TearDown()
+        {
+            FileNames.Clear();
+            Files.Clear();
+
+            base.TearDown();
         }
     }
 }

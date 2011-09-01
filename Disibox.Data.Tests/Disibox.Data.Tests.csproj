@@ -49,16 +49,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddFileTests.cs" />
-    <Compile Include="AddUserTests.cs" />
-    <Compile Include="BaseClientTests.cs" />
-    <Compile Include="BaseFileTests.cs" />
-    <Compile Include="BaseServerTests.cs" />
-    <Compile Include="BaseUserTests.cs" />
-    <Compile Include="DeleteFileTests.cs" />
-    <Compile Include="DeleteUserTests.cs" />
-    <Compile Include="LoginTests.cs" />
+    <Compile Include="Client\AddFileTests.cs" />
+    <Compile Include="Client\AddUserTests.cs" />
+    <Compile Include="Client\BaseClientTests.cs" />
+    <Compile Include="Client\BaseFileTests.cs" />
+    <Compile Include="Client\BaseUserTests.cs" />
+    <Compile Include="Client\DeleteFileTests.cs" />
+    <Compile Include="Client\DeleteUserTests.cs" />
+    <Compile Include="Client\LoginTests.cs" />
+    <Compile Include="Mixed\BaseMixedTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\AddOutputTests.cs" />
+    <Compile Include="Server\BaseProcMsgTests.cs" />
+    <Compile Include="Server\BaseServerTests.cs" />
+    <Compile Include="Server\DequeueProcMsgTests.cs" />
+    <Compile Include="Server\EnqueueProcMsgTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
