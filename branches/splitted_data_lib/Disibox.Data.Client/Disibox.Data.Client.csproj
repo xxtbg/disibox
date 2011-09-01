@@ -43,12 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientDataSource.cs" />
-    <Compile Include="Exceptions\AdminUserRequiredException.cs" />
-    <Compile Include="Exceptions\CannotDeleteUserException.cs" />
+    <Compile Include="Exceptions\UserNotAdminException.cs" />
+    <Compile Include="Exceptions\CannotDeleteLastAdminException.cs" />
     <Compile Include="Exceptions\FileNotOwnedException.cs" />
     <Compile Include="Exceptions\FileExistingException.cs" />
     <Compile Include="Exceptions\FileNotExistingException.cs" />
-    <Compile Include="Exceptions\LoggedInUserRequiredException.cs" />
+    <Compile Include="Exceptions\UserNotLoggedInException.cs" />
     <Compile Include="Exceptions\UserExistingException.cs" />
     <Compile Include="Exceptions\UserNotExistingException.cs" />
     <Compile Include="FileMetadata.cs" />

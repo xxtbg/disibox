@@ -187,7 +187,7 @@ namespace Disibox.Gui {
             var ok = false;
             try {
                 ok = _dataSource.DeleteFile(selectedItem.Uri);
-            } catch (LoggedInUserRequiredException) {
+            } catch (UserNotLoggedInException) {
                 MessageBox.Show("Only a logged user can delete files that owns", "Deleting file");
             } catch (FileNotOwnedException) {
                 MessageBox.Show("Error deleting not owned file", "Deleting file");
@@ -253,11 +253,11 @@ namespace Disibox.Gui {
 
             try {
                 _dataSource.DeleteUser(selectedUser.User);
-            } catch (LoggedInUserRequiredException) {
+            } catch (UserNotLoggedInException) {
                 MessageBox.Show("Only a logged user (only administrator) can see the list of users", "Deleting User");
-            } catch (AdminUserRequiredException) {
+            } catch (UserNotAdminException) {
                 MessageBox.Show("Only a logged user (only administrator) can see the list of users", "Deleting User");
-            } catch (CannotDeleteUserException) {
+            } catch (CannotDeleteLastAdminException) {
                 MessageBox.Show("The default administrator user cannot be deleted!", "Deleting User");
             } catch (UserNotExistingException) {
                 MessageBox.Show("The user you are trying to delete does not exists!", "Deleting User");

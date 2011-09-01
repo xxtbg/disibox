@@ -67,14 +67,14 @@ namespace Disibox.Data.Tests.Client
         }
 
         [Test]
-        [ExpectedException(typeof (LoggedInUserRequiredException))]
+        [ExpectedException(typeof (UserNotLoggedInException))]
         public void AddOneCommonUserWithoutLoggingIn()
         {
             DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
         }
 
         [Test]
-        [ExpectedException(typeof (AdminUserRequiredException))]
+        [ExpectedException(typeof (UserNotAdminException))]
         public void AddOneCommonUserAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
@@ -108,14 +108,14 @@ namespace Disibox.Data.Tests.Client
         }
 
         [Test]
-        [ExpectedException(typeof (LoggedInUserRequiredException))]
+        [ExpectedException(typeof (UserNotLoggedInException))]
         public void AddOneAdminUserWithoutLoggingIn()
         {
             DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
         }
 
         [Test]
-        [ExpectedException(typeof (AdminUserRequiredException))]
+        [ExpectedException(typeof (UserNotAdminException))]
         public void AddOneAdminUserAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);

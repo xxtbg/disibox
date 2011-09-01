@@ -90,7 +90,7 @@ namespace Disibox.Data.Client
         /// <exception cref="ArgumentNullException">Both parameters should not be null.</exception>
         /// <exception cref="FileExistingException">If the current user already have a file with the name <paramref name="fileName"/></exception>
         /// <exception cref="InvalidFileNameException"></exception>
-        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         public string AddFile(string fileName, Stream fileContent, bool overwrite = false)
         {
             // Requirements
@@ -187,11 +187,11 @@ namespace Disibox.Data.Client
         /// <param name="userEmail">The email address of the new user.</param>
         /// <param name="userPwd">The password for the new user.</param>
         /// <param name="userIsAdmin">Whether new user will be administrator or not.</param>
-        /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
+        /// <exception cref="UserNotAdminException">Only administrators can use this method.</exception>
         /// <exception cref="ArgumentNullException">At least one of given email or password is null.</exception>
         /// <exception cref="InvalidEmailException">Given email is not syntactically correct.</exception>
         /// <exception cref="InvalidPasswordException">Given password is shorter than MinPasswordLength.</exception>
-        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         /// <exception cref="UserExistingException">A user with given email address already exists.</exception>
         public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
         {
@@ -213,10 +213,11 @@ namespace Disibox.Data.Client
         /// Deletes user corresponding to given email address.
         /// </summary>
         /// <param name="userEmail">The email address of the user that should be deleted.</param>
-        /// <exception cref="AdminUserRequiredException">This method can only be used by an administrator.</exception>
+        /// <exception cref="UserNotAdminException">This method can only be used by an administrator.</exception>
         /// <exception cref="ArgumentNullException">Given email address is null.</exception>
-        /// <exception cref="LoggedInUserRequiredException">Must be called by a logged in user.</exception>
+        /// <exception cref="UserNotLoggedInException">Must be called by a logged in user.</exception>
         /// <exception cref="UserNotExistingException">There is no user with given email.</exception>
+        /// <exception cref="CannotDeleteLastAdminException">The last admin is the target of the delete.</exception>
         public void DeleteUser(string userEmail)
         {
             // Requirements
@@ -226,6 +227,13 @@ namespace Disibox.Data.Client
             RequireExistingUser(userEmail);
 
             var user = _usersTableCtx.Entities.Where(u => u.Email == userEmail).First();
+            
+            if (user.IsAdmin)
+            {
+                var adminEmails = GetAdminUsersEmails();
+                if (adminEmails.Count == 1 && adminEmails.Contains(userEmail))
+                    throw new CannotDeleteLastAdminException();
+            }
 
             _usersTableCtx.DeleteEntity(user);
             _usersTableCtx.SaveChanges();
@@ -235,8 +243,8 @@ namespace Disibox.Data.Client
         /// Fetches and returns all administrators emails.
         /// </summary>
         /// <returns>All administrators emails.</returns>
-        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
-        /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
+        /// <exception cref="UserNotAdminException">Only administrators can use this method.</exception>
         public IList<string> GetAdminUsersEmails()
         {
             // Requirements
@@ -251,8 +259,8 @@ namespace Disibox.Data.Client
         /// Fetches and returns all common users emails.
         /// </summary>
         /// <returns>All common users emails.</returns>
-        /// <exception cref="LoggedInUserRequiredException">A user must be logged in to use this method.</exception>
-        /// <exception cref="AdminUserRequiredException">Only administrators can use this method.</exception>
+        /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
+        /// <exception cref="UserNotAdminException">Only administrators can use this method.</exception>
         public IList<string> GetCommonUsersEmails()
         {
             // Requirements
@@ -312,21 +320,21 @@ namespace Disibox.Data.Client
         /// Checks if currently logged in user is administrator;
         /// if he's not, an appropriate exception is thrown.
         /// </summary>
-        /// <exception cref="AdminUserRequiredException">If logged in user is not administrator.</exception>
+        /// <exception cref="UserNotAdminException">If logged in user is not administrator.</exception>
         private void RequireAdminUser()
         {
             if (_loggedUserIsAdmin) return;
-            throw new AdminUserRequiredException();
+            throw new UserNotAdminException();
         }
 
         /// <summary>
         /// Checks if there is a logged in user.
         /// </summary>
-        /// <exception cref="LoggedInUserRequiredException">No user is currently logged in.</exception>
+        /// <exception cref="UserNotLoggedInException">No user is currently logged in.</exception>
         private void RequireLoggedInUser()
         {
             if (_userIsLoggedIn) return;
-            throw new LoggedInUserRequiredException();
+            throw new UserNotLoggedInException();
         }
 
         private void RequireExistingFile(string fileName)
