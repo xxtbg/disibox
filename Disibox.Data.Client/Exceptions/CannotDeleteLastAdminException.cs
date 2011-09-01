@@ -29,7 +29,7 @@ using System;
 
 namespace Disibox.Data.Client.Exceptions
 {
-    public class AdminUserRequiredException : Exception
+    public class CannotDeleteLastAdminException : Exception
     {
         // Empty
     }

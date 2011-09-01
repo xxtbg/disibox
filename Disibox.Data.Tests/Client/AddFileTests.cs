@@ -97,7 +97,7 @@ namespace Disibox.Data.Tests.Client
         }
 
         [Test]
-        [ExpectedException(typeof (LoggedInUserRequiredException))]
+        [ExpectedException(typeof (UserNotLoggedInException))]
         public void AddOneFileWithoutLoggingIn()
         {
             DataSource.AddFile(FileNames[0], Files[0]);

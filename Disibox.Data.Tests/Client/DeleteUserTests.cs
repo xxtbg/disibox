@@ -45,6 +45,10 @@ namespace Disibox.Data.Tests.Client
             base.TearDown();
         }
 
+        /*=============================================================================
+            Valid calls
+        =============================================================================*/
+
         [Test]
         public void DeleteOneCommonUser()
         {
@@ -54,23 +58,6 @@ namespace Disibox.Data.Tests.Client
 
             var commonUserEmails = DataSource.GetCommonUsersEmails();
             Assert.True(commonUserEmails.Count == 0);
-        }
-
-        /*=============================================================================
-            AdminUserRequiredException
-        =============================================================================*/
-
-        [Test]
-        [ExpectedException(typeof(AdminUserRequiredException))]
-        public void DeleteOneAdminUserLoggingInAsCommonUser()
-        {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-            DataSource.Logout();
-
-            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
-            DataSource.DeleteUser(AdminUserEmails[0]);
         }
 
         /*=============================================================================
@@ -86,14 +73,32 @@ namespace Disibox.Data.Tests.Client
         }
 
         /*=============================================================================
-            LoggedInUserRequiredException
+            CannotDeleteLastAdminException
         =============================================================================*/
 
         [Test]
-        [ExpectedException(typeof(LoggedInUserRequiredException))]
-        public void DeleteWithoutLoggingIn()
+        [ExpectedException(typeof(CannotDeleteLastAdminException))]
+        public void DeleteLastAdmin()
         {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.DeleteUser(DefaultAdminEmail);
+        }
+
+        /*=============================================================================
+            UserNotAdminException
+        =============================================================================*/
+
+        [Test]
+        [ExpectedException(typeof(UserNotAdminException))]
+        public void DeleteOneAdminUserLoggingInAsCommonUser()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.Logout();
+
+            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.DeleteUser(AdminUserEmails[0]);
         }
 
         /*=============================================================================
@@ -106,6 +111,17 @@ namespace Disibox.Data.Tests.Client
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.DeleteUser(CommonUserEmails[0]);
+        }
+
+        /*=============================================================================
+            UserNotLoggedInException
+        =============================================================================*/
+
+        [Test]
+        [ExpectedException(typeof(UserNotLoggedInException))]
+        public void DeleteWithoutLoggingIn()
+        {
+            DataSource.DeleteUser(DefaultAdminEmail);
         }
     }
 }

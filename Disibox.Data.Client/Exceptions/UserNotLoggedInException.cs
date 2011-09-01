@@ -29,7 +29,7 @@ using System;
 
 namespace Disibox.Data.Client.Exceptions
 {
-    public class LoggedInUserRequiredException : Exception
+    public class UserNotLoggedInException : Exception
     {
         // Empty
     }
