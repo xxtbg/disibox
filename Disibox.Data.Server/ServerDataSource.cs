@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Disibox.Data.Entities;
+using Disibox.Data.Exceptions;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
 
@@ -44,6 +45,9 @@ namespace Disibox.Data.Server
 
         private readonly DataContext<User> _usersTableCtx;
 
+        /// <summary>
+        /// Creates a data source that should be used server-side only.
+        /// </summary>
         public ServerDataSource()
         {
             var connectionString = Properties.Settings.Default.DataConnectionString;
@@ -67,6 +71,19 @@ namespace Disibox.Data.Server
             _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
         }
 
+        /*=============================================================================
+            User handling methods
+        =============================================================================*/
+
+        /// <summary>
+        /// Checks if a user with given credentials exists.
+        /// </summary>
+        /// <param name="userEmail">User email address.</param>
+        /// <param name="userPwd">User password.</param>
+        /// <returns>True if a user with given credentials exists, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">At least one argument is null.</exception>
+        /// <exception cref="InvalidEmailException">Given email is not syntactically correct.</exception>
+        /// <exception cref="InvalidPasswordException">Given password is shorter than MinPasswordLength.</exception>
         public bool UserExists(string userEmail, string userPwd)
         {
             // Requirements

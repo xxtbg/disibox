@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using Disibox.Data.Client.Exceptions;
 using NUnit.Framework;
 
@@ -55,8 +56,12 @@ namespace Disibox.Data.Tests.Client
             Assert.True(commonUserEmails.Count == 0);
         }
 
+        /*=============================================================================
+            AdminUserRequiredException
+        =============================================================================*/
+
         [Test]
-        [ExpectedException(typeof (AdminUserRequiredException))]
+        [ExpectedException(typeof(AdminUserRequiredException))]
         public void DeleteOneAdminUserLoggingInAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
@@ -68,12 +73,39 @@ namespace Disibox.Data.Tests.Client
             DataSource.DeleteUser(AdminUserEmails[0]);
         }
 
+        /*=============================================================================
+            ArgumentNullException
+        =============================================================================*/
+
         [Test]
-        [ExpectedException(typeof (CannotDeleteUserException))]
-        public void DeleteDefaultAdminUser()
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DeleteUsingNullEmail()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.DeleteUser(null);
+        }
+
+        /*=============================================================================
+            LoggedInUserRequiredException
+        =============================================================================*/
+
+        [Test]
+        [ExpectedException(typeof(LoggedInUserRequiredException))]
+        public void DeleteWithoutLoggingIn()
+        {
             DataSource.DeleteUser(DefaultAdminEmail);
+        }
+
+        /*=============================================================================
+            UserNotExistingException
+        =============================================================================*/
+
+        [Test]
+        [ExpectedException(typeof(UserNotExistingException))]
+        public void DeleteNotExistingUser()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.DeleteUser(CommonUserEmails[0]);
         }
     }
 }

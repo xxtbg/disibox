@@ -50,7 +50,7 @@ namespace Disibox.Data.Client
         private bool _userIsLoggedIn;
 
         /// <summary>
-        /// Creates a client.
+        /// Creates a data source that can be used client-side.
         /// </summary>
         public ClientDataSource()
         {
