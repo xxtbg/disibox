@@ -25,12 +25,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using Disibox.Data.Client.Exceptions;
+using System.Collections.Generic;
+using Disibox.Data.Server;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Server
 {
-    internal class DeleteFileTests : BaseFileTests
+    public class DequeueProcMsgTests : BaseProcMsgTests
     {
         [SetUp]
         protected override void SetUp()
@@ -44,54 +45,55 @@ namespace Disibox.Data.Tests
             base.TearDown();
         }
 
+        /*=============================================================================
+            Valid calls
+        =============================================================================*/
+
         [Test]
-        public void DeleteOneCommonUserFileAsAdminUser()
+        public void DequeueOneRequest()
         {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-            DataSource.Logout();
-
-            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
-            DataSource.Logout();
-
-            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            DataSource.DeleteFile(fileUri);
-
-            var fileMetadata = DataSource.GetFileMetadata();
-            Assert.True(fileMetadata.Count == 0);
+            DequeueOneMessage(DataSource.EnqueueProcessingRequest, DataSource.DequeueProcessingRequest);
         }
 
         [Test]
-        [ExpectedException(typeof (FileNotOwnedException))]
-        public void DeleteOneCommonUserFileAsOtherCommonUser()
+        public void DequeueOneCompletion()
         {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], false);
-            DataSource.Logout();
-
-            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
-            DataSource.Logout();
-
-            DataSource.Login(CommonUserEmails[1], CommonUserPwds[1]);
-            DataSource.DeleteFile(fileUri);
+            DequeueOneMessage(DataSource.EnqueueProcessingCompletion, DataSource.DequeueProcessingCompletion);
         }
 
         [Test]
-        public void DeleteOneCommonUserFileAsProprietaryUser()
+        public void DequeueManyRequests()
         {
-            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-            DataSource.Logout();
+            DequeueManyMessages(DataSource.EnqueueProcessingRequest, DataSource.DequeueProcessingRequest);
+        }
 
-            DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
-            DataSource.DeleteFile(fileUri);
+        [Test]
+        public void DequeueManyCompletions()
+        {
+            DequeueManyMessages(DataSource.EnqueueProcessingCompletion, DataSource.DequeueProcessingCompletion);
+        }
 
-            var fileMetadata = DataSource.GetFileMetadata();
-            Assert.True(fileMetadata.Count == 0);
+        /*=============================================================================
+            Private methods
+        =============================================================================*/
+
+        private void DequeueOneMessage(EnqueueMethod enqueueMethod, DequeueMethod dequeueMethod)
+        {
+            enqueueMethod(Messages[0]);
+            var message = dequeueMethod();
+            Assert.True(message == Messages[0]);
+        }
+
+        private void DequeueManyMessages(EnqueueMethod enqueueMethod, DequeueMethod dequeueMethod)
+        {
+            foreach (var message in Messages)
+                enqueueMethod(message);
+            var messages = new List<ProcessingMessage>();
+            for (var i = 0; i < Messages.Count; ++i)
+                messages.Add(dequeueMethod());
+            Assert.True(messages.Count == Messages.Count);
+            foreach (var message in Messages)
+                messages.Contains(message);
         }
     }
 }

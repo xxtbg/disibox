@@ -81,7 +81,7 @@ namespace Disibox.Processor
 
             var file = _clientDataSource.GetFile(procReq.FileUri);
             var output = tool.ProcessFile(file, procReq.FileContentType);
-            var outputUri = _clientDataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
+            var outputUri = _serverDataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
 
             _clientDataSource.Logout();
 

@@ -31,7 +31,7 @@ using Disibox.Data.Client.Exceptions;
 using Disibox.Utils;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests
+namespace Disibox.Data.Tests.Client
 {
     public class AddFileTests : BaseFileTests
     {

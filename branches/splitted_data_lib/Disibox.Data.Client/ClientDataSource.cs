@@ -157,27 +157,6 @@ namespace Disibox.Data.Client
             Output handling methods
         =============================================================================*/
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <param name="toolName"></param>
-        /// <param name="outputContentType"></param>
-        /// <param name="outputContent"></param>
-        /// <returns></returns>
-        public string AddOutput(string toolName, string outputContentType, Stream outputContent)
-        {
-            // Requirements
-            Require.NotNull(toolName, "toolName");
-            Require.NotNull(outputContentType, "outputContentType");
-            Require.NotNull(outputContent, "outputContent");
-            RequireLoggedInUser();
-            RequireAdminUser();
-
-            var outputName = toolName + Guid.NewGuid();
-            return _outputsContainer.AddBlob(outputName, outputContentType, outputContent);
-        }
-
         public bool DeleteOutput(string outputUri)
         {
             // Requirements
