@@ -10,8 +10,8 @@
     <p>
         To learn more about ASP.NET visit <a href="http://www.asp.net" title="ASP.NET Website">www.asp.net</a>.</p>
     <p>
-        &nbsp;<asp:GridView ID="GridView1" runat="server">
-        </asp:GridView>
+        <asp:Table ID="FilesTable" runat="server">
+        </asp:Table>
     </p>
     <p>
         <asp:FileUpload ID="FileUpload" runat="server" />
