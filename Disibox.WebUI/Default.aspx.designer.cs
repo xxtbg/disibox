@@ -13,15 +13,6 @@ namespace Disibox.WebUI {
     public partial class _Default {
         
         /// <summary>
-        /// FilesTable control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Disibox.WebUI.Controls.FilesTable FilesTable;
-        
-        /// <summary>
         /// FileUpload control.
         /// </summary>
         /// <remarks>
@@ -38,5 +29,59 @@ namespace Disibox.WebUI {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button UploadButton;
+        
+        /// <summary>
+        /// DeleteFilesButton control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button DeleteFilesButton;
+        
+        /// <summary>
+        /// FilesTable control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Disibox.WebUI.Controls.FilesTable FilesTable;
+        
+        /// <summary>
+        /// DeleteAdminUsersButton control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button DeleteAdminUsersButton;
+        
+        /// <summary>
+        /// AdminUsersTable control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Disibox.WebUI.Controls.UsersTable AdminUsersTable;
+        
+        /// <summary>
+        /// DeleteCommonUsersButton control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button DeleteCommonUsersButton;
+        
+        /// <summary>
+        /// CommonUsersTable control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::Disibox.WebUI.Controls.UsersTable CommonUsersTable;
     }
 }

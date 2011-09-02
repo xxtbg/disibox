@@ -38,8 +38,35 @@ namespace Disibox.WebUI
         private const string AdminEmail = "admin@disibox.com";
         private const string AdminPwd = "roottoor";
 
+        /*=============================================================================
+            Event handlers
+        =============================================================================*/
+
         protected void Page_Load(object sender, EventArgs e)
         {
+            RefreshFilesTable();
+            RefreshAdminUsersTable();
+            RefreshCommonUsersTable();
+        }
+
+        protected void DeleteAdminUsersButton_Click(object sender, EventArgs e)
+        {
+            RefreshAdminUsersTable();
+        }
+
+        protected void DeleteCommonUsersButton_Click(object sender, EventArgs e)
+        {
+            RefreshCommonUsersTable();
+        }
+
+        protected void DeleteFilesButton_Click(object sender, EventArgs e)
+        {
+            var selectedFiles = FilesTable.GetSelectedItems();
+            _dataSource.Login(AdminEmail, AdminPwd);
+            foreach (var selectedFile in selectedFiles)
+                _dataSource.DeleteFile(selectedFile.Uri);
+            _dataSource.Logout();
+
             RefreshFilesTable();
         }
 
@@ -60,6 +87,20 @@ namespace Disibox.WebUI
         {
             _dataSource.Login(AdminEmail, AdminPwd);
             FilesTable.Refresh(_dataSource.GetFileMetadata());
+            _dataSource.Logout();
+        }
+
+        private void RefreshAdminUsersTable()
+        {
+            _dataSource.Login(AdminEmail, AdminPwd);
+            AdminUsersTable.Refresh(_dataSource.GetAdminUsersEmails());
+            _dataSource.Logout();
+        }
+
+        private void RefreshCommonUsersTable()
+        {
+            _dataSource.Login(AdminEmail, AdminPwd);
+            CommonUsersTable.Refresh(_dataSource.GetCommonUsersEmails());
             _dataSource.Logout();
         }
     }
