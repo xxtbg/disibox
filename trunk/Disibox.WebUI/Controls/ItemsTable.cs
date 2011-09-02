@@ -25,15 +25,59 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System.Collections.Generic;
+using System.Web.UI.WebControls;
+
 namespace Disibox.WebUI.Controls
 {
-    public class UsersTable : ItemsTable<string, UsersTableRow>
+    public abstract class ItemsTable<TItem, TRow> : Table where TRow : ItemsTableRow<TItem>, new()
     {
-        private static readonly string[] ColumnHeaders = { "Email" };
+        private readonly ItemsTableHeader _header;
 
-        public UsersTable() : base(ColumnHeaders)
+        private IList<TItem> _currentItems;
+
+        protected ItemsTable(IEnumerable<string> columnHeaders)
         {
-            // Empty
+            _header = new ItemsTableHeader(columnHeaders);
+            Rows.Add(_header);
+        }
+
+        public IList<TItem> GetSelectedItems()
+        {
+            var selectedItems = new List<TItem>();
+
+            // We start from 1 to skip the header.
+            for (var i = 1; i < Rows.Count; ++i)
+            {
+                var checkCell = (CheckCell) Rows[i].Cells[0];
+                if (!checkCell.Checked) continue;
+                selectedItems.Add(_currentItems[i - 1]);
+            }
+
+            return selectedItems;
+        }
+
+        public void Refresh(IList<TItem> items)
+        {
+            Rows.Clear();
+            Rows.Add(_header);
+            foreach (var item in items)
+            {
+                var row = new TRow();
+                row.Fill(item);
+                Rows.Add(row);
+            }
+            _currentItems = items;
+        }
+
+        private sealed class ItemsTableHeader : TableRow
+        {
+            public ItemsTableHeader(IEnumerable<string> columnHeaders)
+            {
+                Cells.Add(new LabelCell()); // Corresponding to the CheckCell.
+                foreach (var columnHeader in columnHeaders)
+                    Cells.Add(new LabelCell(columnHeader));
+            }
         }
     }
 }

@@ -25,72 +25,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System.Collections.Generic;
-using System.Web.UI.WebControls;
 using Disibox.Data.Client;
 
 namespace Disibox.WebUI.Controls
 {
-    public sealed class FilesTable : Table
+    public sealed class FilesTable : ItemsTable<FileMetadata, FilesTableRow>
     {
-        private readonly FilesTableHeader _header = new FilesTableHeader();
+        private static readonly string[] ColumnHeaders = { "Name", "ContentType", "Owner", "Size" };
 
-        private IList<FileMetadata> _currentMetadata;
-
-        public FilesTable()
+        public FilesTable() : base(ColumnHeaders)
         {
-            Rows.Add(_header);
-        }
-
-        public IEnumerable<FileMetadata> GetSelectedFiles()
-        {
-            var selectedFiles = new List<FileMetadata>();
-
-            // We start from 1 to skip the header.
-            for (var i = 1; i < Rows.Count; ++i)
-            {
-                var checkCell = (CheckCell) Rows[i].Cells[0];
-                if (!checkCell.Checked) continue;
-                selectedFiles.Add(_currentMetadata[i-1]);
-            }
-
-            return selectedFiles;
-        }
-
-        public void Refresh(IList<FileMetadata> fileMetadata)
-        {
-            Rows.Clear();
-            Rows.Add(_header);
-            foreach (var metadata in fileMetadata)
-                Rows.Add(new FilesTableRow(metadata));
-            _currentMetadata = fileMetadata;
-        }
-
-        private sealed class FilesTableHeader : TableRow
-        {
-            private readonly string[] _columnHeaders = { "", "Name", "ContentType", "Owner", "Size" };
-
-            public FilesTableHeader()
-            {
-                foreach (var columnHeader in _columnHeaders)
-                    Cells.Add(new LabelCell(columnHeader));
-            }
-        }
-
-        private sealed class FilesTableRow : TableRow
-        {
-            public FilesTableRow(FileMetadata metadata)
-            {
-                var cells = new TableCell[]
-                            {
-                                new CheckCell(),
-                                new LabelCell(metadata.Name),
-                                new LabelCell(metadata.ContentType),
-                                new LabelCell(metadata.Owner),
-                                new LabelCell(metadata.Size.ToString())
-                            };
-                Cells.AddRange(cells);
-            }
+            // Empty
         }
     }
 }
+
