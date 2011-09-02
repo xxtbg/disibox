@@ -19,7 +19,7 @@ namespace Disibox.WebUI {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Table FilesTable;
+        protected global::Disibox.WebUI.Controls.FilesTable FilesTable;
         
         /// <summary>
         /// FileUpload control.

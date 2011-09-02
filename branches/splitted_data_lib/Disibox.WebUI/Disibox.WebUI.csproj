@@ -113,6 +113,10 @@
     <Compile Include="Account\Register.aspx.designer.cs">
       <DependentUpon>Register.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CheckCell.cs" />
+    <Compile Include="Controls\FilesTable.cs" />
+    <Compile Include="Controls\LabelCell.cs" />
+    <Compile Include="Controls\UsersTable.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
