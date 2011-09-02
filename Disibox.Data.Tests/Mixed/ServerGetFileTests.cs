@@ -25,14 +25,38 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Disibox.Utils;
+using NUnit.Framework;
 
-namespace Disibox.Data.Tests.Server
+namespace Disibox.Data.Tests.Mixed
 {
-    class AddOutputTests
+    public class ServerGetFileTests : BaseMixedTests
     {
+        [SetUp]
+        protected override void SetUp()
+        {
+            base.SetUp();
+        }
+
+        [TearDown]
+        protected override void TearDown()
+        {
+            base.TearDown();
+        }
+
+        /*=============================================================================
+            Valid calls
+        =============================================================================*/
+
+        [Test]
+        public void GetOneFile()
+        {
+            ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            var fileUri = ClientDataSource.AddFile(FileNames[0], FileStreams[0]);
+            ClientDataSource.Logout();
+
+            var file = ServerDataSource.GetFile(fileUri);
+            Assert.True(Shared.StreamsAreEqual(file, FileStreams[0]));
+        }
     }
 }

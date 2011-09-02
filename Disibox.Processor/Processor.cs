@@ -62,10 +62,6 @@ namespace Disibox.Processor
             return base.OnStart();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="procReq"></param>
         private void ProcessRequest(ProcessingMessage procReq)
         {
             var tool = ToolsManifest.GetTool(procReq.ToolName);
