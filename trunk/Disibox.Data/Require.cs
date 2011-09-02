@@ -101,6 +101,23 @@ namespace Disibox.Data
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="outputUri"></param>
+        /// <param name="argName"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidOutputUriException"></exception>
+        public static void ValidOutputUri(string outputUri, string argName)
+        {
+            // Requirements
+            NotNull(outputUri, argName);
+
+            var outputsContainerName = Properties.Settings.Default.FilesContainerName;
+            if (outputUri.Contains("/" + outputsContainerName + "/")) return;
+            throw new InvalidOutputUriException(outputUri);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="pwd"></param>
         /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
