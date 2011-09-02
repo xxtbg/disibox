@@ -32,7 +32,7 @@ namespace Disibox.Data.Entities
     /// <summary>
     /// Table entity representing an entry, that is, a (name, value) pair.
     /// </summary>
-    internal sealed class Entry : BaseEntity
+    public sealed class Entry : BaseEntity
     {
         /// <summary>
         /// 

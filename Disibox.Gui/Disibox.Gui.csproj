@@ -158,12 +158,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
-      <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
-      <Name>Disibox.Data</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -184,6 +178,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Disibox.Data.Client\Disibox.Data.Client.csproj">
+      <Project>{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}</Project>
+      <Name>Disibox.Data.Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

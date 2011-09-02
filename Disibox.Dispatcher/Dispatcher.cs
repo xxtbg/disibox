@@ -16,7 +16,7 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+// DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF GENOA BE LIABLE FOR ANY
 // DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 // (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 // LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -32,8 +32,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Disibox.Data;
-using Disibox.Data.Exceptions;
+using Disibox.Data.Server;
 using Disibox.Processing;
 using Microsoft.WindowsAzure.ServiceRuntime;
 
@@ -120,11 +119,10 @@ namespace Disibox.Dispatcher
 //            Trace.WriteLine("mime: " + mime, "Information");
 //            Trace.WriteLine("uri file: " + uriFile, "Information");
 
-            var datasource = new DataSource();
+            var datasource = new ServerDataSource();
 
-            try {
-                datasource.Login(user, password);
-            } catch (UserNotExistingException) {
+            if (!datasource.UserExists(user, password))
+            {
                 writer.WriteLine("KO");
                 client.Close();
                 return;

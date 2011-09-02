@@ -16,7 +16,7 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+// DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF GENOA BE LIABLE FOR ANY
 // DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 // (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 // LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -26,8 +26,8 @@
 //
 
 using System.Windows;
-using Disibox.Data;
-using Disibox.Data.Exceptions;
+using Disibox.Data.Client;
+using Disibox.Data.Client.Exceptions;
 
 namespace Disibox.Gui {
     /// <summary>
@@ -35,12 +35,12 @@ namespace Disibox.Gui {
     /// </summary>
     public partial class LoginWindow : Window {
         private readonly MainWindow _mainWindow;
-        private readonly DataSource _dataSource;
+        private readonly ClientDataSource _dataSource;
 
         public LoginWindow() {
             InitializeComponent();
             _mainWindow = new MainWindow();
-            _dataSource = new DataSource();
+            _dataSource = new ClientDataSource();
             textBox.Focus();
         }
 

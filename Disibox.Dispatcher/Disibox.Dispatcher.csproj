@@ -107,6 +107,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Disibox.Data.Server\Disibox.Data.Server.csproj">
+      <Project>{12B985FA-4D02-4AEF-B988-6A59D615E3F1}</Project>
+      <Name>Disibox.Data.Server</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
       <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
       <Name>Disibox.Data</Name>
