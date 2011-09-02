@@ -93,7 +93,7 @@ namespace Disibox.Data.Tests.Server
                 messages.Add(dequeueMethod());
             Assert.True(messages.Count == Messages.Count);
             foreach (var message in Messages)
-                messages.Contains(message);
+                Assert.True(messages.Contains(message));
         }
     }
 }

@@ -109,7 +109,7 @@ namespace Disibox.Data.Tests.Server
             var messages = peekMethod();
             Assert.True(messages.Count == Messages.Count);
             foreach (var message in Messages)
-                messages.Contains(message);
+                Assert.True(messages.Contains(message));
         }
 
         private static void EnqueueNullMessage(EnqueueMethod enqueueMethod)
