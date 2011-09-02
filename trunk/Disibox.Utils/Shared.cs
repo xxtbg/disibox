@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using System.IO;
 using System.Text;
 using Microsoft.Win32;
@@ -113,7 +114,7 @@ namespace Disibox.Utils
         /// <returns>The result of the conversion.</returns>
         public static double ConvertBytesToKilobytes(long bytes)
         {
-            return bytes / 1024f;
+            return Math.Round(bytes / 1024f, 2);
         }
     }
 }
