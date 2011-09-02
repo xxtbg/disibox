@@ -30,7 +30,7 @@ using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
 {
-    public class AddUserTests : BaseUserTests
+    public class AddUserTests : BaseClientTests
     {
         [SetUp]
         protected override void SetUp()

@@ -26,25 +26,24 @@
 //
 
 using Disibox.Data.Client;
-using Disibox.Data.Setup;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
 {
-    [TestFixture]
-    public abstract class BaseClientTests
+    public abstract class BaseClientTests : BaseDataTests
     {
         [SetUp]
-        protected virtual void SetUp()
+        protected override void SetUp()
         {
-            CloudStorageSetup.ResetStorage();
+            base.SetUp();
             DataSource = new ClientDataSource();
         }
 
         [TearDown]
-        protected virtual void TearDown()
+        protected override void TearDown()
         {
             DataSource = null;
+            base.TearDown();
         }
 
         protected ClientDataSource DataSource { get; private set; }

@@ -30,7 +30,7 @@ using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
 {
-    internal class DeleteFileTests : BaseFileTests
+    internal class DeleteFileTests : BaseClientTests
     {
         [SetUp]
         protected override void SetUp()
@@ -52,7 +52,7 @@ namespace Disibox.Data.Tests.Client
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], FileStreams[0]);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
@@ -72,7 +72,7 @@ namespace Disibox.Data.Tests.Client
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], FileStreams[0]);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[1], CommonUserPwds[1]);
@@ -87,7 +87,7 @@ namespace Disibox.Data.Tests.Client
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            var fileUri = DataSource.AddFile(FileNames[0], Files[0]);
+            var fileUri = DataSource.AddFile(FileNames[0], FileStreams[0]);
             DataSource.DeleteFile(fileUri);
 
             var fileMetadata = DataSource.GetFileMetadata();

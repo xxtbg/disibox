@@ -42,5 +42,72 @@ namespace Disibox.Data.Tests.Mixed
         {
             base.TearDown();
         }
+
+        /*=============================================================================
+            Valid calls
+        =============================================================================*/
+
+        [Test]
+        public void DefaultAdminExists()
+        {
+            Assert.True(ServerDataSource.UserExists(DefaultAdminEmail, DefaultAdminPwd));
+        }
+
+        [Test]
+        public void OneExistingAdminUser()
+        {
+            ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            ClientDataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            ClientDataSource.Logout();
+
+            Assert.True(ServerDataSource.UserExists(AdminUserEmails[0], AdminUserPwds[0]));
+        }
+
+        [Test]
+        public void ManyExistingAdminUsers()
+        {
+            ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            for (var i = 0; i < AdminUserEmails.Count; ++i)
+                ClientDataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], false);
+            ClientDataSource.Logout();
+
+            for (var i = 0; i < AdminUserEmails.Count; ++i)
+                Assert.True(ServerDataSource.UserExists(AdminUserEmails[i], AdminUserPwds[i]));
+        }
+
+        [Test]
+        public void OneExistingCommonUser()
+        {
+            ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            ClientDataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            ClientDataSource.Logout();
+
+            Assert.True(ServerDataSource.UserExists(CommonUserEmails[0], CommonUserPwds[0]));
+        }
+
+        [Test]
+        public void ManyExistingCommonUsers()
+        {
+            ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            for (var i = 0; i < CommonUserEmails.Count; ++i)
+                ClientDataSource.AddUser(CommonUserEmails[i], CommonUserPwds[i], false);
+            ClientDataSource.Logout();
+
+            for (var i = 0; i < CommonUserEmails.Count; ++i)
+                Assert.True(ServerDataSource.UserExists(CommonUserEmails[i], CommonUserPwds[i]));
+        }
+
+        [Test]
+        public void OneNotExistingUser()
+        {
+            Assert.False(ServerDataSource.UserExists(AdminUserEmails[0], AdminUserPwds[0]));
+        }
+
+        [Test]
+        public void ManyNotExistingUsers()
+        {
+            for (var i = 0; i < AdminUserEmails.Count; ++i)
+                Assert.False(ServerDataSource.UserExists(AdminUserEmails[i], AdminUserPwds[i]));
+        }
     }
 }

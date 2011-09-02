@@ -26,17 +26,23 @@
 //
 
 using System.Collections.Generic;
+using System.IO;
+using Disibox.Data.Setup;
+using Disibox.Utils;
 using NUnit.Framework;
 
-namespace Disibox.Data.Tests.Client
+namespace Disibox.Data.Tests
 {
-    public abstract class BaseUserTests : BaseClientTests
+    [TestFixture]
+    public abstract class BaseDataTests
     {
         protected const int AdminUserCount = 5;
         protected const int CommonUserCount = 5;
+        protected const int FileCount = 3;
 
-        protected const int EmailLength = 7;
-        protected const int PwdLength = 9;
+        private const int EmailLength = 7;
+        private const int PwdLength = 9;
+        private const int FileNameLength = 5;
 
         protected readonly IList<string> AdminUserEmails = new List<string>();
         protected readonly IList<string> AdminUserPwds = new List<string>();
@@ -44,14 +50,32 @@ namespace Disibox.Data.Tests.Client
         protected readonly IList<string> CommonUserEmails = new List<string>();
         protected readonly IList<string> CommonUserPwds = new List<string>();
 
-        [SetUp]
-        protected override void SetUp()
-        {
-            base.SetUp();
+        protected readonly IList<string> FileNames = new List<string>();
+        protected readonly IList<Stream> FileStreams = new List<Stream>();
 
+        [SetUp]
+        protected virtual void SetUp()
+        {
+            CloudStorageSetup.ResetStorage();
+            SetUpAdminUsers();
+            SetUpCommonUsers();
+            SetUpFiles();
+        }
+
+        [TearDown]
+        protected virtual void TearDown()
+        {
+            TearDownAdminUsers();
+            TearDownCommonUsers();
+            TearDownFiles();
+            CloudStorageSetup.ResetStorage();
+        }
+
+        private void SetUpAdminUsers()
+        {
             for (var i = 0; i < AdminUserCount; ++i)
             {
-                var currChar = (char) ('a' + i);
+                var currChar = (char)('a' + i);
 
                 var email = new string(currChar, EmailLength);
                 AdminUserEmails.Add(email + "_admin@test.pino");
@@ -59,10 +83,19 @@ namespace Disibox.Data.Tests.Client
                 var pwd = new string(currChar, PwdLength);
                 AdminUserPwds.Add(pwd + "_pwd");
             }
+        }
 
+        private void TearDownAdminUsers()
+        {
+            AdminUserEmails.Clear();
+            AdminUserPwds.Clear();
+        }
+
+        private void SetUpCommonUsers()
+        {
             for (var i = 0; i < CommonUserCount; ++i)
             {
-                var currChar = (char) ('a' + i);
+                var currChar = (char)('a' + i);
 
                 var email = new string(currChar, EmailLength);
                 CommonUserEmails.Add(email + "_common@test.pino");
@@ -72,16 +105,30 @@ namespace Disibox.Data.Tests.Client
             }
         }
 
-        [TearDown]
-        protected override void TearDown()
+        private void TearDownCommonUsers()
         {
-            AdminUserEmails.Clear();
-            AdminUserPwds.Clear();
-
             CommonUserEmails.Clear();
             CommonUserPwds.Clear();
+        }
 
-            base.TearDown();
+        private void SetUpFiles()
+        {
+            for (var i = 0; i < FileCount; ++i)
+            {
+                var currChar = (char)('a' + i);
+
+                var fileName = new string(currChar, FileNameLength);
+                FileNames.Add(fileName + ".txt");
+
+                var file = new MemoryStream(Shared.StringToByteArray(fileName));
+                FileStreams.Add(file);
+            }
+        }
+
+        private void TearDownFiles()
+        {
+            FileNames.Clear();
+            FileStreams.Clear();
         }
     }
 }
