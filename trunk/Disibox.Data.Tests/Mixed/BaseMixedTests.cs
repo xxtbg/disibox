@@ -27,26 +27,26 @@
 
 using Disibox.Data.Client;
 using Disibox.Data.Server;
-using Disibox.Data.Setup;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Mixed
 {
-    public abstract class BaseMixedTests
+    public abstract class BaseMixedTests : BaseDataTests
     {
         [SetUp]
-        protected virtual void SetUp()
+        protected override void SetUp()
         {
-            CloudStorageSetup.ResetStorage();
+            base.SetUp();
             ClientDataSource = new ClientDataSource();
             ServerDataSource = new ServerDataSource();
         }
 
         [TearDown]
-        protected virtual void TearDown()
+        protected override void TearDown()
         {
             ClientDataSource = null;
             ServerDataSource = null;
+            base.TearDown();
         }
 
         protected ClientDataSource ClientDataSource { get; private set; }

@@ -49,11 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseDataTests.cs" />
     <Compile Include="Client\AddFileTests.cs" />
     <Compile Include="Client\AddUserTests.cs" />
     <Compile Include="Client\BaseClientTests.cs" />
-    <Compile Include="Client\BaseFileTests.cs" />
-    <Compile Include="Client\BaseUserTests.cs" />
     <Compile Include="Client\DeleteFileTests.cs" />
     <Compile Include="Client\DeleteUserTests.cs" />
     <Compile Include="Client\LoginTests.cs" />

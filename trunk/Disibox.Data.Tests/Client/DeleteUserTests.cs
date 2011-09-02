@@ -31,7 +31,7 @@ using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
 {
-    internal class DeleteUserTests : BaseUserTests
+    internal class DeleteUserTests : BaseClientTests
     {
         [SetUp]
         protected override void SetUp()
