@@ -135,6 +135,11 @@ namespace Disibox.Data.Server
             return _processingRequests.PeekMessages();
         }
 
+        public void ClearProcessingRequests()
+        {
+            _processingRequests.ClearMessages();
+        }
+
         /*=============================================================================
             Completions handling methods
         =============================================================================*/
@@ -168,6 +173,11 @@ namespace Disibox.Data.Server
         public IList<ProcessingMessage> PeekProcessingCompletions()
         {
             return _processingCompletions.PeekMessages();
+        }
+
+        public void ClearProcessingCompletions()
+        {
+            _processingCompletions.ClearMessages();
         }
 
         /*=============================================================================
