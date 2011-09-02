@@ -138,7 +138,7 @@ namespace Disibox.Gui
 
                 try
                 {
-                    sourceFileBlob = _ds.GetFile(processedFile);
+                    sourceFileBlob = _ds.GetOutput(processedFile);
                 }
                 catch (Exception)
                 {
