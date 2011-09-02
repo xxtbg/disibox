@@ -25,12 +25,13 @@
             <TabItem Header="List Files" Name="tabItemFiles">
                 <Grid>
                     <Button Content="Refresh" Margin="0,0,6,6" Name="buttonRefreshFiles" Click="buttonRefreshFiles_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" TabIndex="2" IsDefault="True" Grid.Column="1" />
-                    <ListView SelectionMode="Single" ItemsSource="{Binding FileAndMime}" Margin="6,6,6,35" Name="listView_Files" TabIndex="1" Grid.ColumnSpan="2">
+                    <ListView SelectionMode="Single" ItemsSource="{Binding FileMetadata}" Margin="6,6,6,35" Name="listView_Files" TabIndex="1" Grid.ColumnSpan="2">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="File Mime" Width="100" DisplayMemberBinding="{Binding Mime}"/>
-                                <GridViewColumn Header="File Name" Width="250" DisplayMemberBinding="{Binding Filename}"  />
-                                <GridViewColumn Header="Size in Kbytes" Width="100" DisplayMemberBinding="{Binding Size}"  />
+                                <GridViewColumn Header="File Mime" Width="60" DisplayMemberBinding="{Binding ContentType}"/>
+                                <GridViewColumn Header="File Name" Width="220" DisplayMemberBinding="{Binding Name}"  />
+                                <GridViewColumn Header="File Owner" Width="100" DisplayMemberBinding="{Binding Owner}"  />
+                                <GridViewColumn Header="Size in Kbytes" Width="80" DisplayMemberBinding="{Binding Size}"  />
                             </GridView>
                         </ListView.View>
                     </ListView>
