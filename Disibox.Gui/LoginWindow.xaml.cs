@@ -25,9 +25,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using System.Windows;
 using Disibox.Data.Client;
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Exceptions;
 
 namespace Disibox.Gui {
     /// <summary>
@@ -59,6 +61,12 @@ namespace Disibox.Gui {
                 }
             } catch (UserNotExistingException) {
                 MessageBox.Show("User and/or Passowrd are not correct, please retry!", "Error when Log in");
+            } catch(InvalidEmailException) {
+                MessageBox.Show("User email is not valid, please retry!", "Error when Log in");
+            } catch(InvalidPasswordException) {
+                MessageBox.Show("User password is not valid, please retry!", "Error when Log in");
+            } catch(ArgumentNullException) {
+                MessageBox.Show("User and/or Passowrd are blank, please retry!", "Error when Log in");
             }
         }
 
