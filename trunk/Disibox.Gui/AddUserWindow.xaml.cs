@@ -28,6 +28,8 @@
 using System;
 using System.Windows;
 using Disibox.Data.Client;
+using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Exceptions;
 
 namespace Disibox.Gui {
     /// <summary>
@@ -55,12 +57,33 @@ namespace Disibox.Gui {
 
                 try {
                     _ds.AddUser(username, password1, isAdmin);
-                } catch (Exception) {
+                } catch (UserNotAdminException) {
                     MessageBox.Show("Only a user with administrator priviledges can add a user",
                                     "Error inserting a new user");
+            } catch (ArgumentNullException) {
+                    MessageBox.Show("User and/or Passowrd are blank, please retry!", "Error inserting new user");
+                    textBox.Focus();
+                    return;
+                } catch (InvalidEmailException) {
+                    MessageBox.Show("User email is invalid, please retry!", "Error inserting new user");
+                    textBox.Focus();
+                    return;
+                } catch (InvalidPasswordException) {
+                    MessageBox.Show("User password is invalid, please retry!", "Error inserting new user");
+                    textBox.Focus();
+                    return;
+                } catch (UserNotLoggedInException) {
+                    MessageBox.Show("Trying to insert new user without being logged in, log in " +
+                                    "first and then please retry !", "Error inserting new user");
+                    textBox.Focus();
+                    return;
+                } catch (UserExistingException) {
+                    MessageBox.Show("The user you trying to insert already exists, please retry with another email!",
+                                    "Error inserting new user");
                     textBox.Focus();
                     return;
                 }
+
                 Close();
             } else {
                 MessageBox.Show("The two passwords must be the same!", "Error inserting a new user");
