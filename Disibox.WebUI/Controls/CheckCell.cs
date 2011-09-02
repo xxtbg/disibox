@@ -25,42 +25,29 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
-using System.Web.UI;
-using Disibox.Data.Client;
+using System.Web.UI.WebControls;
 
-namespace Disibox.WebUI
+namespace Disibox.WebUI.Controls
 {
-    public partial class _Default : Page
+    public sealed class CheckCell : TableCell
     {
-        private readonly ClientDataSource _dataSource = new ClientDataSource();
+        private readonly CheckBox _checkBox = new CheckBox();
 
-        private const string AdminEmail = "admin@disibox.com";
-        private const string AdminPwd = "roottoor";
-
-        protected void Page_Load(object sender, EventArgs e)
+        public CheckCell() : this(false)
         {
-            RefreshFilesTable();
+            // Empty
         }
 
-        protected void UploadButton_Click(object sender, EventArgs e)
+        public CheckCell(bool isChecked)
         {
-            _dataSource.Login(AdminEmail, AdminPwd);
-            _dataSource.AddFile(FileUpload.FileName, FileUpload.FileContent); 
-            _dataSource.Logout();
-
-            RefreshFilesTable();
+            _checkBox.Checked = isChecked;
+            Controls.Add(_checkBox);
         }
 
-        /*=============================================================================
-            Private methods
-        =============================================================================*/
-
-        private void RefreshFilesTable()
+        public bool Checked
         {
-            _dataSource.Login(AdminEmail, AdminPwd);
-            FilesTable.Refresh(_dataSource.GetFileMetadata());
-            _dataSource.Logout();
+            get { return _checkBox.Checked; }
+            set { _checkBox.Checked = value; }
         }
     }
 }

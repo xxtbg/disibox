@@ -1,6 +1,8 @@
 ﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
     CodeBehind="Default.aspx.cs" Inherits="Disibox.WebUI._Default" %>
 
+<%@ Register assembly="Disibox.WebUI" namespace="Disibox.WebUI.Controls" tagprefix="cc1" %>
+
 <asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
 </asp:Content>
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
@@ -8,8 +10,8 @@
         Files for ADMIN USER
     </h2>
     <p>
-        <asp:Table ID="FilesTable" runat="server">
-        </asp:Table>
+        <cc1:FilesTable ID="FilesTable" runat="server">
+        </cc1:FilesTable>
     </p>
     <p>
         <asp:FileUpload ID="FileUpload" runat="server" />
