@@ -64,6 +64,8 @@ namespace Disibox.Data.Tests.Server
         protected override void TearDown()
         {
             Messages.Clear();
+            DataSource.ClearProcessingRequests();
+            DataSource.ClearProcessingCompletions();
 
             base.TearDown();
         }

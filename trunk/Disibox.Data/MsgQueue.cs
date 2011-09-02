@@ -76,5 +76,10 @@ namespace Disibox.Data
 
             return messages;
         }
+
+        public void ClearMessages()
+        {
+            _queue.Clear();
+        }
     }
 }
