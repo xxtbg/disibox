@@ -111,7 +111,6 @@ namespace Disibox.Data
             NotNull(outputUri, argName);
 
             var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            //may be this was the problem -> FilesContainerName;
             if (outputUri.Contains("/" + outputsContainerName + "/")) return;
             throw new InvalidOutputUriException(outputUri);
         }
