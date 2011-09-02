@@ -165,22 +165,34 @@ namespace Disibox.Data.Client
             Output handling methods
         =============================================================================*/
 
+        /// <summary>
+        /// Deletes processing output pointed by given uri.
+        /// </summary>
+        /// <param name="outputUri">The uri pointing at the processing output that should be deleted.</param>
+        /// <returns>True if processing output has been really deleted, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">Given uri is null.</exception>
+        /// <exception cref="InvalidOutputUriException">Given uri has an invalid format.</exception>
         public bool DeleteOutput(string outputUri)
         {
             // Requirements
-            Require.NotNull(outputUri, "outputUri");
+            Require.ValidOutputUri(outputUri, "outputUri");
             RequireLoggedInUser();
-            RequireAdminUser();
 
             return _outputsContainer.DeleteBlob(outputUri);
         }
 
+        /// <summary>
+        /// Returns the content of the processing output pointed by given uri.
+        /// </summary>
+        /// <param name="outputUri">The uri pointing at the processing output to download.</param>
+        /// <returns>The content of processing output pointed by given uri.</returns>
+        /// <exception cref="ArgumentNullException">Given uri is null.</exception>
+        /// <exception cref="InvalidOutputUriException">Given uri has an invalid format.</exception>
         public Stream GetOutput(string outputUri)
         {
             // Requirements
-            Require.NotNull(outputUri, "outputUri");
+            Require.ValidOutputUri(outputUri, "outputUri");
             RequireLoggedInUser();
-            RequireAdminUser();
 
             return _outputsContainer.GetBlob(outputUri);
         }
