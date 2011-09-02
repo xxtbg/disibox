@@ -52,6 +52,9 @@ namespace Disibox.Processing.Tests
             get { return Data.Setup.Properties.Settings.Default.DefaultAdminPwd; }
         }
 
+        private static readonly String _commonUserEmail = "a_common@test.pino";
+        private static readonly String _commonUserPwd = new string('a',_commonUserEmail.Length) + "_pwd";
+
         private static readonly string _serverString = Properties.Settings.Default.DefaultProcessingServer;
         private static readonly int _serverPort = Properties.Settings.Default.DefaultProcessingServerPort;
 
@@ -60,6 +63,9 @@ namespace Disibox.Processing.Tests
         private TcpClient _server;
         private StreamReader _reader;
         private StreamWriter _writer;
+
+        private Stream _processedFileStream;
+        private Stream _fileToUpload;
 
 
         [SetUp]
@@ -89,80 +95,109 @@ namespace Disibox.Processing.Tests
             _server = null;
             _reader = null;
             _writer = null;
+
+            try {
+                _processedFileStream.Close();
+                _fileToUpload.Close();
+            } catch {}
         }
 
         [Test]
-        public void UploadTextFileAndProcessMd5() {
+        public void UploadTextFileAndProcessMd5AsAdminUser() {
             UploadFileAndProcessMd5("textfile.txt");
         }
 
         [Test]
-        public void UploadImageFileAndProcessMd5() {
+        public void UploadImageFileAndProcessMd5AsAdminUser() {
             UploadFileAndProcessMd5("image.jpg");
         }
 
+        [Test]
+        public void UploadTextFileAndProcessMd5AsCommonUser() {   
+            UploadFileAndProcessMd5("textfile.txt", true);
 
-        private void UploadFileAndProcessMd5(string fileName) {
-            var fileToUpload = new FileStream("Files/" + fileName, FileMode.Open);
+        }
+
+        [Test]
+        public void UploadImageFileAndProcessMd5AsCommonUser() {
+            UploadFileAndProcessMd5("image.jpg", true);
+        }
+
+
+        private void UploadFileAndProcessMd5(string fileName, bool commonUser = false) {
+            _fileToUpload = new FileStream("Files\\" + fileName, FileMode.Open, FileAccess.Read);
             IList<ProcessingToolInformation> processingToolInformations = new List<ProcessingToolInformation>();
 
-            try {
-                /* uploading the file to process */
-                DataSource.AddFile(fileName, fileToUpload, true);
+            #region preparing_environment
 
-                /* retriving the uri of the file just uploaded */
-                var fileMetadata = DataSource.GetFileMetadata().Where(fm => fm.Name.Equals(fileName)).First();
-
-                /* authenticating */
-                _writer.WriteLine(DefaultAdminEmail);
-                _writer.WriteLine(DefaultAdminPwd);
-
-                _writer.WriteLine(fileMetadata.ContentType);
-                _writer.WriteLine(fileMetadata.Uri);
-
-                var answer = _reader.ReadLine();
-                if (answer == null || answer.Equals("KO"))
-                    throw new Exception();
-
-                /* useless but have to do this */
-                var numberOfProcessingTools = Int32.Parse(_reader.ReadLine());
-
-                for (var i = 0; i < numberOfProcessingTools; ++i) {
-                    string[] info;
-                    info = _reader.ReadLine().Split(',');
-                    if (info.Length != 3)
-                        throw new Exception();
-                    processingToolInformations.Add(new ProcessingToolInformation(info[0].Trim(), info[1].Trim(),
-                                                                                 info[2].Trim()));
-                }
-            } catch (Exception) {
-                Assert.Fail("Error while preparing the environment for testing");
+            if (commonUser) {
+                DataSource.AddUser(_commonUserEmail, _commonUserPwd, false);
+                DataSource.Logout();
+                DataSource.Login(_commonUserEmail, _commonUserPwd);
             }
+
+            /* uploading the file to process */
+            DataSource.AddFile(fileName, _fileToUpload, true);
+
+            /* retriving the uri of the file just uploaded */
+            var fileMetadata = DataSource.GetFileMetadata().Where(fm => fm.Name.Equals(fileName)).First();
+
+            /* authenticating */
+            var email = (commonUser) ? _commonUserEmail : DefaultAdminEmail;
+            var pwd = (commonUser) ? _commonUserPwd : DefaultAdminPwd;
+            _writer.WriteLine(email);
+            _writer.WriteLine(pwd);
+
+            _writer.WriteLine(fileMetadata.ContentType);
+            _writer.WriteLine(fileMetadata.Uri);
+
+            var answer = _reader.ReadLine();
+            if (answer == null || answer.Equals("KO"))
+                throw new Exception();
+
+            /* useless but have to do this */
+            var numberOfProcessingTools = Int32.Parse(_reader.ReadLine());
+
+            for (var i = 0; i < numberOfProcessingTools; ++i) {
+                string[] info;
+                info = _reader.ReadLine().Split(',');
+                if (info.Length != 3)
+                    throw new Exception();
+                processingToolInformations.Add(new ProcessingToolInformation(info[0].Trim(), info[1].Trim(),
+                                                                             info[2].Trim()));
+            }
+
+            #endregion
 
             var operationToApply = "MD5 calculator";
-            var uriProcessedFile="";
-           
-            try {
-                _writer.WriteLine(operationToApply);
-                uriProcessedFile = _reader.ReadLine();
-            } catch(Exception) {
-                Assert.Fail("Error processing the file");                
-            }
+            var uriProcessedFile = "";
 
-            try {
-                Console.WriteLine(uriProcessedFile);
-                var processedFileStream = DataSource.GetOutput(uriProcessedFile);
-                DataSource.DeleteOutput(uriProcessedFile);
+            #region getting_result
 
-                var md5 = Hash.ComputeMD5(fileToUpload);
-                var actualMd5Stream = new MemoryStream(Shared.StringToByteArray(md5));
+            _writer.WriteLine(operationToApply);
+            uriProcessedFile = _reader.ReadLine();
+            
+            _fileToUpload.Seek(0, SeekOrigin.Begin); //fundamental!
 
-                Assert.IsTrue(Shared.StreamsAreEqual(processedFileStream, actualMd5Stream),
-                              "Md5 computed for the file locally is different from that computed on the cloud");
-            } catch (Exception e) {
-                Assert.Fail("Error downloading the file: " + e);
-            }
-          
+            _processedFileStream = DataSource.GetOutput(uriProcessedFile);
+
+            DataSource.DeleteFile(fileMetadata.Uri);
+
+            #endregion
+
+
+            var md5 = Hash.ComputeMD5(_fileToUpload);
+            var actualMd5Stream = new MemoryStream(Shared.StringToByteArray(md5));
+
+            Assert.IsTrue(Shared.StreamsAreEqual(_processedFileStream, actualMd5Stream),
+                          "Md5 computed for the file locally is different from that computed on the cloud");
+
+            DataSource.DeleteOutput(uriProcessedFile);
+
+            if (!commonUser) return;
+            DataSource.Logout();
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.DeleteUser(_commonUserEmail);
         }
 
 
