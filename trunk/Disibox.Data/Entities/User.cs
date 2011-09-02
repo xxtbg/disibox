@@ -33,7 +33,7 @@ namespace Disibox.Data.Entities
     /// <summary>
     /// Table entity representing a user.
     /// </summary>
-    internal sealed class User : BaseEntity
+    public sealed class User : BaseEntity
     {
         /// <summary>
         /// Creates a User entity according to given parameters.

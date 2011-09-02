@@ -21,6 +21,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Dispatcher", "Disib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Data.Tests", "Disibox.Data.Tests\Disibox.Data.Tests.csproj", "{AF07F114-277E-4FE8-819C-5E3B43C7B532}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Data.Client", "Disibox.Data.Client\Disibox.Data.Client.csproj", "{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Data.Server", "Disibox.Data.Server\Disibox.Data.Server.csproj", "{12B985FA-4D02-4AEF-B988-6A59D615E3F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Disibox.Data.Setup", "Disibox.Data.Setup\Disibox.Data.Setup.csproj", "{68F0666F-E2EF-414F-A424-68584CDB048A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{14F1B783-35B6-419F-B446-2AB620B58964}"
+	ProjectSection(SolutionItems) = preProject
+		Doxyfile = Doxyfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -135,6 +146,36 @@ Global
 		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AF07F114-277E-4FE8-819C-5E3B43C7B532}.Release|x86.ActiveCfg = Release|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}.Release|x86.ActiveCfg = Release|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{12B985FA-4D02-4AEF-B988-6A59D615E3F1}.Release|x86.ActiveCfg = Release|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{68F0666F-E2EF-414F-A424-68584CDB048A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

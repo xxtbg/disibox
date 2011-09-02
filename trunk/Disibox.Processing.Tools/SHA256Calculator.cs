@@ -41,7 +41,7 @@ namespace Disibox.Processing.Tools
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
             var sha256 = Hash.ComputeSHA256(file);
-            var streamedSHA256 = new MemoryStream(Common.StringToByteArray(sha256));
+            var streamedSHA256 = new MemoryStream(Shared.StringToByteArray(sha256));
             return new ProcessingOutput(streamedSHA256, "text/plain");
         }
     }

@@ -49,29 +49,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddFileTests.cs" />
-    <Compile Include="AddUserTests.cs" />
-    <Compile Include="BaseDataTests.cs" />
-    <Compile Include="BaseFileTests.cs" />
-    <Compile Include="BaseUserTests.cs" />
-    <Compile Include="DeleteFileTests.cs" />
-    <Compile Include="DeleteUserTests.cs" />
+    <Compile Include="Client\AddFileTests.cs" />
+    <Compile Include="Client\AddUserTests.cs" />
+    <Compile Include="Client\BaseClientTests.cs" />
+    <Compile Include="Client\BaseFileTests.cs" />
+    <Compile Include="Client\BaseUserTests.cs" />
+    <Compile Include="Client\DeleteFileTests.cs" />
+    <Compile Include="Client\DeleteUserTests.cs" />
+    <Compile Include="Client\LoginTests.cs" />
+    <Compile Include="Mixed\BaseMixedTests.cs" />
+    <Compile Include="Mixed\UserExistsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
+    <Compile Include="Server\AddOutputTests.cs" />
+    <Compile Include="Server\BaseProcMsgTests.cs" />
+    <Compile Include="Server\BaseServerTests.cs" />
+    <Compile Include="Server\DequeueProcMsgTests.cs" />
+    <Compile Include="Server\EnqueueProcMsgTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Disibox.Data.Client\Disibox.Data.Client.csproj">
+      <Project>{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}</Project>
+      <Name>Disibox.Data.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Disibox.Data.Server\Disibox.Data.Server.csproj">
+      <Project>{12B985FA-4D02-4AEF-B988-6A59D615E3F1}</Project>
+      <Name>Disibox.Data.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Disibox.Data.Setup\Disibox.Data.Setup.csproj">
+      <Project>{68F0666F-E2EF-414F-A424-68584CDB048A}</Project>
+      <Name>Disibox.Data.Setup</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
       <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
       <Name>Disibox.Data</Name>

@@ -1,17 +1,17 @@
 ﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
     CodeBehind="Default.aspx.cs" Inherits="Disibox.WebUI._Default" %>
 
+<%@ Register assembly="Disibox.WebUI" namespace="Disibox.WebUI.Controls" tagprefix="cc1" %>
+
 <asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
 </asp:Content>
 <asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
     <h2>
-        Welcome to ASP.NET!
+        Files for ADMIN USER
     </h2>
     <p>
-        To learn more about ASP.NET visit <a href="http://www.asp.net" title="ASP.NET Website">www.asp.net</a>.</p>
-    <p>
-        &nbsp;<asp:GridView ID="GridView1" runat="server">
-        </asp:GridView>
+        <cc1:FilesTable ID="FilesTable" runat="server">
+        </cc1:FilesTable>
     </p>
     <p>
         <asp:FileUpload ID="FileUpload" runat="server" />

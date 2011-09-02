@@ -34,8 +34,8 @@ using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
 using System.Windows.Controls;
-using Disibox.Data;
-using Disibox.Data.Exceptions;
+using Disibox.Data.Client;
+using Disibox.Data.Client.Exceptions;
 using Disibox.Gui.Util;
 using Microsoft.Win32;
 using Path = System.IO.Path;
@@ -47,7 +47,7 @@ namespace Disibox.Gui {
     public partial class MainWindow : Window {
         private string _user;
         private string _password;
-        private DataSource _dataSource;
+        private ClientDataSource _dataSource;
 
         //for accessing the server
         private readonly string _serverString;
@@ -73,7 +73,7 @@ namespace Disibox.Gui {
             set { _password = value; }
         }
 
-        public DataSource Datasource {
+        public ClientDataSource Datasource {
             get { return _dataSource; }
             set { _dataSource = value; }
         }
@@ -111,7 +111,7 @@ namespace Disibox.Gui {
                 var result = MessageBoxResult.Cancel;
                 try {
                     _dataSource.AddFile(fileName, fileStream, false);
-                } catch (FileAlreadyExistingException) {
+                } catch (FileExistingException) {
                     result = MessageBox.Show("This file already exists on the cloud, " +
                                              "do you want to overwrite it?",
                                              "Uploading a file", MessageBoxButton.YesNo);
@@ -187,9 +187,9 @@ namespace Disibox.Gui {
             var ok = false;
             try {
                 ok = _dataSource.DeleteFile(selectedItem.Uri);
-            } catch (LoggedInUserRequiredException) {
+            } catch (UserNotLoggedInException) {
                 MessageBox.Show("Only a logged user can delete files that owns", "Deleting file");
-            } catch (DeletingNotOwnedFileException) {
+            } catch (FileNotOwnedException) {
                 MessageBox.Show("Error deleting not owned file", "Deleting file");
                 return;
             }
@@ -253,11 +253,11 @@ namespace Disibox.Gui {
 
             try {
                 _dataSource.DeleteUser(selectedUser.User);
-            } catch (LoggedInUserRequiredException) {
+            } catch (UserNotLoggedInException) {
                 MessageBox.Show("Only a logged user (only administrator) can see the list of users", "Deleting User");
-            } catch (AdminUserRequiredException) {
+            } catch (UserNotAdminException) {
                 MessageBox.Show("Only a logged user (only administrator) can see the list of users", "Deleting User");
-            } catch (CannotDeleteUserException) {
+            } catch (CannotDeleteLastAdminException) {
                 MessageBox.Show("The default administrator user cannot be deleted!", "Deleting User");
             } catch (UserNotExistingException) {
                 MessageBox.Show("The user you are trying to delete does not exists!", "Deleting User");
