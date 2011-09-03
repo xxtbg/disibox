@@ -4,13 +4,14 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using Disibox.Data.Client;
 
 namespace Disibox.WebUI
 {
-    public partial class About : System.Web.UI.Page
+    public partial class SiteMemberOnly : System.Web.UI.MasterPage
     {
-        protected void Page_Load(object sender, EventArgs e) {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

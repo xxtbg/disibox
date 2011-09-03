@@ -50,6 +50,8 @@ namespace Disibox.Gui {
             var username = textBox.Text;
             var password = passwordBox.Password;
 
+            const string titleMessageBox = "Log In";
+            const string messageMessageBox = "Error while logging in: ";
             try {
                 _dataSource.Login(username, password);
                 if (!_mainWindow.IsVisible) {
@@ -60,13 +62,16 @@ namespace Disibox.Gui {
                     Close();
                 }
             } catch (UserNotExistingException) {
-                MessageBox.Show("User and/or Passowrd are not correct, please retry!", "Error when Log in");
+                MessageBox.Show(messageMessageBox+"there is not a user with this credentials!", titleMessageBox);
             } catch(InvalidEmailException) {
-                MessageBox.Show("User email is not valid, please retry!", "Error when Log in");
+                MessageBox.Show(messageMessageBox+"user email is not valid!", titleMessageBox);
             } catch(InvalidPasswordException) {
-                MessageBox.Show("User password is not valid, please retry!", "Error when Log in");
+                MessageBox.Show(messageMessageBox+"user password is not valid!", titleMessageBox);
             } catch(ArgumentNullException) {
-                MessageBox.Show("User and/or Passowrd are blank, please retry!", "Error when Log in");
+                MessageBox.Show(messageMessageBox+"user and/or passowrd are blank!", titleMessageBox);
+            } catch (Exception) {
+                MessageBox.Show(messageMessageBox + "unknown error!", titleMessageBox);
+                
             }
         }
 

@@ -8,10 +8,9 @@
         Log In
     </h2>
     <p>
-        Please enter your username and password.
-        <asp:HyperLink ID="RegisterHyperLink" runat="server" EnableViewState="false">Register</asp:HyperLink> if you don't have an account.
+        Please enter your username and password. Ask the administrator to have an username and password if you don't have an account.
     </p>
-    <asp:Login ID="LoginUser" runat="server" EnableViewState="false" RenderOuterTable="false">
+    <asp:Login ID="LoginUser" runat="server" EnableViewState="false" RenderOuterTable="false" DestinationPageUrl="../MembersOnly.aspx">
         <LayoutTemplate>
             <span class="failureNotification">
                 <asp:Literal ID="FailureText" runat="server"></asp:Literal>
@@ -41,7 +40,8 @@
                     </p>
                 </fieldset>
                 <p class="submitButton">
-                    <asp:Button ID="LoginButton" runat="server" CommandName="Login" Text="Log In" ValidationGroup="LoginUserValidationGroup"/>
+                    <asp:Button ID="LoginButton" runat="server" CommandName="Login" Text="Log In" 
+                        ValidationGroup="LoginUserValidationGroup" onclick="Login_click"/>
                 </p>
             </div>
         </LayoutTemplate>

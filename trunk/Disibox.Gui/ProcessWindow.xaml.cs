@@ -29,6 +29,8 @@ using System;
 using System.IO;
 using System.Windows;
 using Disibox.Data.Client;
+using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Exceptions;
 using Disibox.Gui.Util;
 using Microsoft.Win32;
 
@@ -59,16 +61,20 @@ namespace Disibox.Gui
         private void FillListView() {
             string temp = null;
             var numberOfProcessingTools = 0;
+
+            const string titleMessageBox = "Processing tools";
+            const string messageMessageBox = "Error while retriving the list of processing lists: ";
+
             try {
                 temp = _reader.ReadLine();
             } catch (Exception) {
-                MessageBox.Show("The server is not responding, try later!", "Information");
+                MessageBox.Show(messageMessageBox+"the server is not responding! (retriving the number of tools)", titleMessageBox);
                 _erroFillingList = true;
                 return;
             }
 
             if (temp == null) {
-                MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                MessageBox.Show(messageMessageBox + "number of tools is not valid format or null", titleMessageBox);
                 _erroFillingList = true;
                 return;
             }
@@ -76,7 +82,7 @@ namespace Disibox.Gui
             try {
                 numberOfProcessingTools = Int32.Parse(temp);
             } catch (Exception) {
-                MessageBox.Show("Mesage returned from server is wrong format or null, try later!", "Information");
+                MessageBox.Show(messageMessageBox + "number of tools is not valid format or null", titleMessageBox);
                 _erroFillingList = true;
                 return;
             }
@@ -89,7 +95,7 @@ namespace Disibox.Gui
                     if (info.Length != 3)
                         throw new Exception();
                 } catch (Exception) {
-                    MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                    MessageBox.Show(messageMessageBox + "cannot retrive tool information", titleMessageBox);
                     _erroFillingList = true;
                     return;
                 }
@@ -103,6 +109,8 @@ namespace Disibox.Gui
             var operationToApply = (ProcessingToolInformation) listView.SelectedItem;
             if (operationToApply == null) return;
             string processedFile = null;
+            const string titleMessageBox = "Processing the file";
+            const string messageMessageBox = "Error applying the processing tool: ";
 
             try {
                 _writer.WriteLine(operationToApply.Name);
@@ -110,13 +118,13 @@ namespace Disibox.Gui
                 //leggo l'uri del file processato
                 processedFile = _reader.ReadLine();
             } catch (Exception) {
-                MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                MessageBox.Show(messageMessageBox+"error occured retriving the uri of the output file!", titleMessageBox);
                 Close();
                 return;
             }
 
             if (processedFile == null) {
-                MessageBox.Show("Error occured during comminication with the server, try later!", "Information");
+                MessageBox.Show(messageMessageBox+"uri of the output file is null!", titleMessageBox);
                 Close();
                 return;
             }
@@ -129,20 +137,33 @@ namespace Disibox.Gui
                 FileStream destinationFile;
 
                 try {
-                   destinationFile = File.Create(path);
+                    destinationFile = File.Create(path);
                 } catch (Exception) {
-                    MessageBox.Show("Error during the creation of the destination file", "Downloading file");
+                    MessageBox.Show(messageMessageBox + "error during the creation of the destination file",
+                                    titleMessageBox);
                     Close();
                     return;
                 }
 
-                try
-                {
+                try {
                     sourceFileBlob = _ds.GetOutput(processedFile);
-                }
-                catch (Exception)
-                {
-                    MessageBox.Show("Error during the download of the file", "Downloading file");
+                } catch (InvalidOutputUriException) {
+                    MessageBox.Show(messageMessageBox + "invalid output uri!", titleMessageBox);
+                    destinationFile.Close();
+                    Close();
+                    return;
+                } catch (ArgumentNullException) {
+                    MessageBox.Show(messageMessageBox + "argument is null!", titleMessageBox);
+                    destinationFile.Close();
+                    Close();
+                    return;
+                } catch (UserNotLoggedInException) {
+                    MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
+                    destinationFile.Close();
+                    Close();
+                    return;
+                } catch (Exception) {
+                    MessageBox.Show(messageMessageBox + "unknown error!", titleMessageBox);
                     destinationFile.Close();
                     Close();
                     return;
@@ -152,30 +173,36 @@ namespace Disibox.Gui
                 try {
                     sourceFileBlob.CopyTo(destinationFile);
                 } catch (Exception) {
-                    MessageBox.Show("Error during the download of the file to the destination", "Downloading file");
+                    MessageBox.Show(messageMessageBox+"error during the download of the file to the destination", titleMessageBox);
                    
                     destinationFile.Close();
                     sourceFileBlob.Close();
                     try {
                         _ds.DeleteOutput(processedFile);
-                    } catch {}
+                    } catch {
+                        MessageBox.Show("An error occured while deleting the output file on the cloud! " +
+                                        "But the file is successfuly saved locally!", titleMessageBox);
+                    }
 
                     Close();
                     return;
                 }
                 sourceFileBlob.Close();
                 destinationFile.Close();
-                MessageBox.Show("File successfuly downloaded to: " + path, "Downloading file");
+                MessageBox.Show("File successfuly downloaded to: " + path, titleMessageBox);
             } else {
-                MessageBox.Show("processed file deleted from the cloud because you didn't " +
-                                "want to save it or the specified path does not exist", "Downloading file");
+                try {
+                    _ds.DeleteOutput(processedFile);
+                } catch {
+                    MessageBox.Show("An error occured while deleting the output file on the cloud! " +
+                                    "Nothing is saved locally!", titleMessageBox);
+                }
+                MessageBox.Show("Processed file deleted from the cloud because you didn't " +
+                                "want to save it or the specified path does not exists!", titleMessageBox);
             }
 
-            try {
-                _ds.DeleteOutput(processedFile);
-            } catch {}
-
             Close();
+
         }
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e)
