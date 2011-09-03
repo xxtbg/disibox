@@ -8,6 +8,6 @@
         About
     </h2>
     <p>
-        Put content here.
+        This is a simple web interface for the Disibox service running in the cloud. Disibox is like Dropbox without synchronization and it uses the Microsoft Windows Azure Platform as the cloud.
     </p>
 </asp:Content>

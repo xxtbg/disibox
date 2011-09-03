@@ -172,6 +172,7 @@ namespace Disibox.Data.Client
         /// <returns>True if processing output has been really deleted, false otherwise.</returns>
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
         /// <exception cref="InvalidOutputUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="UserNotLoggedInException"></exception>
         public bool DeleteOutput(string outputUri)
         {
             // Requirements
@@ -188,6 +189,7 @@ namespace Disibox.Data.Client
         /// <returns>The content of processing output pointed by given uri.</returns>
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
         /// <exception cref="InvalidOutputUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="UserNotLoggedInException"></exception>
         public Stream GetOutput(string outputUri)
         {
             // Requirements

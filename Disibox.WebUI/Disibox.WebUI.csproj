@@ -60,7 +60,9 @@
     <Content Include="Account\ChangePassword.aspx" />
     <Content Include="Account\ChangePasswordSuccess.aspx" />
     <Content Include="Account\Login.aspx" />
+    <Content Include="Logout.aspx" />
     <Content Include="Account\Register.aspx" />
+    <Content Include="MemberOnly.aspx" />
     <Content Include="Styles\Site.css" />
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
@@ -106,6 +108,13 @@
     <Compile Include="Account\Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Logout.aspx.cs">
+      <DependentUpon>Logout.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Logout.aspx.designer.cs">
+      <DependentUpon>Logout.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Account\Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -121,6 +130,20 @@
     <Compile Include="Controls\LabelCell.cs" />
     <Compile Include="Controls\UsersTable.cs" />
     <Compile Include="Controls\UsersTableRow.cs" />
+    <Compile Include="SiteMemberOnly.Master.cs">
+      <DependentUpon>SiteMemberOnly.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="SiteMemberOnly.Master.designer.cs">
+      <DependentUpon>SiteMemberOnly.Master</DependentUpon>
+    </Compile>
+    <Compile Include="MemberOnly.aspx.cs">
+      <DependentUpon>MemberOnly.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="MemberOnly.aspx.designer.cs">
+      <DependentUpon>MemberOnly.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -153,6 +176,13 @@
       <Project>{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}</Project>
       <Name>Disibox.Data.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
+      <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
+      <Name>Disibox.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SiteMemberOnly.Master" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

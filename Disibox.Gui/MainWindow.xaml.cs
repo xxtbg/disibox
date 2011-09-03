@@ -36,6 +36,7 @@ using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using Disibox.Data.Client;
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Exceptions;
 using Disibox.Gui.Util;
 using Microsoft.Win32;
 using Path = System.IO.Path;
@@ -95,6 +96,9 @@ namespace Disibox.Gui {
         }
 
         private void buttonUpload_Click(object sender, RoutedEventArgs e) {
+            var titleMessageBox = "Uploading file";
+            var messageMessageBox = "Error while uploading the file to the cloud: ";
+
             if (textBoxFileToUpload.Text != "") {
                 var filePath = textBoxFileToUpload.Text;
                 var fileName = Path.GetFileName(filePath);
@@ -115,8 +119,23 @@ namespace Disibox.Gui {
                     result = MessageBox.Show("This file already exists on the cloud, " +
                                              "do you want to overwrite it?",
                                              "Uploading a file", MessageBoxButton.YesNo);
+                } catch (InvalidFileNameException) {
+                    MessageBox.Show(messageMessageBox + "filename is invalid!", titleMessageBox);
+                    textBoxFileToUpload.Text = "";
+                    fileStream.Close();
+                    return;
+                } catch (ArgumentNullException) {
+                    MessageBox.Show(messageMessageBox + "argument is null!", titleMessageBox);
+                    textBoxFileToUpload.Text = "";
+                    fileStream.Close();
+                    return;
+                } catch (UserNotLoggedInException) {
+                    MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
+                    textBoxFileToUpload.Text = "";
+                    fileStream.Close();
+                    return;
                 } catch (Exception) {
-                    MessageBox.Show("Cannot upload the file to the cloud", "Uploading a file");
+                    MessageBox.Show(messageMessageBox, titleMessageBox);
                     textBoxFileToUpload.Text = "";
                     fileStream.Close();
                     return;
@@ -124,32 +143,48 @@ namespace Disibox.Gui {
 
                 switch (result) {
                     case MessageBoxResult.Cancel:
-                        MessageBox.Show("The file has been uploaded successfully!", "Uploading a file");
+                        MessageBox.Show("The file has been uploaded successfully!", titleMessageBox);
                         break;
 
                     case MessageBoxResult.No:
                         MessageBox.Show("The file on the cloud has been NOT overwritten by the local file!",
-                                        "Uploading a file");
+                                        titleMessageBox);
                         break;
 
                     case MessageBoxResult.Yes:
+                        titleMessageBox += " (Overwritting)";
                         try {
                             _dataSource.AddFile(fileName, fileStream, true);
+                        } catch (InvalidFileNameException) {
+                            MessageBox.Show(messageMessageBox + "filename is invalid!", titleMessageBox);
+                            textBoxFileToUpload.Text = "";
+                            fileStream.Close();
+                            return;
+                        } catch (ArgumentNullException) {
+                            MessageBox.Show(messageMessageBox + "argument is null!", titleMessageBox);
+                            textBoxFileToUpload.Text = "";
+                            fileStream.Close();
+                            return;
+                        } catch (UserNotLoggedInException) {
+                            MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
+                            textBoxFileToUpload.Text = "";
+                            fileStream.Close();
+                            return;
                         } catch (Exception) {
-                            MessageBox.Show("Cannot upload the file to the cloud (overwritting)", "Uploading a file");
+                            MessageBox.Show(messageMessageBox, titleMessageBox);
                             textBoxFileToUpload.Text = "";
                             fileStream.Close();
                             return;
                         }
 
-                        MessageBox.Show("The file has been uploaded successfully!", "Uploading a file");
+                        MessageBox.Show("The file has been uploaded successfully!", titleMessageBox);
                         break;
                 }
 
                 textBoxFileToUpload.Text = "";
                 fileStream.Close();
             } else {
-                MessageBox.Show("No file to upload", "Uploading a File");
+                MessageBox.Show("No file to upload", titleMessageBox);
             }
         }
 
@@ -164,10 +199,15 @@ namespace Disibox.Gui {
         private void buttonRefreshFiles_Click(object sender, RoutedEventArgs e) {
             IList<FileMetadata> names = null;
 
+            var titleMessageBox = "Refreshing file list";
+            var messageMessageBox = "Error while refreshing the file list: ";
+
             try {
                 names = _dataSource.GetFileMetadata();
+            }catch(UserNotLoggedInException) {
+                MessageBox.Show(messageMessageBox+"you are not logged in", titleMessageBox);
             } catch (Exception) {
-                MessageBox.Show("Cannot refresh the file list", "Refreshing file list");
+                MessageBox.Show(messageMessageBox+"unknown error!", titleMessageBox);
             }
 
             if (names == null)
@@ -185,16 +225,31 @@ namespace Disibox.Gui {
             if (selectedItem == null) return;
 
             var ok = false;
+            const string titleMessageBox = "Deleting file";
+            const string messageMessageBox = "Error while deleting the file from the cloud: ";
             try {
                 ok = _dataSource.DeleteFile(selectedItem.Uri);
+            } catch (ArgumentNullException) {
+                MessageBox.Show(messageMessageBox + "argument is null!", titleMessageBox);
+                return;
+            } catch (FileNotFoundException) {
+                MessageBox.Show(messageMessageBox + "file not found!", titleMessageBox);
+                return;
             } catch (UserNotLoggedInException) {
-                MessageBox.Show("Only a logged user can delete files that owns", "Deleting file");
+                MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
+                return;
             } catch (FileNotOwnedException) {
-                MessageBox.Show("Error deleting not owned file", "Deleting file");
+                MessageBox.Show(messageMessageBox + "file not owned by you!", titleMessageBox);
+                return;
+            } catch (InvalidFileUriException) {
+                MessageBox.Show(messageMessageBox + "invalid uri of the file!", titleMessageBox);
+                return;
+            } catch (Exception) {
+                MessageBox.Show(messageMessageBox + "unknown error!", titleMessageBox);
                 return;
             }
 
-            MessageBox.Show(ok ? "Error deleting the file" : "The file was deleted successfully", "Deleting file");
+            MessageBox.Show(ok ? "Error deleting the file" : "The file was deleted successfully", titleMessageBox);
 
             PerformClick(buttonRefreshFiles);
         }
@@ -203,28 +258,54 @@ namespace Disibox.Gui {
             var selectedItem = (FileMetadata) listView_Files.SelectedItem;
             var saveDialog = new SaveFileDialog();
             FileStream destinationFile;
+            Stream fileToDownload;
 
             if (selectedItem == null || saveDialog.ShowDialog() != true || !saveDialog.CheckPathExists) return;
-            var fileToDownload = _dataSource.GetFile(selectedItem.Uri);
+
+            const string titleMessageBox = "Downloading file";
+            const string messageMessageBox = "Error while downloading the file from the cloud: ";
+
+            try {
+                fileToDownload = _dataSource.GetFile(selectedItem.Uri);
+            } catch (ArgumentNullException) {
+                MessageBox.Show(messageMessageBox + "argument is null!", titleMessageBox);
+                return;
+            } catch (FileNotFoundException) {
+                MessageBox.Show(messageMessageBox + "file not found!", titleMessageBox);
+                return;
+            } catch (FileNotOwnedException) {
+                MessageBox.Show(messageMessageBox + "file not owned by you!", titleMessageBox);
+                return;
+            } catch (InvalidFileUriException) {
+                MessageBox.Show(messageMessageBox + "invalid uri of the file!", titleMessageBox);
+                return;
+            } catch (UserNotLoggedInException) {
+                MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
+                return;
+            } catch (Exception) {
+                MessageBox.Show(messageMessageBox + "unknown error!", titleMessageBox);
+                return;
+            }
+
 
             //catch exception if any
             try {
                 destinationFile = File.Create(saveDialog.FileName);
             } catch (Exception) {
-                MessageBox.Show("Error during the download of the file (creating destination file) ", "Downloading file");
+                MessageBox.Show(messageMessageBox + "creating destination file!", titleMessageBox);
                 return;
             }
 
             try {
                 fileToDownload.CopyTo(destinationFile);
             } catch (Exception ex) {
-                MessageBox.Show("Error during the download of the file: " + ex, "Downloading file");
+                MessageBox.Show(messageMessageBox + ex, titleMessageBox);
                 destinationFile.Close();
                 return;
             }
 
             destinationFile.Close();
-            MessageBox.Show("File successfuly downloaded to: " + saveDialog.FileName, "Downloading file");
+            MessageBox.Show("File successfuly downloaded to: " + saveDialog.FileName, titleMessageBox);
         }
 
         #endregion
@@ -243,6 +324,8 @@ namespace Disibox.Gui {
 
         private void buttonDeleteUser_Click(object sender, RoutedEventArgs e) {
             var selectedUser = (UserAndType) listView_Users.SelectedItem;
+            const string titleMessageBox = "Deleting user";
+            const string messageMessageBox = "Error while deleting the user: ";
             if (selectedUser == null) return;
 
             var result = MessageBox.Show("Are you sure you want to delete \"" + selectedUser.User + "\"?",
@@ -251,16 +334,22 @@ namespace Disibox.Gui {
             if (result == MessageBoxResult.No)
                 return;
 
+
             try {
                 _dataSource.DeleteUser(selectedUser.User);
+            } catch (ArgumentNullException) {
+                MessageBox.Show(messageMessageBox + "argument is null!", titleMessageBox);
             } catch (UserNotLoggedInException) {
-                MessageBox.Show("Only a logged user (only administrator) can see the list of users", "Deleting User");
+                MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
             } catch (UserNotAdminException) {
-                MessageBox.Show("Only a logged user (only administrator) can see the list of users", "Deleting User");
+                MessageBox.Show(messageMessageBox + "in order to delete users you must be administrator", titleMessageBox);
             } catch (CannotDeleteLastAdminException) {
-                MessageBox.Show("The default administrator user cannot be deleted!", "Deleting User");
+                MessageBox.Show(messageMessageBox + "the default administrator user cannot be deleted!", titleMessageBox);
             } catch (UserNotExistingException) {
-                MessageBox.Show("The user you are trying to delete does not exists!", "Deleting User");
+                MessageBox.Show(messageMessageBox + "the user you are trying to delete does not exists!",
+                                titleMessageBox);
+            } catch (Exception) {
+                MessageBox.Show(messageMessageBox + "unknown error!", titleMessageBox);
             }
 
             PerformClick(buttonRefreshUsers);
@@ -269,12 +358,20 @@ namespace Disibox.Gui {
         private void buttonRefreshUsers_Click(object sender, RoutedEventArgs e) {
             IList<string> adminUsers;
             IList<string> commonUsers;
+            const string titleMessageBox = "User Listing";
+            const string messageMessageBox = "Error while listing all the users: ";
 
             try {
                 adminUsers = _dataSource.GetAdminUsersEmails();
                 commonUsers = _dataSource.GetCommonUsersEmails();
+            } catch (UserNotLoggedInException) {
+                MessageBox.Show(messageMessageBox + "you are not logged in!", titleMessageBox);
+                return;
+            } catch (UserNotAdminException) {
+                MessageBox.Show(messageMessageBox + "you are not logged in as ADMIN!", titleMessageBox);
+                return;
             } catch (Exception) {
-                MessageBox.Show("Only a logged user (only administrator) can see the list of users", "User Listing");
+                MessageBox.Show(messageMessageBox + "unknown error!", titleMessageBox);
                 return;
             }
 
@@ -297,9 +394,11 @@ namespace Disibox.Gui {
 
         private void processFile(object sender, RoutedEventArgs e) {
             var selectedItem = (FileMetadata) listView_Files.SelectedItem;
+            const string titleMessageBox = "Processing file";
+            const string messageMessageBox = "Error while procesing a file: ";
 
             if (selectedItem == null) {
-                MessageBox.Show("You must select a file in order to process it!", "Processing file");
+                MessageBox.Show(messageMessageBox + "select a file in order to process it!", titleMessageBox);
                 return;
             }
 
@@ -314,7 +413,7 @@ namespace Disibox.Gui {
                 reader = new StreamReader(server.GetStream());
                 writer = new StreamWriter(server.GetStream()) {AutoFlush = true};
             } catch (Exception ex) {
-                MessageBox.Show("Error during the connection to the processing Server: " + ex, "Processing file");
+                MessageBox.Show(messageMessageBox + "error during the connection to the processing Server: " + ex, titleMessageBox);
                 return;
             }
 
@@ -327,13 +426,13 @@ namespace Disibox.Gui {
 
                 answer = reader.ReadLine();
             } catch (Exception ex) {
-                MessageBox.Show("An error occured while sending credentials and item to process: " + ex,
-                                "Processing file");
+                MessageBox.Show(
+                    messageMessageBox + "error occured while sending credentials and item to process: " + ex, titleMessageBox);
                 return;
             }
 
             if (answer == null || answer.Equals("KO")) {
-                MessageBox.Show("Error during the authentication to the Dispatcher Role", "Processing File");
+                MessageBox.Show(messageMessageBox + "error during the authentication to the Dispatcher Role", titleMessageBox);
                 reader.Close();
                 writer.Close();
                 server.Close();
@@ -372,13 +471,11 @@ namespace Disibox.Gui {
         #endregion
 
         private void tabControl1_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if (e.Source is TabControl) {
-                if (tabItemFiles.IsSelected)
-                    PerformClick(buttonRefreshFiles);
-                else if (tabItemUsers.IsSelected)
-                    PerformClick(buttonRefreshUsers);
-            }
+            if (!(e.Source is TabControl)) return;
+            if (tabItemFiles.IsSelected)
+                PerformClick(buttonRefreshFiles);
+            else if (tabItemUsers.IsSelected)
+                PerformClick(buttonRefreshUsers);
         }
-
     }
 }
