@@ -1,7 +1,4 @@
 ﻿//
-// Copyright (c) 2011, University of Genoa
-// All rights reserved.
-//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -25,45 +22,43 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System.Linq;
-using Disibox.Data.Entities;
-using Microsoft.WindowsAzure;
+using System;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public class DataContext<TEntity> : TableServiceContext where TEntity : BaseEntity
+    public abstract class BaseEntity : TableServiceEntity
     {
-        private readonly string _tableName;
-
-        public DataContext(string tableName, string tableEndpointUri, StorageCredentials credentials)
-            : base(tableEndpointUri, credentials)
+        /// <summary>
+        /// Constructor whose goal is to enforce assignment to basic entity fields
+        /// (<see cref="TableServiceEntity.RowKey"/> and <see cref="TableServiceEntity.PartitionKey"/>).
+        /// </summary>
+        /// <param name="rowKey">The row key associated with this entity.</param>
+        /// <param name="partitionKey">The partition key associated with this group of entities.</param>
+        /// <exception cref="ArgumentNullException">One of the arguments is null.</exception>
+        protected BaseEntity(string rowKey, string partitionKey)
         {
-            Require.NotNull(tableName, "tableName");
-            _tableName = tableName;
+            // Requirements
+            Require.NotNull(rowKey, "rowKey");
+            Require.NotNull(partitionKey, "partitionKey");
+
+            RowKey = rowKey;
+            PartitionKey = partitionKey;
         }
 
-        public new IQueryable<TEntity> Entities
+        /// <summary>
+        /// Seems to be required for serialization sake.
+        /// </summary>
+        /// <param name="partitionKey">The partition key associated with these entities.</param>
+        /// <exception cref="ArgumentNullException">Partition key is null.</exception>
+        [Obsolete]
+        protected BaseEntity(string partitionKey)
         {
-            get { return CreateQuery<TEntity>(_tableName); }
-        }
+            // Requirements
+            Require.NotNull(partitionKey, "partitionKey");
 
-        public void AddEntity(TEntity entity)
-        {
-            Require.NotNull(entity, "entity");
-            AddObject(_tableName, entity);
-        }
-
-        public void DeleteEntity(TEntity entity)
-        {
-            Require.NotNull(entity, "entity");
-            DeleteObject(entity);
-        }
-
-        public void UpdateEntity(TEntity entity)
-        {
-            Require.NotNull(entity, "entity");
-            UpdateObject(entity);
+            RowKey = partitionKey;
+            PartitionKey = partitionKey;
         }
     }
 }

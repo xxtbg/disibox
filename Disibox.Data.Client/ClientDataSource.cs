@@ -39,11 +39,11 @@ namespace Disibox.Data.Client
 {
     public class ClientDataSource
     {
-        private readonly BlobContainer _filesContainer;
-        private readonly BlobContainer _outputsContainer;
+        private readonly AzureContainer _filesContainer;
+        private readonly AzureContainer _outputsContainer;
 
-        private readonly DataContext<Entry> _entriesTableCtx;
-        private readonly DataContext<User> _usersTableCtx;
+        private readonly AzureTable<Entry> _entriesTable;
+        private readonly AzureTable<User> _usersTable;
 
         private string _loggedUserId;
         private bool _loggedUserIsAdmin;
@@ -62,16 +62,16 @@ namespace Disibox.Data.Client
             var credentials = storageAccount.Credentials;
 
             var filesContainerName = Properties.Settings.Default.FilesContainerName;
-            _filesContainer = new BlobContainer(filesContainerName, blobEndpointUri, credentials);
+            _filesContainer = AzureContainer.Connect(filesContainerName, blobEndpointUri, credentials);
 
             var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            _outputsContainer = new BlobContainer(outputsContainerName, blobEndpointUri, credentials);
+            _outputsContainer = AzureContainer.Connect(outputsContainerName, blobEndpointUri, credentials);
 
             var entriesTableName = Properties.Settings.Default.EntriesTableName;
-            _entriesTableCtx = new DataContext<Entry>(entriesTableName, tableEndpointUri, credentials);
+            _entriesTable = AzureTable<Entry>.Connect(entriesTableName, tableEndpointUri, credentials);
 
             var usersTableName = Properties.Settings.Default.UsersTableName;
-            _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
+            _usersTable = AzureTable<User>.Connect(usersTableName, tableEndpointUri, credentials);
         }
 
         /*=============================================================================
@@ -227,8 +227,8 @@ namespace Disibox.Data.Client
             var userId = GenerateUserId(userIsAdmin);
             var user = new User(userId, userEmail, userPwd, userIsAdmin);
 
-            _usersTableCtx.AddEntity(user);
-            _usersTableCtx.SaveChanges();
+            _usersTable.AddEntity(user);
+            _usersTable.SaveChanges();
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Disibox.Data.Client
             RequireAdminUser();
             RequireExistingUser(userEmail);
 
-            var user = _usersTableCtx.Entities.Where(u => u.Email == userEmail).First();
+            var user = _usersTable.Entities.Where(u => u.Email == userEmail).First();
             
             if (user.IsAdmin)
             {
@@ -257,8 +257,8 @@ namespace Disibox.Data.Client
                     throw new CannotDeleteLastAdminException();
             }
 
-            _usersTableCtx.DeleteEntity(user);
-            _usersTableCtx.SaveChanges();
+            _usersTable.DeleteEntity(user);
+            _usersTable.SaveChanges();
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            var users = _usersTableCtx.Entities.ToList();
+            var users = _usersTable.Entities.ToList();
             return users.Where(u => u.IsAdmin).Select(u => u.Email).ToList();
         }
 
@@ -289,7 +289,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            var users = _usersTableCtx.Entities.ToList();
+            var users = _usersTable.Entities.ToList();
             return users.Where(u => !u.IsAdmin).Select(u => u.Email).ToList();
         }
 
@@ -310,7 +310,7 @@ namespace Disibox.Data.Client
 
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
-            var q = _usersTableCtx.Entities.Where(predicate).ToList();
+            var q = _usersTable.Entities.Where(predicate).ToList();
             if (q.Count() != 1)
                 throw new UserNotExistingException(userEmail);
             var user = q.First();
@@ -386,7 +386,7 @@ namespace Disibox.Data.Client
         /// <exception cref="UserNotExistingException">There is no user with given email address.</exception>
         private void RequireExistingUser(string userEmail)
         {
-            var matches = _usersTableCtx.Entities.Where(u => u.Email == userEmail).ToList();
+            var matches = _usersTable.Entities.Where(u => u.Email == userEmail).ToList();
             if (matches.Count == 1) return;
             throw new UserNotExistingException(userEmail);
         }
@@ -398,7 +398,7 @@ namespace Disibox.Data.Client
         /// <exception cref="UserExistingException">There is a user with given email address.</exception>
         private void RequireNotExistingUser(string userEmail)
         {
-            var matches = _usersTableCtx.Entities.Where(u => u.Email == userEmail).ToList();
+            var matches = _usersTable.Entities.Where(u => u.Email == userEmail).ToList();
             if (matches.Count == 0) return;
             throw new UserExistingException(userEmail);
         }
@@ -409,7 +409,7 @@ namespace Disibox.Data.Client
 
         private string GenerateUserId(bool userIsAdmin)
         {
-            var nextUserIdEntry = _entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId").First();
+            var nextUserIdEntry = _entriesTable.Entities.Where(e => e.RowKey == "NextUserId").First();
             var nextUserId = int.Parse(nextUserIdEntry.Value);
 
             var firstIdChar = (userIsAdmin) ? 'a' : 'u';
@@ -419,8 +419,8 @@ namespace Disibox.Data.Client
             nextUserIdEntry.Value = nextUserId.ToString();
 
             // Next method must be called in order to save the update.
-            _entriesTableCtx.UpdateEntity(nextUserIdEntry);
-            _entriesTableCtx.SaveChanges();
+            _entriesTable.UpdateEntity(nextUserIdEntry);
+            _entriesTable.SaveChanges();
 
             return userId;
         }
@@ -482,7 +482,7 @@ namespace Disibox.Data.Client
 
         private string GetUserEmailByUserId(string userId)
         {
-            return _usersTableCtx.Entities.Where(u => u.RowKey == userId).First().Email;
+            return _usersTable.Entities.Where(u => u.RowKey == userId).First().Email;
         }
     }
 }

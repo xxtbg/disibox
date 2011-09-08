@@ -38,13 +38,13 @@ namespace Disibox.Data.Server
 {
     public class ServerDataSource
     {
-        private readonly BlobContainer _filesContainer;
-        private readonly BlobContainer _outputsContainer;
+        private readonly AzureContainer _filesContainer;
+        private readonly AzureContainer _outputsContainer;
 
-        private readonly MsgQueue<ProcessingMessage> _processingRequests;
-        private readonly MsgQueue<ProcessingMessage> _processingCompletions;
+        private readonly AzureQueue<ProcessingMessage> _processingRequests;
+        private readonly AzureQueue<ProcessingMessage> _processingCompletions;
 
-        private readonly DataContext<User> _usersTableCtx;
+        private readonly AzureTable<User> _usersTable;
 
         /// <summary>
         /// Creates a data source that should be used server-side only.
@@ -60,19 +60,19 @@ namespace Disibox.Data.Server
             var credentials = storageAccount.Credentials;
 
             var filesContainerName = Properties.Settings.Default.FilesContainerName;
-            _filesContainer = new BlobContainer(filesContainerName, blobEndpointUri, credentials);
+            _filesContainer = AzureContainer.Connect(filesContainerName, blobEndpointUri, credentials);
 
             var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            _outputsContainer = new BlobContainer(outputsContainerName, blobEndpointUri, credentials);
+            _outputsContainer = AzureContainer.Connect(outputsContainerName, blobEndpointUri, credentials);
 
             var procReqName = Properties.Settings.Default.ProcReqQueueName;
-            _processingRequests = new MsgQueue<ProcessingMessage>(procReqName, queueEndpointUri, credentials);
+            _processingRequests = AzureQueue<ProcessingMessage>.Connect(procReqName, queueEndpointUri, credentials);
 
             var procComplName = Properties.Settings.Default.ProcComplQueueName;
-            _processingCompletions = new MsgQueue<ProcessingMessage>(procComplName, queueEndpointUri, credentials);
+            _processingCompletions = AzureQueue<ProcessingMessage>.Connect(procComplName, queueEndpointUri, credentials);
 
             var usersTableName = Properties.Settings.Default.UsersTableName;
-            _usersTableCtx = new DataContext<User>(usersTableName, tableEndpointUri, credentials);
+            _usersTable = AzureTable<User>.Connect(usersTableName, tableEndpointUri, credentials);
         }
 
         /*=============================================================================
@@ -96,7 +96,7 @@ namespace Disibox.Data.Server
 
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
-            var q = _usersTableCtx.Entities.Where(predicate).ToList();
+            var q = _usersTable.Entities.Where(predicate).ToList();
             return (q.Count() == 1);
         }
 
@@ -137,7 +137,7 @@ namespace Disibox.Data.Server
 
         public void ClearProcessingRequests()
         {
-            _processingRequests.ClearMessages();
+            _processingRequests.Clear();
         }
 
         /*=============================================================================
@@ -177,7 +177,7 @@ namespace Disibox.Data.Server
 
         public void ClearProcessingCompletions()
         {
-            _processingCompletions.ClearMessages();
+            _processingCompletions.Clear();
         }
 
         /*=============================================================================

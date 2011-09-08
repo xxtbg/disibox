@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,60 +34,84 @@ using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public class BlobContainer : CloudBlobContainer
+    public class AzureContainer
     {
-        public BlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)
-            : base(blobEndpointUri + "/" + containerName, credentials)
+        private readonly CloudBlobContainer _container;
+
+        private AzureContainer(CloudBlobContainer container)
         {
-            // Empty
+            _container = container;
         }
 
-        /// <summary>
-        /// Uploads given stream to blob storage.
-        /// </summary>
-        /// <param name="blobName"></param>
-        /// <param name="blobContentType"></param>
-        /// <param name="blobContent"></param>
-        /// <returns></returns>
+        public string Name
+        {
+            get { return _container.Name; }
+        }
+
+        public BlobContainerPermissions Permissions
+        {
+            get { return _container.GetPermissions(); }
+            set { _container.SetPermissions(value); }
+        }
+
+        public Uri Uri
+        {
+            get { return _container.Uri; }
+        }
+
+        public static AzureContainer Connect(string containerName, string blobEndpointUri,
+                                             StorageCredentials credentials)
+        {
+            var container = CreateContainer(containerName, blobEndpointUri, credentials);
+            return new AzureContainer(container);
+        }
+
+        public static AzureContainer Create(string containerName, string blobEndpointUri, StorageCredentials credentials)
+        {
+            var container = CreateContainer(containerName, blobEndpointUri, credentials);
+            container.CreateIfNotExist();
+            return new AzureContainer(container);
+        }
+
         public string AddBlob(string blobName, string blobContentType, Stream blobContent)
         {
+            var oldPosition = blobContent.Position;
             blobContent.Seek(0, SeekOrigin.Begin);
-            var blob = GetBlockBlobReference(blobName);
+            var blob = _container.GetBlockBlobReference(blobName);
             blob.Properties.ContentType = blobContentType;
             blob.UploadFromStream(blobContent);
+            blobContent.Seek(oldPosition, SeekOrigin.Begin);
             return blob.Uri.ToString();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="blobUri"></param>
-        /// <returns></returns>
         public bool DeleteBlob(string blobUri)
         {
-            var blob = GetBlobReference(blobUri);
+            var blob = _container.GetBlobReference(blobUri);
             return blob.DeleteIfExists();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="blobUri"></param>
-        /// <returns></returns>
         public Stream GetBlob(string blobUri)
         {
-            var blob = GetBlockBlobReference(blobUri);
+            var blob = _container.GetBlockBlobReference(blobUri);
             return blob.OpenRead();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public IEnumerable<CloudBlob> GetBlobs()
         {
             var options = new BlobRequestOptions {UseFlatBlobListing = true};
-            return ListBlobs(options).Select(b => (CloudBlob)b).ToList();
+            return _container.ListBlobs(options).Select(b => (CloudBlob) b).ToList();
+        }
+
+        public void Clear()
+        {
+            _container.Delete();
+            _container.Create();
+        }
+
+        private static CloudBlobContainer CreateContainer(string containerName, string blobEndpointUri,
+                                                          StorageCredentials credentials)
+        {
+            return new CloudBlobContainer(blobEndpointUri + "/" + containerName, credentials);
         }
     }
 }
