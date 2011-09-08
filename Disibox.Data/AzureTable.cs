@@ -28,14 +28,13 @@
 using System;
 using System.Data.Services.Client;
 using System.Linq;
-using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public class AzureTable<TEntity> where TEntity : BaseEntity
+    public class AzureTable<TEntity> : IStorage where TEntity : TableServiceEntity
     {
         private readonly CloudTableClient _tableClient;
         private readonly TableServiceContext _tableContext;
@@ -45,7 +44,7 @@ namespace Disibox.Data
         {
             _tableClient = tableClient;
             _tableContext = tableClient.GetDataServiceContext();
-            _tableName = tableName;           
+            _tableName = tableName;
         }
 
         public IQueryable<TEntity> Entities
@@ -53,7 +52,18 @@ namespace Disibox.Data
             get { return _tableContext.CreateQuery<TEntity>(_tableName); }
         }
 
-        public static AzureTable<TEntity> Connect(string tableName, string tableEndpointUri, StorageCredentials credentials)
+        public string Name
+        {
+            get { return _tableName; }
+        }
+
+        public Uri Uri
+        {
+            get { return new Uri(_tableClient.BaseUri + "/" + _tableName); }
+        }
+
+        public static AzureTable<TEntity> Connect(string tableName, string tableEndpointUri,
+                                                  StorageCredentials credentials)
         {
             // Requirements
             Require.NotEmpty(tableName, "tableName");
@@ -63,7 +73,8 @@ namespace Disibox.Data
             return new AzureTable<TEntity>(tableName, tableClient);
         }
 
-        public static AzureTable<TEntity> Create(string tableName, string tableEndpointUri, StorageCredentials credentials)
+        public static AzureTable<TEntity> Create(string tableName, string tableEndpointUri,
+                                                 StorageCredentials credentials)
         {
             // Requirements
             Require.NotEmpty(tableName, "tableName");
@@ -111,6 +122,11 @@ namespace Disibox.Data
             _tableClient.DeleteTableIfExist(_tableName);
         }
 
+        public bool Exists()
+        {
+            return _tableClient.DoesTableExist(_tableName);
+        }
+
         private static CloudTableClient CreateTableClient(string tableEndpointUri, StorageCredentials credentials)
         {
             var tableClient = new CloudTableClient(tableEndpointUri, credentials);
@@ -120,7 +136,7 @@ namespace Disibox.Data
 
         private void RequireExistingTable()
         {
-            if (_tableClient.DoesTableExist(_tableName)) return;
+            if (Exists()) return;
             throw new TableNotExistingException(_tableName);
         }
     }

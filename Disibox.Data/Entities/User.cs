@@ -27,13 +27,14 @@
 
 using System;
 using Disibox.Utils;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
 {
     /// <summary>
     /// Table entity representing a user.
     /// </summary>
-    public sealed class User : BaseEntity
+    public sealed class User : TableServiceEntity
     {
         /// <summary>
         /// Creates a User entity according to given parameters.
@@ -44,8 +45,9 @@ namespace Disibox.Data.Entities
         /// <param name="userPwd">User password (NOT hashed).</param>
         /// <param name="userIsAdmin">Whether user will be or not be administrator.</param>
         public User(string userId, string userEmail, string userPwd, bool userIsAdmin)
-            : base(userId, Properties.Settings.Default.UsersTableName)
         {
+            RowKey = userId;
+            PartitionKey = Properties.Settings.Default.UsersTableName;
             Email = userEmail;
             HashedPassword = Hash.ComputeMD5(userPwd);
             IsAdmin = userIsAdmin;
@@ -56,9 +58,9 @@ namespace Disibox.Data.Entities
         /// </summary>
         [Obsolete]
         public User()
-            : base(Properties.Settings.Default.UsersTableName)
         {
-            // Empty
+            RowKey = Properties.Settings.Default.UsersTableName;
+            PartitionKey = Properties.Settings.Default.UsersTableName;
         }
 
         /// <summary>

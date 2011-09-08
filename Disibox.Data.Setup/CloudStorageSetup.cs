@@ -93,7 +93,7 @@ namespace Disibox.Data.Setup
             }
 
             PrintStep(" * Setting permissions up");
-            container.Permissions.PublicAccess = BlobContainerPublicAccessType.Container;
+            container.Permissions.PublicAccess = BlobContainerPublicAccessType.Off;
         }
 
         private static void SetupProcessingQueues(string queueEndpointUri, StorageCredentials credentials)
