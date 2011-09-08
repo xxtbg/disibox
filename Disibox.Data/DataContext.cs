@@ -27,7 +27,6 @@
 
 using System.Linq;
 using Disibox.Data.Entities;
-using Disibox.Utils;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -40,9 +39,7 @@ namespace Disibox.Data
         public DataContext(string tableName, string tableEndpointUri, StorageCredentials credentials)
             : base(tableEndpointUri, credentials)
         {
-            // Requirements
             Require.NotNull(tableName, "tableName");
-
             _tableName = tableName;
         }
 
@@ -53,16 +50,19 @@ namespace Disibox.Data
 
         public void AddEntity(TEntity entity)
         {
+            Require.NotNull(entity, "entity");
             AddObject(_tableName, entity);
         }
 
         public void DeleteEntity(TEntity entity)
         {
+            Require.NotNull(entity, "entity");
             DeleteObject(entity);
         }
 
         public void UpdateEntity(TEntity entity)
         {
+            Require.NotNull(entity, "entity");
             UpdateObject(entity);
         }
     }
