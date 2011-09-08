@@ -23,7 +23,6 @@
 //
 
 using System;
-using Disibox.Utils;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
@@ -31,11 +30,12 @@ namespace Disibox.Data.Entities
     public abstract class BaseEntity : TableServiceEntity
     {
         /// <summary>
-        /// 
+        /// Constructor whose goal is to enforce assignment to basic entity fields
+        /// (<see cref="TableServiceEntity.RowKey"/> and <see cref="TableServiceEntity.PartitionKey"/>).
         /// </summary>
-        /// <param name="rowKey"></param>
-        /// <param name="partitionKey"></param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="rowKey">The row key associated with this entity.</param>
+        /// <param name="partitionKey">The partition key associated with this group of entities.</param>
+        /// <exception cref="ArgumentNullException">One of the arguments is null.</exception>
         protected BaseEntity(string rowKey, string partitionKey)
         {
             // Requirements
@@ -49,8 +49,8 @@ namespace Disibox.Data.Entities
         /// <summary>
         /// Seems to be required for serialization sake.
         /// </summary>
-        /// <param name="partitionKey"></param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="partitionKey">The partition key associated with these entities.</param>
+        /// <exception cref="ArgumentNullException">Partition key is null.</exception>
         [Obsolete]
         protected BaseEntity(string partitionKey)
         {
