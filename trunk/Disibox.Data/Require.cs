@@ -44,6 +44,20 @@ namespace Disibox.Data
         /// </summary>
         /// <param name="arg"></param>
         /// <param name="argName"></param>
+        public static void NotEmpty(string arg, string argName)
+        {
+            // Requirements
+            NotNull(arg, argName);
+
+            if (arg.Length > 0) return;
+            throw new ArgumentException("Empty string.", argName);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <param name="argName"></param>
         /// <exception cref="ArgumentNullException"></exception>
         public static void NotNull(object arg, string argName)
         {

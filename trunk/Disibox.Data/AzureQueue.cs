@@ -29,15 +29,28 @@ using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public class MsgQueue<TMsg> where TMsg : BaseMessage, new()
+    public class AzureQueue<TMsg> where TMsg : BaseMessage, new()
     {
         private const int PeekCount = 32;
 
         private readonly CloudQueue _queue;
 
-        public MsgQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        private AzureQueue(CloudQueue queue)
         {
-            _queue = new CloudQueue(queueEndpointUri + "/" + queueName, credentials);
+            _queue = queue;
+        }
+
+        public static AzureQueue<TMsg> Connect(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        {
+            var queue = CreateQueue(queueName, queueEndpointUri, credentials);
+            return new AzureQueue<TMsg>(queue);
+        }
+
+        public static AzureQueue<TMsg> Create(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        {
+            var queue = CreateQueue(queueName, queueEndpointUri, credentials);
+            queue.CreateIfNotExist();
+            return new AzureQueue<TMsg>(queue);
         }
 
         public TMsg DequeueMessage()
@@ -77,9 +90,14 @@ namespace Disibox.Data
             return messages;
         }
 
-        public void ClearMessages()
+        public void Clear()
         {
             _queue.Clear();
+        }
+
+        private static CloudQueue CreateQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        {
+            return new CloudQueue(queueEndpointUri + "/" + queueName, credentials);
         }
     }
 }

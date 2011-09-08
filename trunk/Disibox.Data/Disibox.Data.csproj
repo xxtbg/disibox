@@ -67,10 +67,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseMessage.cs" />
-    <Compile Include="BlobContainer.cs" />
-    <Compile Include="DataContext.cs" />
-    <Compile Include="Entities\BaseEntity.cs" />
+    <Compile Include="AzureContainer.cs" />
+    <Compile Include="AzureTable.cs" />
     <Compile Include="Entities\Entry.cs" />
     <Compile Include="Entities\User.cs" />
     <Compile Include="Exceptions\InvalidEmailException.cs" />
@@ -78,7 +78,8 @@
     <Compile Include="Exceptions\InvalidFileUriException.cs" />
     <Compile Include="Exceptions\InvalidOutputUriException.cs" />
     <Compile Include="Exceptions\InvalidPasswordException.cs" />
-    <Compile Include="MsgQueue.cs" />
+    <Compile Include="Exceptions\TableNotExistingException.cs" />
+    <Compile Include="AzureQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

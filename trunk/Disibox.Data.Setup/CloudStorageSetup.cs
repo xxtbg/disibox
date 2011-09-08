@@ -28,6 +28,7 @@
 using System;
 using System.Linq;
 using Disibox.Data.Entities;
+using Disibox.Data.Server;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -35,6 +36,9 @@ namespace Disibox.Data.Setup
 {
     public static class CloudStorageSetup
     {
+        private static bool _doReset;
+        private static bool _printSteps;
+
         public static void Main()
         {
             SetupStorage(false, true);
@@ -50,126 +54,113 @@ namespace Disibox.Data.Setup
             var connectionString = Data.Properties.Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
-            SetupBlobContainers(storageAccount, doReset, printSteps);
-            PrintStep("", printSteps);
-            SetupProcessingQueues(storageAccount, doReset, printSteps);
-            PrintStep("", printSteps);
-            SetupEntriesTable(storageAccount, doReset, printSteps);
-            PrintStep("", printSteps);
-            SetupUsersTable(storageAccount, doReset, printSteps);
+            var blobEndpointUri = storageAccount.BlobEndpoint.ToString();
+            var queueEndpointUri = storageAccount.QueueEndpoint.ToString();
+            var tableEndpointUri = storageAccount.TableEndpoint.ToString();
+            var credentials = storageAccount.Credentials;
+
+            _doReset = doReset;
+            _printSteps = printSteps;
+
+            SetupContainers(blobEndpointUri, credentials);
+            PrintStep("");
+            SetupProcessingQueues(queueEndpointUri, credentials);
+            PrintStep("");
+            SetupEntriesTable(tableEndpointUri, credentials);
+            PrintStep("");
+            SetupUsersTable(tableEndpointUri, credentials);
         }
 
-        private static void SetupBlobContainers(CloudStorageAccount storageAccount, bool doReset, bool printSteps)
+        private static void SetupContainers(string blobEndpointUri, StorageCredentials credentials)
         {
-            PrintStep("Creating blob client...", printSteps);
-            var blobClient = storageAccount.CreateCloudBlobClient();
+            PrintStep("Creating blob containers...");
 
             var filesContainerName = Data.Properties.Settings.Default.FilesContainerName;
-            SetupBlobContainer(blobClient, filesContainerName, doReset, printSteps);
+            SetupBlobContainer(filesContainerName, blobEndpointUri, credentials);
 
             var outputsContainerName = Data.Properties.Settings.Default.OutputsContainerName;
-            SetupBlobContainer(blobClient, outputsContainerName, doReset, printSteps);
+            SetupBlobContainer(outputsContainerName, blobEndpointUri, credentials);
         }
 
-        private static void SetupBlobContainer(CloudBlobClient blobClient, string blobContainerName, bool doReset, bool printSteps)
+        private static void SetupBlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)
         {
-            PrintStep("Creating " + blobContainerName + " blob container...", printSteps);
-            var blobContainer = blobClient.GetContainerReference(blobContainerName);
-
-            blobContainer.CreateIfNotExist();
-            if (doReset)
+            PrintStep("Creating " + containerName + " blob container...");
+            var container = AzureContainer.Create(containerName, blobEndpointUri, credentials);
+            if (_doReset)
             {
-                PrintStep(" * Resetting its content", printSteps);
-                blobContainer.Delete();
-                blobContainer.Create();
+                PrintStep(" * Resetting its content");
+                container.Clear();
             }
 
-            PrintStep(" * Setting permissions up", printSteps);
-            var permissions = blobContainer.GetPermissions();
-            permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-            blobContainer.SetPermissions(permissions);
+            PrintStep(" * Setting permissions up");
+            container.Permissions.PublicAccess = BlobContainerPublicAccessType.Container;
         }
 
-        private static void SetupProcessingQueues(CloudStorageAccount storageAccount, bool doReset, bool printSteps)
+        private static void SetupProcessingQueues(string queueEndpointUri, StorageCredentials credentials)
         {
-            PrintStep("Creating queue client...", printSteps);
-            var queueClient = storageAccount.CreateCloudQueueClient();
+            PrintStep("Creating queue client...");
 
             var processingRequestsName = Data.Properties.Settings.Default.ProcReqQueueName;
-            SetupProcessingQueue(queueClient, processingRequestsName, doReset, printSteps);
+            SetupProcessingQueue(processingRequestsName, queueEndpointUri, credentials);
 
             var processingCompletionsName = Data.Properties.Settings.Default.ProcComplQueueName;
-            SetupProcessingQueue(queueClient, processingCompletionsName, doReset, printSteps);
+            SetupProcessingQueue(processingCompletionsName, queueEndpointUri, credentials);
         }
 
-        private static void SetupProcessingQueue(CloudQueueClient queueClient, string processingQueueName, bool doReset, bool printSteps)
+        private static void SetupProcessingQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
         {
-            PrintStep("Creating " + processingQueueName + " processing queue...", printSteps);
-            var processingQueue = queueClient.GetQueueReference(processingQueueName);
+            PrintStep("Creating " + queueName + " processing queue...");
+            var queue = AzureQueue<ProcessingMessage>.Create(queueName, queueEndpointUri, credentials);
 
-            processingQueue.CreateIfNotExist();
-            if (!doReset) return;
-            PrintStep(" * Resetting its content", printSteps);
-            processingQueue.Delete();
-            processingQueue.Create();
+            if (!_doReset) return;
+            PrintStep(" * Resetting its content");
+            queue.Clear();
         }
 
-        private static void SetupEntriesTable(CloudStorageAccount storageAccount, bool doReset, bool printSteps)
+        private static void SetupEntriesTable(string tableEndpointUri, StorageCredentials credentials)
         {
-            var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
-            tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-
             var entriesTableName = Data.Properties.Settings.Default.EntriesTableName;
-            PrintStep("Creating " + entriesTableName + " table...", printSteps);
-            if (doReset)
-                tableClient.DeleteTableIfExist(entriesTableName);
-            tableClient.CreateTableIfNotExist(entriesTableName);
 
-            PrintStep(" * Adding default entries", printSteps);
+            PrintStep("Creating " + entriesTableName + " table...");
+            var entriesTable = AzureTable<Entry>.Create(entriesTableName, tableEndpointUri, credentials);
+            if (_doReset)
+                entriesTable.Clear();
 
-            var tableServiceUri = storageAccount.TableEndpoint.AbsoluteUri;
-            var credentials = storageAccount.Credentials;
-            var entriesTableCtx = new DataContext<Entry>(entriesTableName, tableServiceUri, credentials);
+            PrintStep(" * Adding default entries");
 
-            var q = entriesTableCtx.Entities.Where(e => e.RowKey == "NextUserId").ToList();
+            var q = entriesTable.Entities.Where(e => e.RowKey == "NextUserId").ToList();
             if (q.Any()) return;
 
             var nextUserIdEntry = new Entry("NextUserId", 0.ToString());
-            entriesTableCtx.AddEntity(nextUserIdEntry);
-            entriesTableCtx.SaveChanges();
+            entriesTable.AddEntity(nextUserIdEntry);
+            entriesTable.SaveChanges();
         }
 
-        private static void SetupUsersTable(CloudStorageAccount storageAccount, bool doReset, bool printSteps)
+        private static void SetupUsersTable(string tableEndpointUri, StorageCredentials credentials)
         {
-            var tableClient = new CloudTableClient(storageAccount.TableEndpoint.AbsoluteUri, storageAccount.Credentials);
-            tableClient.RetryPolicy = RetryPolicies.Retry(3, TimeSpan.FromSeconds(1));
-
             var usersTableName = Data.Properties.Settings.Default.UsersTableName;
-            PrintStep("Creating " + usersTableName + " table...", printSteps);
-            if (doReset)
-                tableClient.DeleteTableIfExist(usersTableName);
-            tableClient.CreateTableIfNotExist(usersTableName);
 
-            PrintStep(" * Adding default users", printSteps);
+            PrintStep("Creating " + usersTableName + " table...");
+            var usersTable = AzureTable<User>.Create(usersTableName, tableEndpointUri, credentials);
+            if (_doReset)
+                usersTable.Clear();
 
-            var tableServiceUri = storageAccount.TableEndpoint.AbsoluteUri;
-            var credentials = storageAccount.Credentials;
-            var usersTableCtx = new DataContext<User>(usersTableName, tableServiceUri, credentials);
+            PrintStep(" * Adding default users");
 
-            var q = usersTableCtx.Entities.Where(u => u.RowKey == "a0").ToList();
+            var q = usersTable.Entities.Where(u => u.RowKey == "a0").ToList();
             if (q.Any()) return;
 
             var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
             var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
             var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, true);
 
-            usersTableCtx.AddEntity(defaultAdminUser);
-            usersTableCtx.SaveChanges();
+            usersTable.AddEntity(defaultAdminUser);
+            usersTable.SaveChanges();
         }
 
-        private static void PrintStep(string step, bool printSteps)
+        private static void PrintStep(string step)
         {
-            if (!printSteps) return;
+            if (!_printSteps) return;
             Console.WriteLine(step);
         }
     }

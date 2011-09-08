@@ -1,4 +1,7 @@
 ﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -23,42 +26,14 @@
 //
 
 using System;
-using Microsoft.WindowsAzure.StorageClient;
 
-namespace Disibox.Data.Entities
+namespace Disibox.Data.Exceptions
 {
-    public abstract class BaseEntity : TableServiceEntity
+    public class TableNotExistingException : Exception
     {
-        /// <summary>
-        /// Constructor whose goal is to enforce assignment to basic entity fields
-        /// (<see cref="TableServiceEntity.RowKey"/> and <see cref="TableServiceEntity.PartitionKey"/>).
-        /// </summary>
-        /// <param name="rowKey">The row key associated with this entity.</param>
-        /// <param name="partitionKey">The partition key associated with this group of entities.</param>
-        /// <exception cref="ArgumentNullException">One of the arguments is null.</exception>
-        protected BaseEntity(string rowKey, string partitionKey)
+        public TableNotExistingException(string tableName) : base(tableName)
         {
-            // Requirements
-            Require.NotNull(rowKey, "rowKey");
-            Require.NotNull(partitionKey, "partitionKey");
-
-            RowKey = rowKey;
-            PartitionKey = partitionKey;
-        }
-
-        /// <summary>
-        /// Seems to be required for serialization sake.
-        /// </summary>
-        /// <param name="partitionKey">The partition key associated with these entities.</param>
-        /// <exception cref="ArgumentNullException">Partition key is null.</exception>
-        [Obsolete]
-        protected BaseEntity(string partitionKey)
-        {
-            // Requirements
-            Require.NotNull(partitionKey, "partitionKey");
-
-            RowKey = partitionKey;
-            PartitionKey = partitionKey;
+            // Empty
         }
     }
 }
