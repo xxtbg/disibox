@@ -26,13 +26,14 @@
 //
 
 using System;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data.Entities
 {
     /// <summary>
     /// Table entity representing an entry, that is, a (name, value) pair.
     /// </summary>
-    public sealed class Entry : BaseEntity
+    public sealed class Entry : TableServiceEntity
     {
         /// <summary>
         /// 
@@ -40,8 +41,9 @@ namespace Disibox.Data.Entities
         /// <param name="entryName"></param>
         /// <param name="entryValue"></param>
         public Entry(string entryName, string entryValue)
-            : base(entryName, Properties.Settings.Default.EntriesTableName)
         {
+            RowKey = entryName;
+            PartitionKey = Properties.Settings.Default.EntriesTableName;
             Value = entryValue;
         }
 
@@ -50,9 +52,9 @@ namespace Disibox.Data.Entities
         /// </summary>
         [Obsolete]
         public Entry()
-            : base(Properties.Settings.Default.EntriesTableName)
         {
-            // Empty
+            RowKey = Properties.Settings.Default.EntriesTableName;
+            PartitionKey = Properties.Settings.Default.EntriesTableName;
         }
 
         /// <summary>

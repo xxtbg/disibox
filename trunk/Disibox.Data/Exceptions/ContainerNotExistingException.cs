@@ -1,4 +1,7 @@
 ﻿//
+// Copyright (c) 2011, University of Genoa
+// All rights reserved.
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //     * Redistributions of source code must retain the above copyright
@@ -24,15 +27,13 @@
 
 using System;
 
-namespace Disibox.Data
+namespace Disibox.Data.Exceptions
 {
-    public abstract class BaseMessage
+    public class ContainerNotExistingException : Exception
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public abstract void FromString(string msg);
+        public ContainerNotExistingException(string containerName) : base(containerName)
+        {
+            // Empty
+        }
     }
 }

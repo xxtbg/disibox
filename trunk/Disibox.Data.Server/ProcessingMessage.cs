@@ -29,7 +29,7 @@ using System;
 
 namespace Disibox.Data.Server
 {
-    public class ProcessingMessage : BaseMessage, IEquatable<ProcessingMessage>
+    public class ProcessingMessage : IMessage, IEquatable<ProcessingMessage>
     {
         public ProcessingMessage()
         {
@@ -49,7 +49,7 @@ namespace Disibox.Data.Server
 
         public string ToolName { get; private set; }
 
-        public override void FromString(string req)
+        public void FromString(string req)
         {
             var reqParts = req.Split(new[] {','});
 

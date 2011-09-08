@@ -29,17 +29,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Disibox.Data.Exceptions;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public class AzureContainer
+    public class AzureContainer : IStorage
     {
+        private readonly CloudBlobClient _blobClient;
         private readonly CloudBlobContainer _container;
 
-        private AzureContainer(CloudBlobContainer container)
+        private AzureContainer(CloudBlobClient blobClient, CloudBlobContainer container)
         {
+            _blobClient = blobClient;
             _container = container;
         }
 
@@ -62,19 +65,30 @@ namespace Disibox.Data
         public static AzureContainer Connect(string containerName, string blobEndpointUri,
                                              StorageCredentials credentials)
         {
-            var container = CreateContainer(containerName, blobEndpointUri, credentials);
-            return new AzureContainer(container);
+            // Requirements
+            Require.NotEmpty(containerName, "containerName");
+            Require.NotEmpty(blobEndpointUri, "blobEndpointUri");
+
+            var blobClient = CreateBlobClient(blobEndpointUri, credentials);
+            var container = CreateContainer(containerName, blobClient);
+            return new AzureContainer(blobClient, container);
         }
 
         public static AzureContainer Create(string containerName, string blobEndpointUri, StorageCredentials credentials)
         {
-            var container = CreateContainer(containerName, blobEndpointUri, credentials);
+            // Requirements
+            Require.NotEmpty(containerName, "containerName");
+            Require.NotEmpty(blobEndpointUri, "blobEndpointUri");
+
+            var blobClient = CreateBlobClient(blobEndpointUri, credentials);
+            var container = CreateContainer(containerName, blobClient);
             container.CreateIfNotExist();
-            return new AzureContainer(container);
+            return new AzureContainer(blobClient, container);
         }
 
         public string AddBlob(string blobName, string blobContentType, Stream blobContent)
         {
+            RequireExistingContainer();
             var oldPosition = blobContent.Position;
             blobContent.Seek(0, SeekOrigin.Begin);
             var blob = _container.GetBlockBlobReference(blobName);
@@ -86,32 +100,58 @@ namespace Disibox.Data
 
         public bool DeleteBlob(string blobUri)
         {
+            RequireExistingContainer();
             var blob = _container.GetBlobReference(blobUri);
             return blob.DeleteIfExists();
         }
 
         public Stream GetBlob(string blobUri)
         {
+            RequireExistingContainer();
             var blob = _container.GetBlockBlobReference(blobUri);
             return blob.OpenRead();
         }
 
         public IEnumerable<CloudBlob> GetBlobs()
         {
+            RequireExistingContainer();
             var options = new BlobRequestOptions {UseFlatBlobListing = true};
             return _container.ListBlobs(options).Select(b => (CloudBlob) b).ToList();
         }
 
         public void Clear()
         {
+            RequireExistingContainer();
             _container.Delete();
             _container.Create();
         }
 
-        private static CloudBlobContainer CreateContainer(string containerName, string blobEndpointUri,
-                                                          StorageCredentials credentials)
+        public void Delete()
         {
-            return new CloudBlobContainer(blobEndpointUri + "/" + containerName, credentials);
+            RequireExistingContainer();
+            _container.Delete();
+        }
+
+        public bool Exists()
+        {
+            var containers = _blobClient.ListContainers();
+            return containers.Contains(_container);
+        }
+
+        private static CloudBlobClient CreateBlobClient(string blobEndpointUri, StorageCredentials credentials)
+        {
+            return new CloudBlobClient(blobEndpointUri, credentials);
+        }
+
+        private static CloudBlobContainer CreateContainer(string containerName, CloudBlobClient blobClient)
+        {
+            return blobClient.GetContainerReference(containerName);
+        }
+
+        private void RequireExistingContainer()
+        {
+            if (Exists()) return;
+            throw new ContainerNotExistingException(_container.Name);
         }
     }
 }

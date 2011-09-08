@@ -22,14 +22,16 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
+using Disibox.Data.Exceptions;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
 namespace Disibox.Data
 {
-    public class AzureQueue<TMsg> where TMsg : BaseMessage, new()
+    public class AzureQueue<TMsg> : IStorage where TMsg : IMessage, new()
     {
         private const int PeekCount = 32;
 
@@ -40,14 +42,32 @@ namespace Disibox.Data
             _queue = queue;
         }
 
+        public string Name
+        {
+            get { return _queue.Name; }
+        }
+
+        public Uri Uri
+        {
+            get { return _queue.Uri; }
+        }
+
         public static AzureQueue<TMsg> Connect(string queueName, string queueEndpointUri, StorageCredentials credentials)
         {
+            // Requirements
+            Require.NotEmpty(queueName, "queueName");
+            Require.NotEmpty(queueEndpointUri, "queueEndpointUri");
+
             var queue = CreateQueue(queueName, queueEndpointUri, credentials);
             return new AzureQueue<TMsg>(queue);
         }
 
         public static AzureQueue<TMsg> Create(string queueName, string queueEndpointUri, StorageCredentials credentials)
         {
+            // Requirements
+            Require.NotEmpty(queueName, "queueName");
+            Require.NotEmpty(queueEndpointUri, "queueEndpointUri");
+
             var queue = CreateQueue(queueName, queueEndpointUri, credentials);
             queue.CreateIfNotExist();
             return new AzureQueue<TMsg>(queue);
@@ -55,6 +75,8 @@ namespace Disibox.Data
 
         public TMsg DequeueMessage()
         {
+            RequireExistingQueue();
+
             CloudQueueMessage queueMsg;
             while ((queueMsg = _queue.GetMessage()) == null)
                 Thread.Sleep(1000);
@@ -70,6 +92,7 @@ namespace Disibox.Data
         {
             // Requirements
             Require.NotNull(msg, "msg");
+            RequireExistingQueue();
 
             var queueMsg = new CloudQueueMessage(msg.ToString());
             _queue.AddMessage(queueMsg);
@@ -77,6 +100,8 @@ namespace Disibox.Data
 
         public IList<TMsg> PeekMessages()
         {
+            RequireExistingQueue();
+
             var queueMessages = _queue.PeekMessages(PeekCount);
             var messages = new List<TMsg>();
 
@@ -92,12 +117,30 @@ namespace Disibox.Data
 
         public void Clear()
         {
+            RequireExistingQueue();
             _queue.Clear();
+        }
+
+        public void Delete()
+        {
+            RequireExistingQueue();
+            _queue.Delete();
+        }
+
+        public bool Exists()
+        {
+            return _queue.Exists();
         }
 
         private static CloudQueue CreateQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
         {
             return new CloudQueue(queueEndpointUri + "/" + queueName, credentials);
+        }
+
+        private void RequireExistingQueue()
+        {
+            if (Exists()) return;
+            throw new QueueNotExistingException(_queue.Name);
         }
     }
 }
