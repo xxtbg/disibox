@@ -118,7 +118,7 @@ namespace Disibox.Data.Tests.Client
         =============================================================================*/
 
         [Test]
-        [ExpectedException(typeof(InvalidPasswordException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void InvalidLoginWithEmptyPwd()
         {
             DataSource.Login(ValidEmail, EmptyPwd);

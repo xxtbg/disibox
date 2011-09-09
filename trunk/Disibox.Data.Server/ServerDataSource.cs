@@ -190,12 +190,9 @@ namespace Disibox.Data.Server
         /// <param name="fileUri">The uri pointing at the file to download.</param>
         /// <returns>The content of file pointed by given uri.</returns>
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
-        /// <exception cref="InvalidFileUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
         public Stream GetFile(string fileUri)
         {
-            // Requirements
-            Require.ValidFileUri(fileUri, "fileUri");
-
             return _filesContainer.GetBlob(fileUri);
         }
 
@@ -212,8 +209,6 @@ namespace Disibox.Data.Server
         {
             // Requirements
             Require.NotNull(toolName, "toolName");
-            Require.NotNull(outputContentType, "outputContentType");
-            Require.NotNull(outputContent, "outputContent");
 
             var outputName = toolName + Guid.NewGuid();
             return _outputsContainer.AddBlob(outputName, outputContentType, outputContent);

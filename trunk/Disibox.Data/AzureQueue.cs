@@ -57,6 +57,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotEmpty(queueName, "queueName");
             Require.NotEmpty(queueEndpointUri, "queueEndpointUri");
+            Require.NotNull(credentials, "credentials");
 
             var queue = CreateQueue(queueName, queueEndpointUri, credentials);
             return new AzureQueue<TMsg>(queue);
@@ -67,6 +68,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotEmpty(queueName, "queueName");
             Require.NotEmpty(queueEndpointUri, "queueEndpointUri");
+            Require.NotNull(credentials, "credentials");
 
             var queue = CreateQueue(queueName, queueEndpointUri, credentials);
             queue.CreateIfNotExist();
@@ -75,6 +77,7 @@ namespace Disibox.Data
 
         public TMsg DequeueMessage()
         {
+            // Requirements
             RequireExistingQueue();
 
             CloudQueueMessage queueMsg;
@@ -100,6 +103,7 @@ namespace Disibox.Data
 
         public IList<TMsg> PeekMessages()
         {
+            // Requirements
             RequireExistingQueue();
 
             var queueMessages = _queue.PeekMessages(PeekCount);
@@ -117,13 +121,17 @@ namespace Disibox.Data
 
         public void Clear()
         {
+            // Requirements
             RequireExistingQueue();
+
             _queue.Clear();
         }
 
         public void Delete()
         {
+            // Requirements
             RequireExistingQueue();
+
             _queue.Delete();
         }
 

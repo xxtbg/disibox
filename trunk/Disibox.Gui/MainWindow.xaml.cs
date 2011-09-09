@@ -241,7 +241,7 @@ namespace Disibox.Gui {
             } catch (FileNotOwnedException) {
                 MessageBox.Show(messageMessageBox + "file not owned by you!", titleMessageBox);
                 return;
-            } catch (InvalidFileUriException) {
+            } catch (InvalidUriException) {
                 MessageBox.Show(messageMessageBox + "invalid uri of the file!", titleMessageBox);
                 return;
             } catch (Exception) {
@@ -276,7 +276,7 @@ namespace Disibox.Gui {
             } catch (FileNotOwnedException) {
                 MessageBox.Show(messageMessageBox + "file not owned by you!", titleMessageBox);
                 return;
-            } catch (InvalidFileUriException) {
+            } catch (InvalidUriException) {
                 MessageBox.Show(messageMessageBox + "invalid uri of the file!", titleMessageBox);
                 return;
             } catch (UserNotLoggedInException) {

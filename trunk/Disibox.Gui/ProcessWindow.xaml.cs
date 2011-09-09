@@ -147,7 +147,7 @@ namespace Disibox.Gui
 
                 try {
                     sourceFileBlob = _ds.GetOutput(processedFile);
-                } catch (InvalidOutputUriException) {
+                } catch (InvalidUriException) {
                     MessageBox.Show(messageMessageBox + "invalid output uri!", titleMessageBox);
                     destinationFile.Close();
                     Close();

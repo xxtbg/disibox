@@ -68,6 +68,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotEmpty(containerName, "containerName");
             Require.NotEmpty(blobEndpointUri, "blobEndpointUri");
+            Require.NotNull(credentials, "credentials");
 
             var blobClient = CreateBlobClient(blobEndpointUri, credentials);
             var container = CreateContainer(containerName, blobClient);
@@ -79,6 +80,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotEmpty(containerName, "containerName");
             Require.NotEmpty(blobEndpointUri, "blobEndpointUri");
+            Require.NotNull(credentials, "credentials");
 
             var blobClient = CreateBlobClient(blobEndpointUri, credentials);
             var container = CreateContainer(containerName, blobClient);
@@ -88,7 +90,12 @@ namespace Disibox.Data
 
         public string AddBlob(string blobName, string blobContentType, Stream blobContent)
         {
+            // Requirements
+            Require.NotEmpty(blobName, "blobName");
+            Require.NotEmpty(blobContentType, "blobContentType");
+            Require.NotNull(blobContent, "blobContent");
             RequireExistingContainer();
+
             var oldPosition = blobContent.Position;
             blobContent.Seek(0, SeekOrigin.Begin);
             var blob = _container.GetBlockBlobReference(blobName);
@@ -100,42 +107,54 @@ namespace Disibox.Data
 
         public bool DeleteBlob(string blobUri)
         {
+            // Requirements
+            RequireValidUri(blobUri, "blobUri");
             RequireExistingContainer();
+
             var blob = _container.GetBlobReference(blobUri);
             return blob.DeleteIfExists();
         }
 
         public Stream GetBlob(string blobUri)
         {
+            // Requirements
+            RequireValidUri(blobUri, "blobUri");
             RequireExistingContainer();
+
             var blob = _container.GetBlockBlobReference(blobUri);
             return blob.OpenRead();
         }
 
         public IEnumerable<CloudBlob> GetBlobs()
         {
+            // Requirements
             RequireExistingContainer();
+
             var options = new BlobRequestOptions {UseFlatBlobListing = true};
             return _container.ListBlobs(options).Select(b => (CloudBlob) b).ToList();
         }
 
         public void Clear()
         {
+            // Requirements
             RequireExistingContainer();
+
             _container.Delete();
             _container.Create();
         }
 
         public void Delete()
         {
+            // Requirements
             RequireExistingContainer();
+
             _container.Delete();
         }
 
         public bool Exists()
         {
-            var containers = _blobClient.ListContainers();
-            return containers.Contains(_container);
+            var containers = _blobClient.ListContainers().Select(c => c.Name);
+            return containers.Contains(_container.Name);
         }
 
         private static CloudBlobClient CreateBlobClient(string blobEndpointUri, StorageCredentials credentials)
@@ -152,6 +171,15 @@ namespace Disibox.Data
         {
             if (Exists()) return;
             throw new ContainerNotExistingException(_container.Name);
+        }
+
+        private void RequireValidUri(string uri, string argName)
+        {
+            // Requirements
+            Require.NotEmpty(uri, argName);
+
+            if (uri.StartsWith(Uri.ToString())) return;
+            throw new InvalidUriException(uri);
         }
     }
 }

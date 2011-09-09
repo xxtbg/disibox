@@ -95,7 +95,6 @@ namespace Disibox.Data.Client
         {
             // Requirements
             Require.ValidFileName(fileName, "fileName");
-            Require.NotNull(fileContent, "fileContent");
             RequireLoggedInUser();
             if (!overwrite)
                 RequireNotExistingFile(fileName);
@@ -113,12 +112,11 @@ namespace Disibox.Data.Client
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
         /// <exception cref="FileNotFoundException">Given uri points to a not existing file.</exception>
         /// <exception cref="FileNotOwnedException">A common user is trying to delete another user's file.</exception>
-        /// <exception cref="InvalidFileUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
         /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         public bool DeleteFile(string fileUri)
         {
             // Requirements
-            Require.ValidFileUri(fileUri, "fileUri");
             RequireLoggedInUser();
             RequireExistingFileUri(fileUri);
 
@@ -133,12 +131,11 @@ namespace Disibox.Data.Client
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
         /// <exception cref="FileNotFoundException">Given uri points to a not existing file.</exception>
         /// <exception cref="FileNotOwnedException">A common user is trying to delete another user's file.</exception>
-        /// <exception cref="InvalidFileUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
         /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         public Stream GetFile(string fileUri)
         {
             // Requirements
-            Require.ValidFileUri(fileUri, "fileUri");
             RequireLoggedInUser();
             RequireExistingFileUri(fileUri);
 
@@ -171,12 +168,11 @@ namespace Disibox.Data.Client
         /// <param name="outputUri">The uri pointing at the processing output that should be deleted.</param>
         /// <returns>True if processing output has been really deleted, false otherwise.</returns>
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
-        /// <exception cref="InvalidOutputUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
         /// <exception cref="UserNotLoggedInException"></exception>
         public bool DeleteOutput(string outputUri)
         {
             // Requirements
-            Require.ValidOutputUri(outputUri, "outputUri");
             RequireLoggedInUser();
 
             return _outputsContainer.DeleteBlob(outputUri);
@@ -188,12 +184,11 @@ namespace Disibox.Data.Client
         /// <param name="outputUri">The uri pointing at the processing output to download.</param>
         /// <returns>The content of processing output pointed by given uri.</returns>
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
-        /// <exception cref="InvalidOutputUriException">Given uri has an invalid format.</exception>
+        /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
         /// <exception cref="UserNotLoggedInException"></exception>
         public Stream GetOutput(string outputUri)
         {
             // Requirements
-            Require.ValidOutputUri(outputUri, "outputUri");
             RequireLoggedInUser();
 
             return _outputsContainer.GetBlob(outputUri);
@@ -476,7 +471,7 @@ namespace Disibox.Data.Client
             if (index == -1 && !_loggedUserIsAdmin)
                 throw new FileNotOwnedException();
             if (index == -1)
-                throw new InvalidFileUriException(fileUri);
+                throw new InvalidUriException(fileUri);
             return fileUri.Substring(prefix.Length);
         }
 
