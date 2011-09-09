@@ -40,10 +40,12 @@ namespace Disibox.Data
         private static readonly int MinPasswordLength = int.Parse(Properties.Settings.Default.MinPasswordLength);
 
         /// <summary>
-        /// 
+        /// Checks if given string is not empty.
         /// </summary>
-        /// <param name="arg"></param>
-        /// <param name="argName"></param>
+        /// <param name="arg">String to be checked.</param>
+        /// <param name="argName">The argument name.</param>
+        /// <exception cref="ArgumentException">Given string is empty.</exception>
+        /// <exception cref="ArgumentNullException">Given string is null.</exception>
         public static void NotEmpty(string arg, string argName)
         {
             // Requirements
@@ -75,7 +77,7 @@ namespace Disibox.Data
         public static void ValidEmail(string email, string argName)
         {
             // Requirements
-            NotNull(email, argName);
+            NotEmpty(email, argName);
 
             var regex = new Regex(EmailRegex);
             if (regex.IsMatch(email)) return;
@@ -92,41 +94,7 @@ namespace Disibox.Data
         public static void ValidFileName(string fileName, string argName)
         {
             // Requirements
-            NotNull(fileName, argName);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fileUri"></param>
-        /// <param name="argName"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidFileUriException"></exception>
-        public static void ValidFileUri(string fileUri, string argName)
-        {
-            // Requirements
-            NotNull(fileUri, argName);
-
-            var filesContainerName = Properties.Settings.Default.FilesContainerName;
-            if (fileUri.Contains("/" + filesContainerName + "/")) return;
-            throw new InvalidFileUriException(fileUri);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="outputUri"></param>
-        /// <param name="argName"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="InvalidOutputUriException"></exception>
-        public static void ValidOutputUri(string outputUri, string argName)
-        {
-            // Requirements
-            NotNull(outputUri, argName);
-
-            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            if (outputUri.Contains("/" + outputsContainerName + "/")) return;
-            throw new InvalidOutputUriException(outputUri);
+            NotEmpty(fileName, argName);
         }
 
         /// <summary>
@@ -139,7 +107,7 @@ namespace Disibox.Data
         public static void ValidPassword(string pwd, string argName)
         {
             // Requirements
-            NotNull(pwd, argName);
+            NotEmpty(pwd, argName);
 
             if (pwd.Length >= MinPasswordLength) return;
             throw new InvalidPasswordException(pwd);

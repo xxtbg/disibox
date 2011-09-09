@@ -68,6 +68,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotEmpty(tableName, "tableName");
             Require.NotEmpty(tableEndpointUri, "tableEndpointUri");
+            Require.NotNull(credentials, "credentials");
 
             var tableClient = CreateTableClient(tableEndpointUri, credentials);
             return new AzureTable<TEntity>(tableName, tableClient);
@@ -79,6 +80,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotEmpty(tableName, "tableName");
             Require.NotEmpty(tableEndpointUri, "tableEndpointUri");
+            Require.NotNull(credentials, "credentials");
 
             var tableClient = CreateTableClient(tableEndpointUri, credentials);
             tableClient.CreateTableIfNotExist(tableName);
@@ -87,25 +89,33 @@ namespace Disibox.Data
 
         public void AddEntity(TEntity entity)
         {
+            // Requirements
             Require.NotNull(entity, "entity");
+
             _tableContext.AddObject(_tableName, entity);
         }
 
         public void DeleteEntity(TEntity entity)
         {
+            // Requirements
             Require.NotNull(entity, "entity");
+
             _tableContext.DeleteObject(entity);
         }
 
         public void UpdateEntity(TEntity entity)
         {
+            // Requirements
             Require.NotNull(entity, "entity");
+
             _tableContext.UpdateObject(entity);
         }
 
         public void SaveChanges(SaveChangesOptions options = SaveChangesOptions.None)
         {
+            // Requirements
             RequireExistingTable();
+
             _tableContext.SaveChanges(options);
         }
 
@@ -118,7 +128,9 @@ namespace Disibox.Data
 
         public void Delete()
         {
+            // Requirements
             RequireExistingTable();
+
             _tableClient.DeleteTableIfExist(_tableName);
         }
 

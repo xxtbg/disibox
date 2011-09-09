@@ -29,9 +29,9 @@ using System;
 
 namespace Disibox.Data.Exceptions
 {
-    public class InvalidFileUriException : Exception
+    public class InvalidUriException : Exception
     {
-        public InvalidFileUriException(string invalidFileUri) : base(invalidFileUri)
+        public InvalidUriException(string invalidUri) : base(invalidUri)
         {
             // Empty
         }

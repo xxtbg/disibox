@@ -118,7 +118,7 @@ namespace Disibox.WebUI
                 msg = "One or more files that you selected ware not found!";
             } catch (FileNotOwnedException) {
                 msg = "One or more files that you selected are not owned by you!";
-            } catch (InvalidFileUriException) {
+            } catch (InvalidUriException) {
                 msg = "One or more files that you selected have not valid uri!";
             } catch (UserNotLoggedInException) {
                 msg = "This is rather impossible... but you are not logged in!";
