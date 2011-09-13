@@ -40,6 +40,12 @@ namespace Disibox.Data
 
         private static readonly int MinPasswordLength = int.Parse(Properties.Settings.Default.MinPasswordLength);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="expectedContentType"></param>
+        /// <exception cref="InvalidContentTypeException"></exception>
         public static void MatchingContentType(string fileName, string expectedContentType)
         {
             var foundContentType = Shared.GetContentType(fileName);
