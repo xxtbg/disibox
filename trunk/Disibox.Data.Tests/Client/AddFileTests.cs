@@ -58,6 +58,8 @@ namespace Disibox.Data.Tests.Client
 
             var file = DataSource.GetFile(fileUri);
             Assert.True(Shared.StreamsAreEqual(file, FileStreams[0]));
+
+            DataSource.Logout();
         }
 
         [Test]
@@ -77,6 +79,8 @@ namespace Disibox.Data.Tests.Client
                 var file = DataSource.GetFile(uris[i]);
                 Assert.True(Shared.StreamsAreEqual(file, FileStreams[i]));
             }
+
+            DataSource.Logout();
         }
 
         [Test]
@@ -94,6 +98,8 @@ namespace Disibox.Data.Tests.Client
 
             var file = DataSource.GetFile(fileUri);
             Assert.True(Shared.StreamsAreEqual(file, FileStreams[0]));
+
+            DataSource.Logout();
         }
 
         [Test]

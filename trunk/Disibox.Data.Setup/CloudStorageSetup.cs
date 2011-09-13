@@ -80,6 +80,9 @@ namespace Disibox.Data.Setup
 
             var outputsContainerName = Data.Properties.Settings.Default.OutputsContainerName;
             SetupBlobContainer(outputsContainerName, blobEndpointUri, credentials);
+
+            var procDllsContainerName = Data.Properties.Settings.Default.ProcDllsContainerName;
+            SetupBlobContainer(procDllsContainerName, blobEndpointUri, credentials);
         }
 
         private static void SetupBlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)

@@ -68,7 +68,7 @@ namespace Disibox.Processor
             if (tool == null)
                 throw new ArgumentException(procReq.ToolName + " does not exist.", "procReq");
 
-            var file = _dataSource.GetFile(procReq.FileUri);
+            var file = _dataSource.GetFileFromUri(procReq.FileUri);
             var output = tool.ProcessFile(file, procReq.FileContentType);
             var outputUri = _dataSource.AddOutput(procReq.ToolName, output.ContentType, output.Content);
 

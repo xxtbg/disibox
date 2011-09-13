@@ -81,6 +81,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Disibox.Data.Client\Disibox.Data.Client.csproj">
+      <Project>{E2470820-CBC2-4843-9E7F-07ECBC36A1D1}</Project>
+      <Name>Disibox.Data.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Disibox.Data.Server\Disibox.Data.Server.csproj">
+      <Project>{12B985FA-4D02-4AEF-B988-6A59D615E3F1}</Project>
+      <Name>Disibox.Data.Server</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Disibox.Utils\Disibox.Utils.csproj">
       <Project>{5885EA43-7F42-4C18-ACFB-DE788F25EF6A}</Project>
       <Name>Disibox.Utils</Name>

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Disibox.Data.Server;
 using Disibox.Processing.Exceptions;
 using Disibox.Utils;
 
@@ -36,6 +37,7 @@ namespace Disibox.Processing
 {
     public static class ToolsManifest
     {
+        private static readonly ServerDataSource DataSource = new ServerDataSource();
         /// <summary>
         /// Contains all available tools.
         /// </summary>
@@ -104,7 +106,7 @@ namespace Disibox.Processing
 
         private static void InitTools()
         {
-            var toolTypes = LoadToolsAssembly();
+            var toolTypes = LoadToolsAssemblies();
 
             foreach (var toolType in toolTypes)
             {
@@ -132,11 +134,19 @@ namespace Disibox.Processing
             }
         }
 
-        private static IEnumerable<Type> LoadToolsAssembly()
+        // TODO Riguardare!!!
+        private static IEnumerable<Type> LoadToolsAssemblies()
         {
-            var toolsAssemblyPath = Properties.Settings.Default.ToolsAssemblyPath;
-            var procAssembly = Assembly.LoadFile(toolsAssemblyPath);
-            return procAssembly.GetTypes();
+            var assembliesNames = DataSource.GetProcessingDllNames();
+            var tools = new List<Type>();
+            foreach (var assemblyName in assembliesNames)
+            {
+                var toolsAssemblyStream = DataSource.GetProcessingDll(assemblyName);
+                var toolsAssembly = Assembly.Load(Shared.StreamToByteArray(toolsAssemblyStream));
+                toolsAssemblyStream.Dispose();
+                tools.AddRange(toolsAssembly.GetTypes());
+            }
+            return tools;
         }
     }
 }

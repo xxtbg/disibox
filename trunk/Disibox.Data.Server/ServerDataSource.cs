@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Disibox.Data.Client;
 using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
 using Disibox.Utils;
@@ -36,7 +37,7 @@ using Microsoft.WindowsAzure;
 
 namespace Disibox.Data.Server
 {
-    public class ServerDataSource
+    public class ServerDataSource : ClientDataSource
     {
         private readonly AzureContainer _filesContainer;
         private readonly AzureContainer _outputsContainer;
@@ -191,9 +192,9 @@ namespace Disibox.Data.Server
         /// <returns>The content of file pointed by given uri.</returns>
         /// <exception cref="ArgumentNullException">Given uri is null.</exception>
         /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
-        public Stream GetFile(string fileUri)
+        public Stream GetFileFromUri(string fileUri)
         {
-            return _filesContainer.GetBlob(fileUri);
+            return _filesContainer.GetBlobData(fileUri);
         }
 
         /// <summary>

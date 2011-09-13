@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="BaseDataTests.cs" />
     <Compile Include="Client\AddFileTests.cs" />
+    <Compile Include="Client\AddProcessingDllTests.cs" />
     <Compile Include="Client\AddUserTests.cs" />
     <Compile Include="Client\BaseClientTests.cs" />
     <Compile Include="Client\DeleteFileTests.cs" />
