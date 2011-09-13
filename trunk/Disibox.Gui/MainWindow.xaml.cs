@@ -135,7 +135,7 @@ namespace Disibox.Gui {
                     fileStream.Close();
                     return;
                 } catch (Exception) {
-                    MessageBox.Show(messageMessageBox, titleMessageBox);
+                    MessageBox.Show(messageMessageBox+"unknown error.", titleMessageBox);
                     textBoxFileToUpload.Text = "";
                     fileStream.Close();
                     return;
@@ -199,13 +199,13 @@ namespace Disibox.Gui {
         private void buttonRefreshFiles_Click(object sender, RoutedEventArgs e) {
             IList<FileMetadata> names = null;
 
-            var titleMessageBox = "Refreshing file list";
-            var messageMessageBox = "Error while refreshing the file list: ";
+            const string titleMessageBox = "Refreshing file list";
+            const string messageMessageBox = "Error while refreshing the file list: ";
 
             try {
                 names = _dataSource.GetFileMetadata();
             }catch(UserNotLoggedInException) {
-                MessageBox.Show(messageMessageBox+"you are not logged in", titleMessageBox);
+                MessageBox.Show(messageMessageBox+"you are not logged in.", titleMessageBox);
             } catch (Exception) {
                 MessageBox.Show(messageMessageBox+"unknown error!", titleMessageBox);
             }
@@ -249,7 +249,7 @@ namespace Disibox.Gui {
                 return;
             }
 
-            MessageBox.Show(ok ? "Error deleting the file" : "The file was deleted successfully", titleMessageBox);
+            MessageBox.Show(ok ? "The file was deleted successfully"  : "Error deleting the file", titleMessageBox);
 
             PerformClick(buttonRefreshFiles);
         }
@@ -386,10 +386,10 @@ namespace Disibox.Gui {
 
         #endregion
 
-        #region process_file
+        #region process_file&dlls
 
         /*=============================================================================
-            Processing files callback
+            Processing files callback and manage dlls
         =============================================================================*/
 
         private void processFile(object sender, RoutedEventArgs e) {
@@ -442,6 +442,12 @@ namespace Disibox.Gui {
             new ProcessWindow(reader, writer, _dataSource);
         }
 
+
+        private void manageDlls(object sender, RoutedEventArgs e)
+        {
+            new ManageDlls(_dataSource);
+        }
+
         #endregion
 
         #region exit_logout
@@ -477,5 +483,6 @@ namespace Disibox.Gui {
             else if (tabItemUsers.IsSelected)
                 PerformClick(buttonRefreshUsers);
         }
+
     }
 }

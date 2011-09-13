@@ -219,6 +219,10 @@ namespace Disibox.Data.Client
         /// <returns></returns>
         /// <exception cref="UserNotAdminException"></exception>
         /// <exception cref="UserNotLoggedInException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="InvalidFileNameException"></exception>
+        /// <exception cref="InvalidContentTypeException"></exception>
+        /// <exception cref="FileExistingException"></exception>
         public string AddProcessingDll(string dllName, Stream dllContent, bool overwrite = false)
         {
             // Requirements
@@ -252,6 +256,8 @@ namespace Disibox.Data.Client
         /// </summary>
         /// <param name="dllName"></param>
         /// <returns></returns>
+        /// <exception cref="UserNotLoggedInException"></exception>
+        /// <exception cref="UserNotAdminException"></exception>
         public Stream GetProcessingDll(string dllName)
         {
             // Requirements
@@ -462,6 +468,11 @@ namespace Disibox.Data.Client
             RequireNotExistingElement(fileName, GetFileMetadata().Select(f => f.Name));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dllName"></param>
+        /// <exception cref="FileExistingException"></exception>
         private void RequireNotExistingDll(string dllName)
         {
             RequireNotExistingElement(dllName, GetProcessingDllNames());
@@ -491,6 +502,12 @@ namespace Disibox.Data.Client
             throw new UserExistingException(userEmail);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="elementId"></param>
+        /// <param name="elementIds"></param>
+        /// <exception cref="FileExistingException"></exception>
         private static void RequireNotExistingElement(string elementId, IEnumerable<string> elementIds)
         {
             var matches = elementIds.Where(e => e == elementId);

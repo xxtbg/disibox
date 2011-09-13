@@ -11,6 +11,7 @@
             </MenuItem>
             <MenuItem Header="Process">
                 <MenuItem Header="Process selected File" Click="processFile"/>
+                <MenuItem Header="Manage Dlls" Click="manageDlls"/>
                
             </MenuItem>
         </Menu>
