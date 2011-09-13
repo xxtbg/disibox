@@ -94,5 +94,14 @@ namespace Disibox.Data.Properties {
                 return ((string)(this["MinPasswordLength"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("procdlls")]
+        public string ProcDllsContainerName {
+            get {
+                return ((string)(this["ProcDllsContainerName"]));
+            }
+        }
     }
 }

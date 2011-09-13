@@ -26,5 +26,8 @@
     <Setting Name="MinPasswordLength" Type="System.String" Scope="Application">
       <Value Profile="(Default)">8</Value>
     </Setting>
+    <Setting Name="ProcDllsContainerName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">procdlls</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ContainerNotExistingException.cs" />
+    <Compile Include="Exceptions\InvalidContentTypeException.cs" />
     <Compile Include="Exceptions\QueueNotExistingException.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="AzureContainer.cs" />

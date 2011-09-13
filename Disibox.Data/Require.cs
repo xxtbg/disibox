@@ -28,6 +28,7 @@
 using System;
 using System.Text.RegularExpressions;
 using Disibox.Data.Exceptions;
+using Disibox.Utils;
 
 namespace Disibox.Data
 {
@@ -38,6 +39,13 @@ namespace Disibox.Data
                                           @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
 
         private static readonly int MinPasswordLength = int.Parse(Properties.Settings.Default.MinPasswordLength);
+
+        public static void MatchingContentType(string fileName, string expectedContentType)
+        {
+            var foundContentType = Shared.GetContentType(fileName);
+            if (foundContentType == expectedContentType) return;
+            throw new InvalidContentTypeException(foundContentType, expectedContentType);
+        }
 
         /// <summary>
         /// Checks if given string is not empty.
@@ -65,6 +73,23 @@ namespace Disibox.Data
         {
             if (arg != null) return;
             throw new ArgumentNullException(argName);
+        }
+
+        public static void ValidBlobName(string blobName, string argName)
+        {
+            if (!string.IsNullOrEmpty(blobName)) return;
+            throw new InvalidFileNameException(blobName);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="contentType"></param>
+        /// <param name="argName"></param>
+        public static void ValidContentType(string contentType, string argName)
+        {
+            if (!string.IsNullOrEmpty(contentType)) return;
+            throw new InvalidContentTypeException(argName);
         }
 
         /// <summary>

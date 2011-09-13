@@ -25,38 +25,22 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using Disibox.Utils;
-using NUnit.Framework;
+using System;
 
-namespace Disibox.Data.Tests.Mixed
+namespace Disibox.Data.Exceptions
 {
-    public class ServerGetFileTests : BaseMixedTests
+    public class InvalidContentTypeException : Exception
     {
-        [SetUp]
-        protected override void SetUp()
+        public InvalidContentTypeException(string argName)
+            : base(argName + " must be not null and not empty.")
         {
-            base.SetUp();
+            // Empty
         }
 
-        [TearDown]
-        protected override void TearDown()
+        public InvalidContentTypeException(string foundContentType, string expectedContentType)
+            : base("Found \"" + foundContentType + "\", expected \"" + expectedContentType + "\"")
         {
-            base.TearDown();
-        }
-
-        /*=============================================================================
-            Valid calls
-        =============================================================================*/
-
-        [Test]
-        public void GetOneFile()
-        {
-            ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            var fileUri = ClientDataSource.AddFile(FileNames[0], FileStreams[0]);
-            ClientDataSource.Logout();
-
-            var file = ServerDataSource.GetFileFromUri(fileUri);
-            Assert.True(Shared.StreamsAreEqual(file, FileStreams[0]));
+            // Empty
         }
     }
 }

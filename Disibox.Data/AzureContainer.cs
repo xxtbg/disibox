@@ -105,24 +105,33 @@ namespace Disibox.Data
             return blob.Uri.ToString();
         }
 
-        public bool DeleteBlob(string blobUri)
+        public bool DeleteBlob(string blobName)
         {
             // Requirements
-            RequireValidUri(blobUri, "blobUri");
+            Require.ValidBlobName(blobName, "blobName");
             RequireExistingContainer();
 
+            var blobUri = blobName;//GetBlobUriFromName(blobName);
             var blob = _container.GetBlobReference(blobUri);
             return blob.DeleteIfExists();
         }
 
-        public Stream GetBlob(string blobUri)
+        public CloudBlob GetBlob(string blobName)
         {
             // Requirements
-            RequireValidUri(blobUri, "blobUri");
             RequireExistingContainer();
 
-            var blob = _container.GetBlockBlobReference(blobUri);
-            return blob.OpenRead();
+            var blobUri = blobName;//GetBlobUriFromName(blobName);
+            return _container.GetBlobReference(blobUri);
+        }
+
+        public Stream GetBlobData(string blobName)
+        {
+            // Requirements
+            Require.ValidBlobName(blobName, "blobName");
+            RequireExistingContainer();
+
+            return GetBlob(blobName).OpenRead();
         }
 
         public IEnumerable<CloudBlob> GetBlobs()
@@ -132,6 +141,14 @@ namespace Disibox.Data
 
             var options = new BlobRequestOptions {UseFlatBlobListing = true};
             return _container.ListBlobs(options).Select(b => (CloudBlob) b).ToList();
+        }
+
+        public IEnumerable<Stream> GetBlobsData()
+        {
+            // Requirerements
+            RequireExistingContainer();
+
+            return GetBlobs().Select(b => b.OpenRead());
         }
 
         public void Clear()
@@ -155,6 +172,11 @@ namespace Disibox.Data
         {
             var containers = _blobClient.ListContainers().Select(c => c.Name);
             return containers.Contains(_container.Name);
+        }
+
+        private string GetBlobUriFromName(string blobName)
+        {
+            return Uri + "/" + blobName;
         }
 
         private static CloudBlobClient CreateBlobClient(string blobEndpointUri, StorageCredentials credentials)
