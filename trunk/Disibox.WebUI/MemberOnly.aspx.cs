@@ -56,8 +56,14 @@ namespace Disibox.WebUI
 
         protected void DeleteAdminUsersButton_Click(object sender, EventArgs e) {
             var adminsSelected = AdminUsersTable.GetSelectedItems();
-
             var msg = "There was an error: ";
+
+            if (adminsSelected.Count == 0) {
+                if (!string.IsNullOrEmpty(DeleteAdminMessage.Text))
+                    DeleteAdminMessage.Text = "";
+                return;
+            }
+
             try {
                 foreach (var admin in adminsSelected) {
                     _dataSource.DeleteUser(admin);
@@ -72,6 +78,8 @@ namespace Disibox.WebUI
                 msg += "the last admin cannot be deleted!";
             } catch (UserNotLoggedInException) {
                 msg = "This is rather impossible... but you are not logged in!";
+            } catch (Exception) {
+                msg += "unknown error.";
             } finally {
                 DeleteAdminMessage.Text = msg;
             }
@@ -82,6 +90,12 @@ namespace Disibox.WebUI
         protected void DeleteCommonUsersButton_Click(object sender, EventArgs e) {
             var commonUsersSelected = CommonUsersTable.GetSelectedItems();
             var msg = "There was an error: ";
+
+            if (commonUsersSelected.Count == 0) {
+                if (!string.IsNullOrEmpty(DeleteUserCommonMessage.Text))
+                    DeleteUserCommonMessage.Text = "";
+                return;
+            }
 
             try {
                 foreach (var commonUser in commonUsersSelected) {
@@ -97,6 +111,8 @@ namespace Disibox.WebUI
                 msg += "the last admin cannot be deleted!";
             } catch (UserNotLoggedInException) {
                 msg = "This is rather impossible... but you are not logged in!";
+            } catch (Exception) {
+                msg += "unknown error.";
             } finally {
                 DeleteUserCommonMessage.Text = msg;
             }

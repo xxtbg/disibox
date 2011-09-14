@@ -45,6 +45,7 @@ namespace Disibox.Gui
         private readonly StreamWriter _writer;
         private readonly ClientDataSource _ds;
         private bool _erroFillingList = false;
+        private const int NUMBER_OF_INFO_TOKENS = 4;
 
         public ProcessWindow(StreamReader reader, StreamWriter writer, ClientDataSource ds) {
             InitializeComponent();
@@ -92,7 +93,7 @@ namespace Disibox.Gui
 
                 try {
                     info = _reader.ReadLine().Split(',');
-                    if (info.Length != 3)
+                    if (info.Length != NUMBER_OF_INFO_TOKENS)
                         throw new Exception();
                 } catch (Exception) {
                     MessageBox.Show(messageMessageBox + "cannot retrive tool information", titleMessageBox);
