@@ -40,7 +40,7 @@ namespace Disibox.Processing.Tools
         private const string PngContentType = "image/png";
 
         public ColorInverter()
-            : base("Color inverter", "Inverts image colors!", "")
+            : base("Color inverter", "Inverts image colors!", "Inverts image colors for bmp, jpeg and png images.")
         {
             ProcessableTypes.Add(BmpContentType);
             ProcessableTypes.Add(JpegContentType);
@@ -56,30 +56,30 @@ namespace Disibox.Processing.Tools
             var data = bitmap.LockBits(area, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             var stride = data.Stride;
 
-            var nWidth = bitmap.Width * 3;
+            var nWidth = bitmap.Width*3;
             var nHeight = bitmap.Height;
-            var nOffset = stride - bitmap.Width * 3;
-            
+            var nOffset = stride - bitmap.Width*3;
+
             var scan0 = data.Scan0;
             unsafe
             {
-                var p = (byte*)(void*)scan0;
-                
+                var p = (byte*) (void*) scan0;
+
                 for (var y = 0; y < nHeight; ++y)
                 {
                     for (var x = 0; x < nWidth; ++x)
                     {
-                        *p = (byte)(255 - *p);
+                        *p = (byte) (255 - *p);
                         ++p;
                     }
                     p += nOffset;
                 }
             }
-            
+
             bitmap.UnlockBits(data);
 
             var invertedStream = new MemoryStream();
-            
+
             bitmap.Save(invertedStream, format);
             return new ProcessingOutput(invertedStream, fileContentType);
         }
@@ -101,13 +101,16 @@ namespace Disibox.Processing.Tools
         private static Bitmap GetBitmapFromStream(Stream input, ImageFormat format)
         {
             BitmapDecoder decoder;
-            
+
             if (format == ImageFormat.Bmp)
-                decoder = new BmpBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                decoder = new BmpBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, 
+                                               BitmapCacheOption.Default);
             else if (format == ImageFormat.Png)
-                decoder = new PngBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                decoder = new PngBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, 
+                                               BitmapCacheOption.Default);
             else // Jpeg and other formats...
-                decoder = new JpegBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                decoder = new JpegBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat,
+                                                BitmapCacheOption.Default);
 
             var source = decoder.Frames[0];
             return GetBitmapFromSource(source);
@@ -126,6 +129,6 @@ namespace Disibox.Processing.Tools
                 default:
                     throw new ArgumentException("Content type not supported.", "imageContentType");
             }
-        } 
+        }
     }
 }

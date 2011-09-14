@@ -88,8 +88,7 @@ namespace Disibox.Processing
 
         public override string ToString()
         {
-            const string format = "{0}, {1}, {2}";
-            return string.Format(format, Name, BriefDescription, LongDescription);
+            return string.Format("{0}, {1}, {2}", Name, BriefDescription, LongDescription);
         }
     }
 }

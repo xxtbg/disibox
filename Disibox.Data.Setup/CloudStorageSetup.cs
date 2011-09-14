@@ -26,9 +26,11 @@
 //
 
 using System;
+using System.IO;
 using System.Linq;
 using Disibox.Data.Entities;
 using Disibox.Data.Server;
+using Disibox.Data.Setup.Properties;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.StorageClient;
 
@@ -80,12 +82,21 @@ namespace Disibox.Data.Setup
 
             var outputsContainerName = Data.Properties.Settings.Default.OutputsContainerName;
             SetupBlobContainer(outputsContainerName, blobEndpointUri, credentials);
-
-            var procDllsContainerName = Data.Properties.Settings.Default.ProcDllsContainerName;
-            SetupBlobContainer(procDllsContainerName, blobEndpointUri, credentials);
+            
+            SetupProcDllsContainer(blobEndpointUri, credentials);
         }
 
-        private static void SetupBlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)
+        private static void SetupProcDllsContainer(string blobEndpointUri, StorageCredentials credentials)
+        {
+            var containerName = Data.Properties.Settings.Default.ProcDllsContainerName;
+            var container = SetupBlobContainer(containerName, blobEndpointUri, credentials);
+
+            PrintStep(" * Adding default DLL");
+            using (var defaultDll = new MemoryStream(Resources.DefaultTools))
+                container.AddBlob("DefaultTools.dll", "application/x-msdownload", defaultDll);
+        }
+
+        private static AzureContainer SetupBlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)
         {
             PrintStep("Creating " + containerName + " blob container...");
             var container = AzureContainer.Create(containerName, blobEndpointUri, credentials);
@@ -97,6 +108,8 @@ namespace Disibox.Data.Setup
 
             PrintStep(" * Setting permissions up");
             container.Permissions.PublicAccess = BlobContainerPublicAccessType.Off;
+
+            return container;
         }
 
         private static void SetupProcessingQueues(string queueEndpointUri, StorageCredentials credentials)
