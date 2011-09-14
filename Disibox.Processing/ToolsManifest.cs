@@ -134,17 +134,20 @@ namespace Disibox.Processing
             }
         }
 
-        // TODO Riguardare!!!
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private static IEnumerable<Type> LoadToolsAssemblies()
         {
-            var assembliesNames = DataSource.GetProcessingDllNames();
+            var assemblyNames = DataSource.GetProcessingDllNames();
             var tools = new List<Type>();
-            foreach (var assemblyName in assembliesNames)
+            foreach (var assemblyName in assemblyNames)
             {
-                var toolsAssemblyStream = DataSource.GetProcessingDll(assemblyName);
-                var toolsAssembly = Assembly.Load(Shared.StreamToByteArray(toolsAssemblyStream));
-                toolsAssemblyStream.Dispose();
-                tools.AddRange(toolsAssembly.GetTypes());
+                var assemblyStream = DataSource.GetProcessingDll(assemblyName);
+                var assembly = Assembly.Load(Shared.StreamToByteArray(assemblyStream));
+                assemblyStream.Dispose();
+                tools.AddRange(assembly.GetTypes());
             }
             return tools;
         }

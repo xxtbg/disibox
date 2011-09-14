@@ -214,5 +214,19 @@ namespace Disibox.Data.Server
             var outputName = toolName + Guid.NewGuid();
             return _outputsContainer.AddBlob(outputName, outputContentType, outputContent);
         }
+
+        /*=============================================================================
+            Overrides
+        =============================================================================*/
+
+        protected override void RequireAdminUser()
+        {
+            // Empty
+        }
+
+        protected override void RequireLoggedInUser()
+        {
+            // Empty
+        }
     }
 }
