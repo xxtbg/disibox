@@ -32,8 +32,11 @@ namespace Disibox.Processing.Tools
 {
     public class SHA256Calculator : BaseTool
     {
+        private const string LongDescr =
+            "Calculates SHA256 hash of given file, using the algorithm included in the standard library.";
+
         public SHA256Calculator()
-            : base("SHA256 calculator", "Calculates SHA256 hash of given file.", "")
+            : base("SHA256 calculator", "Calculates SHA256 hash of given file.", LongDescr)
         {
             
         }

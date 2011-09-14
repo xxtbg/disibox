@@ -32,8 +32,11 @@ namespace Disibox.Processing.Tools
 {
     public class MD5Calculator : BaseTool
     {
+        private const string LongDescr =
+            "Calculates MD5 hash of given file, using the algorithm included in the standard library.";
+
         public MD5Calculator()
-            : base("MD5 calculator", "Calculates MD5 hash of given file.", "")
+            : base("MD5 calculator", "Calculates MD5 hash of given file.", LongDescr)
         {
             // Empty
         }
