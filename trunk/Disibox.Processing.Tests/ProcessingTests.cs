@@ -27,14 +27,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Resources;
 using Disibox.Data.Client;
 using Disibox.Data.Entities;
 using Disibox.Data.Setup;
-using Disibox.Gui.Utils;
+using Disibox.Processing.Common;
 using Disibox.Processing.Tests.Properties;
 using Disibox.Utils;
 using NUnit.Framework;
@@ -125,7 +128,9 @@ namespace Disibox.Processing.Tests
         [Test]
         public void UploadJpgImageFileAndProcessMd5AsAdminUser()
         {
-            UploadFileAndProcessMd5("image.jpg", Shared.ObjectToStream(Resources.JpgImage));
+            var imageContent = new MemoryStream();
+            Resources.JpgImage.Save(imageContent, ImageFormat.Jpeg);
+            UploadFileAndProcessMd5("image.jpg", imageContent);
         }
 
         [Test]
@@ -137,55 +142,45 @@ namespace Disibox.Processing.Tests
         [Test]
         public void UploadJpgImageFileAndProcessMd5AsCommonUser()
         {
-            UploadFileAndProcessMd5("image.jpg", Shared.ObjectToStream(Resources.JpgImage), true);
+            var imageContent = new MemoryStream();
+            Resources.JpgImage.Save(imageContent, ImageFormat.Jpeg);
+            UploadFileAndProcessMd5("image.jpg", imageContent, true);
         }
 
         [Test]
         public void UploadAndInvertBmpImageAsAdminUser()
         {
-            var image = Shared.ObjectToStream(Resources.BmpImage);
-            var invertedImage = Shared.ObjectToStream(Resources.InvertedBmpImage);
-            UploadAndInvertImage("image.bmp", image, invertedImage, UserType.AdminUser);
+            UploadAndInvertImage("image.bmp", Resources.BmpImage, Resources.InvertedBmpImage, ImageFormat.Bmp, UserType.AdminUser);
         }
 
         [Test]
         public void UploadAndInvertJpgImageAsAdminUser()
         {
-            var image = Shared.ObjectToStream(Resources.JpgImage);
-            var invertedImage = Shared.ObjectToStream(Resources.InvertedJpgImage);
-            UploadAndInvertImage("image.jpg", image, invertedImage, UserType.AdminUser);
+            UploadAndInvertImage("image.jpg", Resources.JpgImage, Resources.InvertedJpgImage, ImageFormat.Jpeg, UserType.AdminUser);
         }
 
         [Test]
         public void UploadAndInvertPngImageAsAdminUser()
         {
-            var image = Shared.ObjectToStream(Resources.PngImage);
-            var invertedImage = Shared.ObjectToStream(Resources.InvertedPngImage);
-            UploadAndInvertImage("image.png", image, invertedImage, UserType.AdminUser);
+            UploadAndInvertImage("image.png", Resources.PngImage, Resources.InvertedPngImage, ImageFormat.Png, UserType.AdminUser);
         }
 
         [Test]
         public void UploadAndInvertBmpImageAsCommonUser()
         {
-            var image = Shared.ObjectToStream(Resources.BmpImage);
-            var invertedImage = Shared.ObjectToStream(Resources.InvertedBmpImage);
-            UploadAndInvertImage("image.bmp", image, invertedImage, UserType.CommonUser);
+            UploadAndInvertImage("image.bmp", Resources.BmpImage, Resources.InvertedBmpImage, ImageFormat.Bmp, UserType.CommonUser);
         }
 
         [Test]
         public void UploadAndInvertJpgImageAsCommonUser()
         {
-            var image = Shared.ObjectToStream(Resources.JpgImage);
-            var invertedImage = Shared.ObjectToStream(Resources.InvertedJpgImage);
-            UploadAndInvertImage("image.jpg", image, invertedImage, UserType.CommonUser);
+            UploadAndInvertImage("image.jpg", Resources.JpgImage, Resources.InvertedJpgImage, ImageFormat.Jpeg, UserType.CommonUser);
         }
 
         [Test]
         public void UploadAndInvertPngImageAsCommonUser()
         {
-            var image = Shared.ObjectToStream(Resources.PngImage);
-            var invertedImage = Shared.ObjectToStream(Resources.InvertedPngImage);
-            UploadAndInvertImage("image.png", image, invertedImage, UserType.CommonUser);
+            UploadAndInvertImage("image.png", Resources.PngImage, Resources.InvertedPngImage, ImageFormat.Png, UserType.CommonUser);
         }
 
         private void UploadFileAndProcessMd5(string fileName, Stream fileContent, bool commonUser = false)
@@ -262,9 +257,23 @@ namespace Disibox.Processing.Tests
             DataSource.DeleteUser(CommonUserEmail);
         }
 
+        private void UploadAndInvertImage(string fileName, Image image, Image invertedImage, ImageFormat imageFormat, UserType userType)
+        {
+            var imageContent = new MemoryStream();
+            image.Save(imageContent, imageFormat);
+            var invertedImageContent = new MemoryStream();
+            invertedImage.Save(invertedImageContent, imageFormat);
+            UploadAndInvertImage(fileName, imageContent, invertedImageContent, UserType.AdminUser);
+            image.Dispose();
+            invertedImage.Dispose();
+        }
+
         private void UploadAndInvertImage(string imageName, Stream imageContent, Stream invertedImageContent,
                                           UserType userType)
         {
+            imageContent.Position = 0;
+            invertedImageContent.Position = 0;
+
             var processingToolInformations = new List<ProcessingToolInformation>();
 
             if (userType == UserType.CommonUser)
@@ -304,7 +313,7 @@ namespace Disibox.Processing.Tests
             _processedFileStream = DataSource.GetOutput(uriProcessedFile);
             DataSource.Logout();
 
-            Assert.IsTrue(Shared.StreamsAreEqual(_processedFileStream, invertedImageContent));  
+            Assert.IsTrue(Shared.StreamsAreEqual(_processedFileStream, invertedImageContent, 8));  
         }
     }
 }

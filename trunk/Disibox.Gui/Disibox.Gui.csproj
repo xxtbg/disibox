@@ -75,6 +75,9 @@
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Disibox.Gui.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -99,7 +102,6 @@
     <Compile Include="ManageDlls.xaml.cs">
       <DependentUpon>ManageDlls.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utils\ProcessingToolInformation.cs" />
     <Compile Include="Utils\UserAndType.cs" />
     <Page Include="AddUserWindow.xaml">
       <SubType>Designer</SubType>
@@ -194,6 +196,10 @@
     <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
       <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
       <Name>Disibox.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Disibox.Processing.Common\Disibox.Processing.Common.csproj">
+      <Project>{330EC4FE-6CB2-4912-9A05-E2DBB99F0FD9}</Project>
+      <Name>Disibox.Processing.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Disibox.Utils\Disibox.Utils.csproj">
       <Project>{5885EA43-7F42-4C18-ACFB-DE788F25EF6A}</Project>
