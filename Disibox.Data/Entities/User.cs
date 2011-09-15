@@ -45,14 +45,14 @@ namespace Disibox.Data.Entities
         /// <param name="userId">User unique identifier.</param>
         /// <param name="userEmail">User email address.</param>
         /// <param name="userPwd">User password (NOT hashed).</param>
-        /// <param name="userIsAdmin">Whether user will be or not be administrator.</param>
-        public User(string userId, string userEmail, string userPwd, bool userIsAdmin)
+        /// <param name="userType">The type of user (admin or common).</param>
+        public User(string userId, string userEmail, string userPwd, UserType userType)
         {
             RowKey = userId;
             PartitionKey = TableName;
             Email = userEmail;
             HashedPassword = Hash.ComputeMD5(userPwd);
-            IsAdmin = userIsAdmin;
+            IsAdmin = (userType == UserType.AdminUser);
         }
 
         /// <summary>
@@ -79,5 +79,10 @@ namespace Disibox.Data.Entities
         /// Indicates whether user is administrator.
         /// </summary>
         public bool IsAdmin { get; set; }
+    }
+
+    public enum UserType
+    {
+        AdminUser, CommonUser
     }
 }

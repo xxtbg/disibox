@@ -289,14 +289,14 @@ namespace Disibox.Data.Client
         /// </summary>
         /// <param name="userEmail">The email address of the new user.</param>
         /// <param name="userPwd">The password for the new user.</param>
-        /// <param name="userIsAdmin">Whether new user will be administrator or not.</param>
+        /// <param name="userType">Whether new user will be administrator or not.</param>
         /// <exception cref="UserNotAdminException">Only administrators can use this method.</exception>
         /// <exception cref="ArgumentNullException">At least one of given email or password is null.</exception>
         /// <exception cref="InvalidEmailException">Given email is not syntactically correct.</exception>
         /// <exception cref="InvalidPasswordException">Given password is shorter than MinPasswordLength.</exception>
         /// <exception cref="UserNotLoggedInException">A user must be logged in to use this method.</exception>
         /// <exception cref="UserExistingException">A user with given email address already exists.</exception>
-        public void AddUser(string userEmail, string userPwd, bool userIsAdmin)
+        public void AddUser(string userEmail, string userPwd, UserType userType)
         {
             // Requirements
             Require.ValidEmail(userEmail, "userEmail");
@@ -305,8 +305,8 @@ namespace Disibox.Data.Client
             RequireAdminUser();
             RequireNotExistingUser(userEmail);
 
-            var userId = GenerateUserId(userIsAdmin);
-            var user = new User(userId, userEmail, userPwd, userIsAdmin);
+            var userId = GenerateUserId(userType);
+            var user = new User(userId, userEmail, userPwd, userType);
 
             _users.AddEntity(user);
             _users.SaveChanges();
@@ -509,12 +509,22 @@ namespace Disibox.Data.Client
             Private methods
         =============================================================================*/
 
-        private string GenerateUserId(bool userIsAdmin)
+        /// <summary>
+        /// Converts given number of bytes into kilobytes.
+        /// </summary>
+        /// <param name="bytes">Number of bytes to convert.</param>
+        /// <returns>The result of the conversion.</returns>
+        private static double ConvertBytesToKilobytes(long bytes)
+        {
+            return Math.Round(bytes / 1024f, 2);
+        }
+
+        private string GenerateUserId(UserType userType)
         {
             var nextUserIdEntry = _entries.Entities.Where(e => e.RowKey == "NextUserId").First();
             var nextUserId = int.Parse(nextUserIdEntry.Value);
 
-            var firstIdChar = (userIsAdmin) ? 'a' : 'u';
+            var firstIdChar = (userType == UserType.AdminUser) ? 'a' : 'u';
             var userId = string.Format("{0}{1}", firstIdChar, nextUserId.ToString("D16"));
 
             nextUserId += 1;
@@ -541,7 +551,7 @@ namespace Disibox.Data.Client
                 var fileOwner = GetUserEmailByUserId(fileOwnerId);
                 var fileName = filePath.Substring(fileOwnerId.Length + 1); // To avoid '/'
                 var fileContentType = Shared.GetContentType(fileName);
-                var fileSize = Shared.ConvertBytesToKilobytes(file.Properties.Length);
+                var fileSize = ConvertBytesToKilobytes(file.Properties.Length);
                 var metadata = new FileMetadata(fileName, fileContentType, fileUri, fileOwner, fileSize);
                 fileMetadata.Add(metadata);
             }
@@ -562,7 +572,7 @@ namespace Disibox.Data.Client
                 if (!fileUri.Contains(filesPrefix)) continue;
                 var fileName = fileUri.Substring(filesPrefix.Length);
                 var fileContentType = Shared.GetContentType(fileName);
-                var fileSize = Shared.ConvertBytesToKilobytes(file.Properties.Length);
+                var fileSize = ConvertBytesToKilobytes(file.Properties.Length);
                 var metadata = new FileMetadata(fileName, fileContentType, fileUri, fileOwner, fileSize);
                 fileMetadata.Add(metadata);
             }

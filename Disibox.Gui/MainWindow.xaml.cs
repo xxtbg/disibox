@@ -37,7 +37,7 @@ using System.Windows.Controls;
 using Disibox.Data.Client;
 using Disibox.Data.Client.Exceptions;
 using Disibox.Data.Exceptions;
-using Disibox.Gui.Util;
+using Disibox.Gui.Utils;
 using Microsoft.Win32;
 using Path = System.IO.Path;
 

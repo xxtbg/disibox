@@ -26,6 +26,7 @@
 //
 
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Entities;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
@@ -48,7 +49,7 @@ namespace Disibox.Data.Tests.Client
         public void DeleteOneCommonUserFileAsAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
@@ -67,8 +68,8 @@ namespace Disibox.Data.Tests.Client
         public void DeleteOneCommonUserFileAsOtherCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
-            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
+            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
@@ -83,7 +84,7 @@ namespace Disibox.Data.Tests.Client
         public void DeleteOneCommonUserFileAsProprietaryUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);

@@ -27,6 +27,7 @@
 
 using System;
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Entities;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
@@ -53,7 +54,7 @@ namespace Disibox.Data.Tests.Client
         public void DeleteOneCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.DeleteUser(CommonUserEmails[0]);
 
             var commonUserEmails = DataSource.GetCommonUsersEmails();
@@ -89,7 +90,7 @@ namespace Disibox.Data.Tests.Client
         public void DeleteTwoAdmins()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], UserType.AdminUser);
             DataSource.DeleteUser(DefaultAdminEmail);
             DataSource.DeleteUser(AdminUserEmails[0]);
         }
@@ -100,10 +101,10 @@ namespace Disibox.Data.Tests.Client
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < AdminUserEmails.Count; ++i)
-                DataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], true);
+                DataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], UserType.AdminUser);
             DataSource.DeleteUser(DefaultAdminEmail);
-            for (var i = 0; i < AdminUserEmails.Count; ++i)
-                DataSource.DeleteUser(AdminUserEmails[i]);
+            foreach (var email in AdminUserEmails)
+                DataSource.DeleteUser(email);
         }
 
         /*=============================================================================
@@ -115,11 +116,11 @@ namespace Disibox.Data.Tests.Client
         public void DeleteOneAdminUserLoggingInAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], UserType.AdminUser);
             DataSource.DeleteUser(AdminUserEmails[0]);
         }
 

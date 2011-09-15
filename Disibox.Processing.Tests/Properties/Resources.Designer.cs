@@ -59,5 +59,65 @@ namespace Disibox.Processing.Tests.Properties {
                 resourceCulture = value;
             }
         }
+        
+        internal static System.Drawing.Bitmap BmpImage {
+            get {
+                object obj = ResourceManager.GetObject("BmpImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap InvertedBmpImage {
+            get {
+                object obj = ResourceManager.GetObject("InvertedBmpImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap InvertedJpgImage {
+            get {
+                object obj = ResourceManager.GetObject("InvertedJpgImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap InvertedPngImage {
+            get {
+                object obj = ResourceManager.GetObject("InvertedPngImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap JpgImage {
+            get {
+                object obj = ResourceManager.GetObject("JpgImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap PngImage {
+            get {
+                object obj = ResourceManager.GetObject("PngImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to //
+        ///// Copyright (c) 2011, University of Genoa
+        ///// All rights reserved.
+        /////
+        ///// Redistribution and use in source and binary forms, with or without
+        ///// modification, are permitted provided that the following conditions are met:
+        /////     * Redistributions of source code must retain the above copyright
+        /////       notice, this list of conditions and the following disclaimer.
+        /////     * Redistributions in binary form must reproduce the above copyright
+        /////       notice, this list of conditions and the following disc [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Textfile {
+            get {
+                return ResourceManager.GetString("Textfile", resourceCulture);
+            }
+        }
     }
 }

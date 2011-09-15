@@ -29,6 +29,7 @@ using System;
 using System.Windows;
 using Disibox.Data.Client;
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
 
 namespace Disibox.Gui {
@@ -51,12 +52,12 @@ namespace Disibox.Gui {
             var password2 = passwordBox2.Password;
 
             if (password1.Equals(password2)) {
-                var isAdmin = false;
+                var userType = UserType.CommonUser;
                 if (checkBoxAdmin.IsChecked == true)
-                    isAdmin = true;
+                    userType = UserType.AdminUser;
 
                 try {
-                    _ds.AddUser(username, password1, isAdmin);
+                    _ds.AddUser(username, password1, userType);
                 } catch (UserNotAdminException) {
                     MessageBox.Show("Only a user with administrator priviledges can add a user",
                                     "Error inserting a new user");

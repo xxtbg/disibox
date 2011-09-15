@@ -28,6 +28,7 @@
 using System;
 using System.Linq;
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Entities;
 using Disibox.Utils;
 using NUnit.Framework;
 
@@ -87,7 +88,7 @@ namespace Disibox.Data.Tests.Client
         public void AddOneFileAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);

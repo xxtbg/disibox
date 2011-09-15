@@ -25,12 +25,32 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace Disibox.Gui.Util
-{
-    class UserAndType
-    {
-        public string User { get; set; }
+using System.Text.RegularExpressions;
 
-        public string Type { get; set; }
+namespace Disibox.Gui.Utils
+{
+    public class ProcessingToolInformation
+    {
+        private ProcessingToolInformation(string name, string briefDescr, string longDescr)
+        {
+            Name = name;
+            BriefDescription = briefDescr;
+            LongDescription = longDescr;
+        }
+
+        public string Name { get; private set; }
+
+        public string BriefDescription { get; private set; }
+
+        public string LongDescription { get; private set; }
+        
+        public static ProcessingToolInformation FromString(string info)
+        {
+            var splittedInfo = Regex.Split(info, "\", \"");
+            var name = splittedInfo[0].Substring(1); // To avoid initial '"'
+            var briefDescr = splittedInfo[1];
+            var longDescr = splittedInfo[2].Substring(0, splittedInfo[2].Length-1); // To avoid final '"'
+            return new ProcessingToolInformation(name, briefDescr, longDescr);
+        }
     }
 }

@@ -26,6 +26,7 @@
 //
 
 using Disibox.Data.Client.Exceptions;
+using Disibox.Data.Entities;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Client
@@ -49,7 +50,7 @@ namespace Disibox.Data.Tests.Client
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < CommonUserCount; ++i)
-                DataSource.AddUser(CommonUserEmails[i], CommonUserPwds[i], false);
+                DataSource.AddUser(CommonUserEmails[i], CommonUserPwds[i], UserType.CommonUser);
 
             var commonUsersEmails = DataSource.GetCommonUsersEmails();
             for (var i = 0; i < CommonUserCount; ++i)
@@ -60,7 +61,7 @@ namespace Disibox.Data.Tests.Client
         public void AddOneCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
 
             var commonUsersEmails = DataSource.GetCommonUsersEmails();
             Assert.True(commonUsersEmails.Contains(CommonUserEmails[0]));
@@ -70,7 +71,7 @@ namespace Disibox.Data.Tests.Client
         [ExpectedException(typeof (UserNotLoggedInException))]
         public void AddOneCommonUserWithoutLoggingIn()
         {
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
         }
 
         [Test]
@@ -78,18 +79,18 @@ namespace Disibox.Data.Tests.Client
         public void AddOneCommonUserAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], false);
+            DataSource.AddUser(CommonUserEmails[1], CommonUserPwds[1], UserType.CommonUser);
         }
 
         [Test]
         public void AddOneAdminUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], UserType.AdminUser);
 
             var adminUsersEmails = DataSource.GetAdminUsersEmails();
             Assert.True(adminUsersEmails.Contains(AdminUserEmails[0]));
@@ -100,7 +101,7 @@ namespace Disibox.Data.Tests.Client
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < AdminUserCount; ++i)
-                DataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], true);
+                DataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], UserType.AdminUser);
 
             var adminUsersEmails = DataSource.GetAdminUsersEmails();
             for (var i = 0; i < AdminUserCount; ++i)
@@ -111,7 +112,7 @@ namespace Disibox.Data.Tests.Client
         [ExpectedException(typeof (UserNotLoggedInException))]
         public void AddOneAdminUserWithoutLoggingIn()
         {
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], UserType.AdminUser);
         }
 
         [Test]
@@ -119,11 +120,11 @@ namespace Disibox.Data.Tests.Client
         public void AddOneAdminUserAsCommonUser()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            DataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(CommonUserEmails[0], CommonUserPwds[0]);
-            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], UserType.AdminUser);
         }
     }
 }
