@@ -164,7 +164,7 @@ namespace Disibox.Data.Setup
 
             var defaultAdminEmail = Settings.Default.DefaultAdminEmail;
             var defaultAdminPwd = Settings.Default.DefaultAdminPwd;
-            var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, true);
+            var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, UserType.AdminUser);
 
             usersTable.AddEntity(defaultAdminUser);
             usersTable.SaveChanges();

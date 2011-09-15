@@ -25,19 +25,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace Disibox.Gui.Util
+namespace Disibox.Gui.Utils
 {
-    public class ProcessingToolInformation
+    class UserAndType
     {
-        public ProcessingToolInformation(string name, string briefDescription, string longDescription)
-        {
-            Name = name;
-            BriefDescription = briefDescription;
-            LongDescription = longDescription;
-        }
-        public string Name { get; private set; }
-        public string BriefDescription { get; private set; }
-        public string LongDescription { get; private set; }
-        
+        public string User { get; set; }
+
+        public string Type { get; set; }
     }
 }

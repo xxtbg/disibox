@@ -66,6 +66,10 @@
       <Project>{68F0666F-E2EF-414F-A424-68584CDB048A}</Project>
       <Name>Disibox.Data.Setup</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Disibox.Data\Disibox.Data.csproj">
+      <Project>{57FF244A-C42C-485B-B484-6146D09A508A}</Project>
+      <Name>Disibox.Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Disibox.Gui\Disibox.Gui.csproj">
       <Project>{A1311FD4-39D3-461F-9068-C1E1D6DB5E1F}</Project>
       <Name>Disibox.Gui</Name>
@@ -76,12 +80,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Files\image.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Files\textfile.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="Resources\textfile.txt" />
+    <None Include="Resources\inverted-image.png" />
+    <None Include="Resources\inverted-image.jpg" />
+    <None Include="Resources\inverted-image.bmp" />
+    <None Include="Resources\image.png" />
+    <None Include="Resources\image.jpg" />
+    <None Include="Resources\image.bmp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

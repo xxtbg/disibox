@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Microsoft.Win32;
 
@@ -81,19 +82,48 @@ namespace Disibox.Utils
         }
 
         /// <summary>
+        /// Converts given object to a byte array.
+        /// </summary>
+        /// <param name="obj">Object to convert.</param>
+        /// <returns>Converted object.</returns>
+        public static byte[] ObjectToByteArray(object obj)
+        {
+            if (obj == null) return null;
+            var bf = new BinaryFormatter();
+            using (var ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Converts given object to a stream.
+        /// </summary>
+        /// <param name="obj">Object to convert.</param>
+        /// <returns>Converted object.</returns>
+        public static Stream ObjectToStream(object obj)
+        {
+            if (obj == null) return null;
+            var bf = new BinaryFormatter();
+            var ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms;
+        }
+
+        /// <summary>
         /// Converts given stream to a byte array.
         /// </summary>
         /// <param name="input">Stream to convert.</param>
         /// <returns>Converted stream.</returns>
         public static byte[] StreamToByteArray(Stream input)
         {
+            if (input == null) return null;
             var buffer = new byte[input.Length];
-
             var oldPosition = input.Position;
             input.Seek(0, SeekOrigin.Begin);
             input.Read(buffer, 0, (int) input.Length);
             input.Seek(oldPosition, SeekOrigin.Begin);
-
             return buffer;
         }
 
@@ -105,16 +135,6 @@ namespace Disibox.Utils
         public static byte[] StringToByteArray(string input)
         {
             return Encoding.UTF8.GetBytes(input);
-        }
-
-        /// <summary>
-        /// Converts given number of bytes into kilobytes.
-        /// </summary>
-        /// <param name="bytes">Number of bytes to convert.</param>
-        /// <returns>The result of the conversion.</returns>
-        public static double ConvertBytesToKilobytes(long bytes)
-        {
-            return Math.Round(bytes / 1024f, 2);
         }
     }
 }

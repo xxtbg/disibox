@@ -31,7 +31,7 @@ using System.Windows;
 using Disibox.Data.Client;
 using Disibox.Data.Client.Exceptions;
 using Disibox.Data.Exceptions;
-using Disibox.Gui.Util;
+using Disibox.Gui.Utils;
 using Microsoft.Win32;
 
 namespace Disibox.Gui
@@ -89,19 +89,18 @@ namespace Disibox.Gui
             }
 
             for (var i = 0; i < numberOfProcessingTools; ++i) {
-                string[] info;
-
+                ProcessingToolInformation toolInformation;
+                
                 try {
-                    info = _reader.ReadLine().Split(',');
-                    if (info.Length != NUMBER_OF_INFO_TOKENS)
-                        throw new Exception();
+                    var info = _reader.ReadLine();
+                    toolInformation = ProcessingToolInformation.FromString(info);
                 } catch (Exception) {
                     MessageBox.Show(messageMessageBox + "cannot retrive tool information", titleMessageBox);
                     _erroFillingList = true;
                     return;
                 }
 
-                listView.Items.Add(new ProcessingToolInformation(info[0].Trim(), info[1].Trim(), info[2].Trim()));
+                listView.Items.Add(toolInformation);
             }
         }
 

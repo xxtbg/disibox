@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using Disibox.Data.Entities;
 using NUnit.Framework;
 
 namespace Disibox.Data.Tests.Mixed
@@ -57,7 +58,7 @@ namespace Disibox.Data.Tests.Mixed
         public void OneExistingAdminUser()
         {
             ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            ClientDataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            ClientDataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], UserType.AdminUser);
             ClientDataSource.Logout();
 
             Assert.True(ServerDataSource.UserExists(AdminUserEmails[0], AdminUserPwds[0]));
@@ -68,7 +69,7 @@ namespace Disibox.Data.Tests.Mixed
         {
             ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < AdminUserEmails.Count; ++i)
-                ClientDataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], false);
+                ClientDataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], UserType.CommonUser);
             ClientDataSource.Logout();
 
             for (var i = 0; i < AdminUserEmails.Count; ++i)
@@ -79,7 +80,7 @@ namespace Disibox.Data.Tests.Mixed
         public void OneExistingCommonUser()
         {
             ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            ClientDataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], false);
+            ClientDataSource.AddUser(CommonUserEmails[0], CommonUserPwds[0], UserType.CommonUser);
             ClientDataSource.Logout();
 
             Assert.True(ServerDataSource.UserExists(CommonUserEmails[0], CommonUserPwds[0]));
@@ -90,7 +91,7 @@ namespace Disibox.Data.Tests.Mixed
         {
             ClientDataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             for (var i = 0; i < CommonUserEmails.Count; ++i)
-                ClientDataSource.AddUser(CommonUserEmails[i], CommonUserPwds[i], false);
+                ClientDataSource.AddUser(CommonUserEmails[i], CommonUserPwds[i], UserType.CommonUser);
             ClientDataSource.Logout();
 
             for (var i = 0; i < CommonUserEmails.Count; ++i)

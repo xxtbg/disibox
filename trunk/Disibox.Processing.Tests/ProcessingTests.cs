@@ -32,27 +32,33 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using Disibox.Data.Client;
-using Disibox.Gui.Util;
+using Disibox.Data.Entities;
+using Disibox.Data.Setup;
+using Disibox.Gui.Utils;
+using Disibox.Processing.Tests.Properties;
 using Disibox.Utils;
 using NUnit.Framework;
 
 namespace Disibox.Processing.Tests
 {
     [TestFixture]
-    public class ProcessingTests {
-
-        private static String DefaultAdminEmail {
+    public class ProcessingTests
+    {
+        private static String DefaultAdminEmail
+        {
             get { return Data.Setup.Properties.Settings.Default.DefaultAdminEmail; }
         }
-        private static String DefaultAdminPwd {
+
+        private static String DefaultAdminPwd
+        {
             get { return Data.Setup.Properties.Settings.Default.DefaultAdminPwd; }
         }
 
-        private static readonly String _commonUserEmail = "a_common@test.pino";
-        private static readonly String _commonUserPwd = new string('a',_commonUserEmail.Length) + "_pwd";
+        private const String CommonUserEmail = "a_common@test.pino";
+        private static readonly String CommonUserPwd = new string('a', CommonUserEmail.Length) + "_pwd";
 
-        private static readonly string _serverString = Properties.Settings.Default.DefaultProcessingServer;
-        private static readonly int _serverPort = Properties.Settings.Default.DefaultProcessingServerPort;
+        private static readonly string ServerString = Settings.Default.DefaultProcessingServer;
+        private static readonly int ServerPort = Settings.Default.DefaultProcessingServerPort;
 
         private ClientDataSource DataSource { get; set; }
 
@@ -63,73 +69,89 @@ namespace Disibox.Processing.Tests
         private Stream _processedFileStream;
         private Stream _fileToUpload;
 
-
         [SetUp]
-        protected void SetUp() {
+        protected void SetUp()
+        {
+            CloudStorageSetup.ResetStorage();
             DataSource = new ClientDataSource();
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
 
             _server = new TcpClient();
 
             /* estabilishing tcp connection with dispatcher */
-            _server.Connect(IPAddress.Parse(_serverString), _serverPort);
+            _server.Connect(IPAddress.Parse(ServerString), ServerPort);
             _reader = new StreamReader(_server.GetStream());
-            _writer = new StreamWriter(_server.GetStream()) { AutoFlush = true };
+            _writer = new StreamWriter(_server.GetStream()) {AutoFlush = true};
         }
 
         [TearDown]
-        protected void TearDown() {
+        protected void TearDown()
+        {
             DataSource.Logout();
             DataSource = null;
 
-            try {
+            try
+            {
                 _reader.Close();
                 _writer.Close();
                 _server.Close();
-            } catch {}
+            }
+            catch
+            {
+            }
 
             _server = null;
             _reader = null;
             _writer = null;
 
-            try {
+            try
+            {
                 _processedFileStream.Close();
                 _fileToUpload.Close();
-            } catch {}
+            }
+            catch
+            {
+            }
+
+            CloudStorageSetup.ResetStorage();
         }
 
         [Test]
-        public void UploadTextFileAndProcessMd5AsAdminUser() {
-            UploadFileAndProcessMd5("textfile.txt");
+        public void UploadTextFileAndProcessMd5AsAdminUser()
+        {
+            UploadFileAndProcessMd5("textfile.txt", Shared.ObjectToStream(Resources.Textfile));
         }
 
         [Test]
-        public void UploadImageFileAndProcessMd5AsAdminUser() {
-            UploadFileAndProcessMd5("image.jpg");
+        public void UploadJpgImageFileAndProcessMd5AsAdminUser()
+        {
+            UploadFileAndProcessMd5("image.jpg", Shared.ObjectToStream(Resources.JpgImage));
         }
 
         [Test]
-        public void UploadTextFileAndProcessMd5AsCommonUser() {   
-            UploadFileAndProcessMd5("textfile.txt", true);
-
+        public void UploadTextFileAndProcessMd5AsCommonUser()
+        {
+            UploadFileAndProcessMd5("textfile.txt", Shared.ObjectToStream(Resources.Textfile), true);
         }
 
         [Test]
-        public void UploadImageFileAndProcessMd5AsCommonUser() {
-            UploadFileAndProcessMd5("image.jpg", true);
+        public void UploadJpgImageFileAndProcessMd5AsCommonUser()
+        {
+            UploadFileAndProcessMd5("image.jpg", Shared.ObjectToStream(Resources.JpgImage), true);
         }
 
-
-        private void UploadFileAndProcessMd5(string fileName, bool commonUser = false) {
-            _fileToUpload = new FileStream("Files\\" + fileName, FileMode.Open, FileAccess.Read);
+        private void UploadFileAndProcessMd5(string fileName, Stream fileContent, bool commonUser = false)
+        {
+            _fileToUpload = fileContent;
             IList<ProcessingToolInformation> processingToolInformations = new List<ProcessingToolInformation>();
 
             #region preparing_environment
 
-            if (commonUser) {
-                DataSource.AddUser(_commonUserEmail, _commonUserPwd, false);
+            if (commonUser)
+            {
+                DataSource.AddUser(CommonUserEmail, CommonUserPwd, UserType.CommonUser);
                 DataSource.Logout();
-                DataSource.Login(_commonUserEmail, _commonUserPwd);
+                DataSource.Login(CommonUserEmail, CommonUserPwd);
             }
 
             /* uploading the file to process */
@@ -139,8 +161,8 @@ namespace Disibox.Processing.Tests
             var fileMetadata = DataSource.GetFileMetadata().Where(fm => fm.Name.Equals(fileName)).First();
 
             /* authenticating */
-            var email = (commonUser) ? _commonUserEmail : DefaultAdminEmail;
-            var pwd = (commonUser) ? _commonUserPwd : DefaultAdminPwd;
+            var email = (commonUser) ? CommonUserEmail : DefaultAdminEmail;
+            var pwd = (commonUser) ? CommonUserPwd : DefaultAdminPwd;
             _writer.WriteLine(email);
             _writer.WriteLine(pwd);
 
@@ -154,13 +176,10 @@ namespace Disibox.Processing.Tests
             /* useless but have to do this */
             var numberOfProcessingTools = Int32.Parse(_reader.ReadLine());
 
-            for (var i = 0; i < numberOfProcessingTools; ++i) {
-                string[] info;
-                info = _reader.ReadLine().Split(',');
-                if (info.Length != 3)
-                    throw new Exception();
-                processingToolInformations.Add(new ProcessingToolInformation(info[0].Trim(), info[1].Trim(),
-                                                                             info[2].Trim()));
+            for (var i = 0; i < numberOfProcessingTools; ++i)
+            {
+                var info = _reader.ReadLine();
+                processingToolInformations.Add(ProcessingToolInformation.FromString(info));
             }
 
             #endregion
@@ -172,7 +191,7 @@ namespace Disibox.Processing.Tests
 
             _writer.WriteLine(operationToApply);
             uriProcessedFile = _reader.ReadLine();
-            
+
             _fileToUpload.Seek(0, SeekOrigin.Begin); //fundamental!
 
             _processedFileStream = DataSource.GetOutput(uriProcessedFile);
@@ -180,7 +199,6 @@ namespace Disibox.Processing.Tests
             DataSource.DeleteFile(fileMetadata.Uri);
 
             #endregion
-
 
             var md5 = Hash.ComputeMD5(_fileToUpload);
             var actualMd5Stream = new MemoryStream(Shared.StringToByteArray(md5));
@@ -193,10 +211,52 @@ namespace Disibox.Processing.Tests
             if (!commonUser) return;
             DataSource.Logout();
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.DeleteUser(_commonUserEmail);
+            DataSource.DeleteUser(CommonUserEmail);
         }
 
+        private void UploadAndInvertImage(string imageName, Stream imageContent, Stream invertedImageContent,
+                                          UserType userType)
+        {
+            var processingToolInformations = new List<ProcessingToolInformation>();
 
+            if (userType == UserType.CommonUser)
+            {
+                DataSource.AddUser(CommonUserEmail, CommonUserPwd, userType);
+                DataSource.Logout();
+                DataSource.Login(CommonUserEmail, CommonUserPwd);
+            }
 
+            DataSource.AddFile(imageName, imageContent);
+            var imageMetadata = DataSource.GetFileMetadata().First(fm => fm.Name.Equals(imageName));
+
+            var email = (userType == UserType.CommonUser) ? CommonUserEmail : DefaultAdminEmail;
+            var pwd = (userType == UserType.CommonUser) ? CommonUserPwd : DefaultAdminPwd;
+            _writer.WriteLine(email);
+            _writer.WriteLine(pwd);
+
+            _writer.WriteLine(imageMetadata.ContentType);
+            _writer.WriteLine(imageMetadata.Uri);
+
+            var answer = _reader.ReadLine();
+            if (answer == null || answer.Equals("KO"))
+                throw new Exception();
+
+            /* useless but have to do this */
+            var numberOfProcessingTools = Int32.Parse(_reader.ReadLine());
+
+            for (var i = 0; i < numberOfProcessingTools; ++i)
+            {
+                var info = _reader.ReadLine();
+                processingToolInformations.Add(ProcessingToolInformation.FromString(info));
+            }
+
+            _writer.WriteLine("Color inverter");
+
+            var uriProcessedFile = _reader.ReadLine();
+            _processedFileStream = DataSource.GetOutput(uriProcessedFile);
+            DataSource.Logout();
+
+            Assert.IsTrue(Shared.StreamsAreEqual(_processedFileStream, invertedImageContent));  
+        }
     }
 }

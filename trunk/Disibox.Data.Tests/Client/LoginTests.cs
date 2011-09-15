@@ -26,6 +26,7 @@
 //
 
 using System;
+using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
 using NUnit.Framework;
 
@@ -145,7 +146,7 @@ namespace Disibox.Data.Tests.Client
         private void ValidAddAndLogCommonUser(string userEmail, string userPwd)
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
-            DataSource.AddUser(userEmail, userPwd, false);
+            DataSource.AddUser(userEmail, userPwd, UserType.CommonUser);
             DataSource.Logout();
 
             DataSource.Login(userEmail, userPwd);
