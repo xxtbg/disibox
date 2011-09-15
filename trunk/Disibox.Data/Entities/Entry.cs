@@ -35,6 +35,8 @@ namespace Disibox.Data.Entities
     /// </summary>
     public sealed class Entry : TableServiceEntity
     {
+        private static readonly string TableName = (typeof (Entry)).Name.ToLower(); 
+
         /// <summary>
         /// 
         /// </summary>
@@ -43,7 +45,7 @@ namespace Disibox.Data.Entities
         public Entry(string entryName, string entryValue)
         {
             RowKey = entryName;
-            PartitionKey = Properties.Settings.Default.EntriesTableName;
+            PartitionKey = TableName;
             Value = entryValue;
         }
 
@@ -53,8 +55,8 @@ namespace Disibox.Data.Entities
         [Obsolete]
         public Entry()
         {
-            RowKey = Properties.Settings.Default.EntriesTableName;
-            PartitionKey = Properties.Settings.Default.EntriesTableName;
+            RowKey = TableName;
+            PartitionKey = TableName;
         }
 
         /// <summary>

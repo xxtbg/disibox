@@ -78,10 +78,32 @@ namespace Disibox.Data.Tests.Client
 
         [Test]
         [ExpectedException(typeof(CannotDeleteLastAdminException))]
-        public void DeleteLastAdmin()
+        public void DeleteDefaultAdmin()
         {
             DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
             DataSource.DeleteUser(DefaultAdminEmail);
+        }
+
+        [Test]
+        [ExpectedException(typeof(CannotDeleteLastAdminException))]
+        public void DeleteTwoAdmins()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            DataSource.AddUser(AdminUserEmails[0], AdminUserPwds[0], true);
+            DataSource.DeleteUser(DefaultAdminEmail);
+            DataSource.DeleteUser(AdminUserEmails[0]);
+        }
+
+        [Test]
+        [ExpectedException(typeof(CannotDeleteLastAdminException))]
+        public void DeleteManyAdmins()
+        {
+            DataSource.Login(DefaultAdminEmail, DefaultAdminPwd);
+            for (var i = 0; i < AdminUserEmails.Count; ++i)
+                DataSource.AddUser(AdminUserEmails[i], AdminUserPwds[i], true);
+            DataSource.DeleteUser(DefaultAdminEmail);
+            for (var i = 0; i < AdminUserEmails.Count; ++i)
+                DataSource.DeleteUser(AdminUserEmails[i]);
         }
 
         /*=============================================================================

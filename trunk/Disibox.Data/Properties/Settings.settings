@@ -2,12 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Disibox.Data.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="EntriesTableName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">entries</Value>
-    </Setting>
-    <Setting Name="UsersTableName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">users</Value>
-    </Setting>
     <Setting Name="DataConnectionString" Type="System.String" Scope="Application">
       <Value Profile="(Default)">UseDevelopmentStorage=true</Value>
     </Setting>

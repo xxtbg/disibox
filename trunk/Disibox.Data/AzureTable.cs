@@ -36,55 +36,51 @@ namespace Disibox.Data
 {
     public class AzureTable<TEntity> : IStorage where TEntity : TableServiceEntity
     {
+        private static readonly string TableName = (typeof (TEntity)).Name.ToLower();
+        
         private readonly CloudTableClient _tableClient;
-        private readonly TableServiceContext _tableContext;
-        private readonly string _tableName;
+        private readonly TableServiceContext _tableContext; 
 
-        private AzureTable(string tableName, CloudTableClient tableClient)
+        private AzureTable(CloudTableClient tableClient)
         {
             _tableClient = tableClient;
             _tableContext = tableClient.GetDataServiceContext();
-            _tableName = tableName;
         }
 
         public IQueryable<TEntity> Entities
         {
-            get { return _tableContext.CreateQuery<TEntity>(_tableName); }
+            get { return _tableContext.CreateQuery<TEntity>(TableName); }
         }
 
         public string Name
         {
-            get { return _tableName; }
+            get { return TableName; }
         }
 
         public Uri Uri
         {
-            get { return new Uri(_tableClient.BaseUri + "/" + _tableName); }
+            get { return new Uri(_tableClient.BaseUri + "/" + TableName); }
         }
 
-        public static AzureTable<TEntity> Connect(string tableName, string tableEndpointUri,
-                                                  StorageCredentials credentials)
+        public static AzureTable<TEntity> Connect(string tableEndpointUri, StorageCredentials credentials)
         {
             // Requirements
-            Require.NotEmpty(tableName, "tableName");
             Require.NotEmpty(tableEndpointUri, "tableEndpointUri");
             Require.NotNull(credentials, "credentials");
 
             var tableClient = CreateTableClient(tableEndpointUri, credentials);
-            return new AzureTable<TEntity>(tableName, tableClient);
+            return new AzureTable<TEntity>(tableClient);
         }
 
-        public static AzureTable<TEntity> Create(string tableName, string tableEndpointUri,
-                                                 StorageCredentials credentials)
+        public static AzureTable<TEntity> Create(string tableEndpointUri, StorageCredentials credentials)
         {
             // Requirements
-            Require.NotEmpty(tableName, "tableName");
             Require.NotEmpty(tableEndpointUri, "tableEndpointUri");
             Require.NotNull(credentials, "credentials");
 
             var tableClient = CreateTableClient(tableEndpointUri, credentials);
-            tableClient.CreateTableIfNotExist(tableName);
-            return new AzureTable<TEntity>(tableName, tableClient);
+            tableClient.CreateTableIfNotExist(TableName);
+            return new AzureTable<TEntity>(tableClient);
         }
 
         public void AddEntity(TEntity entity)
@@ -92,7 +88,7 @@ namespace Disibox.Data
             // Requirements
             Require.NotNull(entity, "entity");
 
-            _tableContext.AddObject(_tableName, entity);
+            _tableContext.AddObject(TableName, entity);
         }
 
         public void DeleteEntity(TEntity entity)
@@ -131,12 +127,12 @@ namespace Disibox.Data
             // Requirements
             RequireExistingTable();
 
-            _tableClient.DeleteTableIfExist(_tableName);
+            _tableClient.DeleteTableIfExist(TableName);
         }
 
         public bool Exists()
         {
-            return _tableClient.DoesTableExist(_tableName);
+            return _tableClient.DoesTableExist(TableName);
         }
 
         private static CloudTableClient CreateTableClient(string tableEndpointUri, StorageCredentials credentials)
@@ -149,7 +145,7 @@ namespace Disibox.Data
         private void RequireExistingTable()
         {
             if (Exists()) return;
-            throw new TableNotExistingException(_tableName);
+            throw new TableNotExistingException(TableName);
         }
     }
 }
