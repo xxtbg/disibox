@@ -78,12 +78,39 @@ namespace Disibox.Processing.Tools
 
             bitmap.UnlockBits(data);*/
 
-            var inverted = InvertImageColorMatrix(bitmap);
+            var inverted = InvertImage(bitmap);
 
             var invertedStream = new MemoryStream();
 
             inverted.Save(invertedStream, format);
             return new ProcessingOutput(invertedStream, fileContentType);
+        }
+
+        private static Image InvertImage(Image originalImg)
+        {
+            Bitmap invertedBmp = null;
+
+            using (Bitmap originalBmp = new Bitmap(originalImg))
+            {
+                invertedBmp = new Bitmap(originalBmp.Width, originalBmp.Height);
+
+                for (int x = 0; x < originalBmp.Width; x++)
+                {
+                    for (int y = 0; y < originalBmp.Height; y++)
+                    {
+                        //Get the color
+                        Color clr = originalBmp.GetPixel(x, y);
+
+                        //Invert the clr
+                        clr = Color.FromArgb(255 - clr.R, 255 - clr.G, 255 - clr.B);
+
+                        //Update the color
+                        invertedBmp.SetPixel(x, y, clr);
+                    }
+                }
+            }
+
+            return (Image)invertedBmp;
         }
 
         private static Image InvertImageColorMatrix(Image originalImg)
