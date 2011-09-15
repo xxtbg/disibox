@@ -31,7 +31,7 @@ using System.Windows;
 using Disibox.Data.Client;
 using Disibox.Data.Client.Exceptions;
 using Disibox.Data.Exceptions;
-using Disibox.Gui.Utils;
+using Disibox.Processing.Common;
 using Microsoft.Win32;
 
 namespace Disibox.Gui

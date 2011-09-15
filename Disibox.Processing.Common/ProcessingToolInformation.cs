@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2011, University of Genoa
 // All rights reserved.
 //
@@ -27,7 +27,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace Disibox.Gui.Utils
+namespace Disibox.Processing.Common
 {
     public class ProcessingToolInformation
     {
