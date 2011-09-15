@@ -52,7 +52,7 @@ namespace Disibox.Processing.Tools
             var format = GetFormatFromContentType(fileContentType);
             var bitmap = GetBitmapFromStream(file, format);
 
-            var area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            /*var area = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
             var data = bitmap.LockBits(area, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             var stride = data.Stride;
 
@@ -76,12 +76,43 @@ namespace Disibox.Processing.Tools
                 }
             }
 
-            bitmap.UnlockBits(data);
+            bitmap.UnlockBits(data);*/
+
+            var inverted = InvertImageColorMatrix(bitmap);
 
             var invertedStream = new MemoryStream();
 
-            bitmap.Save(invertedStream, format);
+            inverted.Save(invertedStream, format);
             return new ProcessingOutput(invertedStream, fileContentType);
+        }
+
+        private static Image InvertImageColorMatrix(Image originalImg)
+        {
+            var invertedBmp = new Bitmap(originalImg.Width, originalImg.Height);
+
+            //Setup color matrix
+            var clrMatrix = new ColorMatrix(new float[][]
+                                                    {
+                                                    new float[] {-1, 0, 0, 0, 0},
+                                                    new float[] {0, -1, 0, 0, 0},
+                                                    new float[] {0, 0, -1, 0, 0},
+                                                    new float[] {0, 0, 0, 1, 0},
+                                                    new float[] {1, 1, 1, 0, 1}
+                                                    });
+
+            using (var attr = new ImageAttributes())
+            {
+                //Attach matrix to image attributes
+                attr.SetColorMatrix(clrMatrix);
+
+                using (Graphics g = Graphics.FromImage(invertedBmp))
+                {
+                    g.DrawImage(originalImg, new Rectangle(0, 0, originalImg.Width, originalImg.Height),
+                                0, 0, originalImg.Width, originalImg.Height, GraphicsUnit.Pixel, attr);
+                }
+            }
+
+            return invertedBmp;
         }
 
         private static Bitmap GetBitmapFromSource(BitmapSource source)
