@@ -140,6 +140,54 @@ namespace Disibox.Processing.Tests
             UploadFileAndProcessMd5("image.jpg", Shared.ObjectToStream(Resources.JpgImage), true);
         }
 
+        [Test]
+        public void UploadAndInvertBmpImageAsAdminUser()
+        {
+            var image = Shared.ObjectToStream(Resources.BmpImage);
+            var invertedImage = Shared.ObjectToStream(Resources.InvertedBmpImage);
+            UploadAndInvertImage("image.bmp", image, invertedImage, UserType.AdminUser);
+        }
+
+        [Test]
+        public void UploadAndInvertJpgImageAsAdminUser()
+        {
+            var image = Shared.ObjectToStream(Resources.JpgImage);
+            var invertedImage = Shared.ObjectToStream(Resources.InvertedJpgImage);
+            UploadAndInvertImage("image.jpg", image, invertedImage, UserType.AdminUser);
+        }
+
+        [Test]
+        public void UploadAndInvertPngImageAsAdminUser()
+        {
+            var image = Shared.ObjectToStream(Resources.PngImage);
+            var invertedImage = Shared.ObjectToStream(Resources.InvertedPngImage);
+            UploadAndInvertImage("image.png", image, invertedImage, UserType.AdminUser);
+        }
+
+        [Test]
+        public void UploadAndInvertBmpImageAsCommonUser()
+        {
+            var image = Shared.ObjectToStream(Resources.BmpImage);
+            var invertedImage = Shared.ObjectToStream(Resources.InvertedBmpImage);
+            UploadAndInvertImage("image.bmp", image, invertedImage, UserType.CommonUser);
+        }
+
+        [Test]
+        public void UploadAndInvertJpgImageAsCommonUser()
+        {
+            var image = Shared.ObjectToStream(Resources.JpgImage);
+            var invertedImage = Shared.ObjectToStream(Resources.InvertedJpgImage);
+            UploadAndInvertImage("image.jpg", image, invertedImage, UserType.CommonUser);
+        }
+
+        [Test]
+        public void UploadAndInvertPngImageAsCommonUser()
+        {
+            var image = Shared.ObjectToStream(Resources.PngImage);
+            var invertedImage = Shared.ObjectToStream(Resources.InvertedPngImage);
+            UploadAndInvertImage("image.png", image, invertedImage, UserType.CommonUser);
+        }
+
         private void UploadFileAndProcessMd5(string fileName, Stream fileContent, bool commonUser = false)
         {
             _fileToUpload = fileContent;
