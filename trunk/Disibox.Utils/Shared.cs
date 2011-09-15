@@ -67,8 +67,9 @@ namespace Disibox.Utils
         /// </summary>
         /// <param name="s1">First stream.</param>
         /// <param name="s2">Second stream.</param>
+        /// <param name="tolerance"></param>
         /// <returns>True if streams are equal, false otherwise.</returns>
-        public static bool StreamsAreEqual(Stream s1, Stream s2)
+        public static bool StreamsAreEqual(Stream s1, Stream s2, int tolerance = 0)
         {
             if (s1.Length != s2.Length) return false;
 
@@ -76,7 +77,11 @@ namespace Disibox.Utils
             var b2 = StreamToByteArray(s2);
 
             for (var i = 0; i < b1.Length; ++i)
-                if (b1[i] != b2[i]) return false;
+                if (b1[i] != b2[i])
+                {
+                    if (tolerance == 0) return false;
+                    --tolerance;
+                }        
 
             return true;
         }
