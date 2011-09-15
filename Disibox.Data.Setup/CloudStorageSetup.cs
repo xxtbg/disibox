@@ -135,10 +135,8 @@ namespace Disibox.Data.Setup
 
         private static void SetupEntriesTable(string tableEndpointUri, StorageCredentials credentials)
         {
-            var entriesTableName = Data.Properties.Settings.Default.EntriesTableName;
-
-            PrintStep("Creating " + entriesTableName + " table...");
-            var entriesTable = AzureTable<Entry>.Create(entriesTableName, tableEndpointUri, credentials);
+            PrintStep("Creating entries table...");
+            var entriesTable = AzureTable<Entry>.Create(tableEndpointUri, credentials);
             if (_doReset)
                 entriesTable.Clear();
 
@@ -154,10 +152,8 @@ namespace Disibox.Data.Setup
 
         private static void SetupUsersTable(string tableEndpointUri, StorageCredentials credentials)
         {
-            var usersTableName = Data.Properties.Settings.Default.UsersTableName;
-
-            PrintStep("Creating " + usersTableName + " table...");
-            var usersTable = AzureTable<User>.Create(usersTableName, tableEndpointUri, credentials);
+            PrintStep("Creating users table...");
+            var usersTable = AzureTable<User>.Create(tableEndpointUri, credentials);
             if (_doReset)
                 usersTable.Clear();
 
@@ -166,8 +162,8 @@ namespace Disibox.Data.Setup
             var q = usersTable.Entities.Where(u => u.RowKey == "a0").ToList();
             if (q.Any()) return;
 
-            var defaultAdminEmail = Properties.Settings.Default.DefaultAdminEmail;
-            var defaultAdminPwd = Properties.Settings.Default.DefaultAdminPwd;
+            var defaultAdminEmail = Settings.Default.DefaultAdminEmail;
+            var defaultAdminPwd = Settings.Default.DefaultAdminPwd;
             var defaultAdminUser = new User("a0", defaultAdminEmail, defaultAdminPwd, true);
 
             usersTable.AddEntity(defaultAdminUser);

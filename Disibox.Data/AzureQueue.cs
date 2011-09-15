@@ -80,6 +80,7 @@ namespace Disibox.Data
             // Requirements
             RequireExistingQueue();
 
+            // TODO Very ugly, there should be another way...
             CloudQueueMessage queueMsg;
             while ((queueMsg = _queue.GetMessage()) == null)
                 Thread.Sleep(1000);

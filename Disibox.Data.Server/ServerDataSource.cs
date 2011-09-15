@@ -29,30 +29,31 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Disibox.Data.Client;
 using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
+using Disibox.Data.Properties;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
 
 namespace Disibox.Data.Server
 {
-    public class ServerDataSource : ClientDataSource
+    public class ServerDataSource
     {
-        private readonly AzureContainer _filesContainer;
-        private readonly AzureContainer _outputsContainer;
+        private readonly AzureContainer _files;
+        private readonly AzureContainer _outputs;
+        private readonly AzureContainer _procDlls;
 
         private readonly AzureQueue<ProcessingMessage> _processingRequests;
         private readonly AzureQueue<ProcessingMessage> _processingCompletions;
 
-        private readonly AzureTable<User> _usersTable;
+        private readonly AzureTable<User> _users;
 
         /// <summary>
         /// Creates a data source that should be used server-side only.
         /// </summary>
         public ServerDataSource()
         {
-            var connectionString = Properties.Settings.Default.DataConnectionString;
+            var connectionString = Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
             var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
@@ -60,20 +61,22 @@ namespace Disibox.Data.Server
             var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
 
-            var filesContainerName = Properties.Settings.Default.FilesContainerName;
-            _filesContainer = AzureContainer.Connect(filesContainerName, blobEndpointUri, credentials);
+            var filesContainerName = Settings.Default.FilesContainerName;
+            _files = AzureContainer.Connect(filesContainerName, blobEndpointUri, credentials);
 
-            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            _outputsContainer = AzureContainer.Connect(outputsContainerName, blobEndpointUri, credentials);
+            var outputsContainerName = Settings.Default.OutputsContainerName;
+            _outputs = AzureContainer.Connect(outputsContainerName, blobEndpointUri, credentials);
 
-            var procReqName = Properties.Settings.Default.ProcReqQueueName;
+            var procDllsContainerName = Settings.Default.ProcDllsContainerName;
+            _procDlls = AzureContainer.Connect(procDllsContainerName, blobEndpointUri, credentials);
+
+            var procReqName = Settings.Default.ProcReqQueueName;
             _processingRequests = AzureQueue<ProcessingMessage>.Connect(procReqName, queueEndpointUri, credentials);
 
-            var procComplName = Properties.Settings.Default.ProcComplQueueName;
+            var procComplName = Settings.Default.ProcComplQueueName;
             _processingCompletions = AzureQueue<ProcessingMessage>.Connect(procComplName, queueEndpointUri, credentials);
 
-            var usersTableName = Properties.Settings.Default.UsersTableName;
-            _usersTable = AzureTable<User>.Connect(usersTableName, tableEndpointUri, credentials);
+            _users = AzureTable<User>.Connect(tableEndpointUri, credentials);
         }
 
         /*=============================================================================
@@ -97,7 +100,7 @@ namespace Disibox.Data.Server
 
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
-            var q = _usersTable.Entities.Where(predicate).ToList();
+            var q = _users.Entities.Where(predicate).ToList();
             return (q.Count() == 1);
         }
 
@@ -194,7 +197,7 @@ namespace Disibox.Data.Server
         /// <exception cref="InvalidUriException">Given uri has an invalid format.</exception>
         public Stream GetFileFromUri(string fileUri)
         {
-            return _filesContainer.GetBlobData(fileUri);
+            return _files.GetBlobData(fileUri);
         }
 
         /// <summary>
@@ -212,21 +215,38 @@ namespace Disibox.Data.Server
             Require.NotNull(toolName, "toolName");
 
             var outputName = toolName + Guid.NewGuid();
-            return _outputsContainer.AddBlob(outputName, outputContentType, outputContent);
+            return _outputs.AddBlob(outputName, outputContentType, outputContent);
         }
 
         /*=============================================================================
             Overrides
         =============================================================================*/
 
-        protected override void RequireAdminUser()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dllName"></param>
+        /// <returns></returns>
+        public Stream GetProcessingDll(string dllName)
         {
-            // Empty
+            return _procDlls.GetBlobData(_procDlls.Uri + "/" + dllName);
         }
 
-        protected override void RequireLoggedInUser()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetProcessingDllNames()
         {
-            // Empty
+            var procDllNames = new List<string>();
+            foreach (var procDll in _procDlls.GetBlobs())
+            {
+                var procDllUri = procDll.Uri.ToString();
+                var lastSlashIndex = procDllUri.LastIndexOf('/');
+                var procDllName = procDllUri.Substring(lastSlashIndex + 1); // To avoid '/'
+                procDllNames.Add(procDllName);
+            }
+            return procDllNames;
         }
     }
 }

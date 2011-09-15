@@ -36,6 +36,8 @@ namespace Disibox.Data.Entities
     /// </summary>
     public sealed class User : TableServiceEntity
     {
+        private static readonly string TableName = (typeof (User)).Name.ToLower();
+
         /// <summary>
         /// Creates a User entity according to given parameters.
         /// In particular, it takes care of storing the hashed password.
@@ -47,7 +49,7 @@ namespace Disibox.Data.Entities
         public User(string userId, string userEmail, string userPwd, bool userIsAdmin)
         {
             RowKey = userId;
-            PartitionKey = Properties.Settings.Default.UsersTableName;
+            PartitionKey = TableName;
             Email = userEmail;
             HashedPassword = Hash.ComputeMD5(userPwd);
             IsAdmin = userIsAdmin;
@@ -59,8 +61,8 @@ namespace Disibox.Data.Entities
         [Obsolete]
         public User()
         {
-            RowKey = Properties.Settings.Default.UsersTableName;
-            PartitionKey = Properties.Settings.Default.UsersTableName;
+            RowKey = TableName;
+            PartitionKey = TableName;
         }
 
         /// <summary>

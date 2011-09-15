@@ -32,6 +32,7 @@ using System.Linq;
 using Disibox.Data.Client.Exceptions;
 using Disibox.Data.Entities;
 using Disibox.Data.Exceptions;
+using Disibox.Data.Properties;
 using Disibox.Utils;
 using Microsoft.WindowsAzure;
 
@@ -40,6 +41,13 @@ namespace Disibox.Data.Client
     public class ClientDataSource
     {
         private const string DllMimeType = "application/x-msdownload";
+
+        private readonly AzureContainer _files;
+        private readonly AzureContainer _outputs;
+        private readonly AzureContainer _procDlls;
+
+        private readonly AzureTable<Entry> _entries;
+        private readonly AzureTable<User> _users;
 
         private string _loggedUserId;
         private bool _loggedUserIsAdmin;
@@ -50,42 +58,25 @@ namespace Disibox.Data.Client
         /// </summary>
         public ClientDataSource()
         {
-            var connectionString = Properties.Settings.Default.DataConnectionString;
+            var connectionString = Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
 
             var blobEndpointUri = storageAccount.BlobEndpoint.AbsoluteUri;
             var tableEndpointUri = storageAccount.TableEndpoint.AbsoluteUri;
             var credentials = storageAccount.Credentials;
 
-            var filesContainerName = Properties.Settings.Default.FilesContainerName;
-            Files = AzureContainer.Connect(filesContainerName, blobEndpointUri, credentials);
+            var filesContainerName = Settings.Default.FilesContainerName;
+            _files = AzureContainer.Connect(filesContainerName, blobEndpointUri, credentials);
 
-            var outputsContainerName = Properties.Settings.Default.OutputsContainerName;
-            Outputs = AzureContainer.Connect(outputsContainerName, blobEndpointUri, credentials);
+            var outputsContainerName = Settings.Default.OutputsContainerName;
+            _outputs = AzureContainer.Connect(outputsContainerName, blobEndpointUri, credentials);
 
-            var procDllsContainerName = Properties.Settings.Default.ProcDllsContainerName;
-            ProcDlls = AzureContainer.Connect(procDllsContainerName, blobEndpointUri, credentials);
+            var procDllsContainerName = Settings.Default.ProcDllsContainerName;
+            _procDlls = AzureContainer.Connect(procDllsContainerName, blobEndpointUri, credentials);
 
-            var entriesTableName = Properties.Settings.Default.EntriesTableName;
-            Entries = AzureTable<Entry>.Connect(entriesTableName, tableEndpointUri, credentials);
-
-            var usersTableName = Properties.Settings.Default.UsersTableName;
-            Users = AzureTable<User>.Connect(usersTableName, tableEndpointUri, credentials);
+            _entries = AzureTable<Entry>.Connect(tableEndpointUri, credentials);
+            _users = AzureTable<User>.Connect(tableEndpointUri, credentials);
         }
-
-        /*=============================================================================
-            Protected properties
-        =============================================================================*/
-
-        protected AzureContainer Files { get; private set; }
-        
-        protected AzureContainer Outputs { get; private set; }
-
-        protected AzureContainer ProcDlls { get; private set; }
-
-        protected AzureTable<Entry> Entries { get; private set; }
-
-        protected AzureTable<User> Users { get; private set; }
 
         /*=============================================================================
             File handling methods
@@ -114,7 +105,7 @@ namespace Disibox.Data.Client
 
             var cloudFileName = _loggedUserId + "/" + fileName;
             var fileContentType = Shared.GetContentType(fileName);
-            return Files.AddBlob(cloudFileName, fileContentType, fileContent);
+            return _files.AddBlob(cloudFileName, fileContentType, fileContent);
         }
 
         /// <summary>
@@ -133,7 +124,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireExistingFileUri(fileUri);
 
-            return Files.DeleteBlob(fileUri);
+            return _files.DeleteBlob(fileUri);
         }
 
         /// <summary>
@@ -152,7 +143,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireExistingFileUri(fileUri);
 
-            return Files.GetBlobData(fileUri);
+            return _files.GetBlobData(fileUri);
         }
 
         /// <summary>
@@ -187,7 +178,7 @@ namespace Disibox.Data.Client
             // Requirements
             RequireLoggedInUser();
 
-            Outputs.DeleteBlob(outputUri);
+            _outputs.DeleteBlob(outputUri);
         }
 
         /// <summary>
@@ -203,7 +194,7 @@ namespace Disibox.Data.Client
             // Requirements
             RequireLoggedInUser();
 
-            return Outputs.GetBlobData(outputUri);
+            return _outputs.GetBlobData(outputUri);
         }
 
         /*=============================================================================
@@ -216,14 +207,13 @@ namespace Disibox.Data.Client
         /// <param name="dllName"></param>
         /// <param name="dllContent"></param>
         /// <param name="overwrite"></param>
-        /// <returns></returns>
         /// <exception cref="UserNotAdminException"></exception>
         /// <exception cref="UserNotLoggedInException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="InvalidFileNameException"></exception>
         /// <exception cref="InvalidContentTypeException"></exception>
         /// <exception cref="FileExistingException"></exception>
-        public string AddProcessingDll(string dllName, Stream dllContent, bool overwrite = false)
+        public void AddProcessingDll(string dllName, Stream dllContent, bool overwrite = false)
         {
             // Requirements
             Require.ValidFileName(dllName, "dllName");
@@ -233,7 +223,7 @@ namespace Disibox.Data.Client
             if (!overwrite)
                 RequireNotExistingDll(dllName);
 
-            return ProcDlls.AddBlob(dllName, DllMimeType, dllContent);
+            _procDlls.AddBlob(dllName, DllMimeType, dllContent);
         }
 
         /// <summary>
@@ -248,7 +238,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            ProcDlls.DeleteBlob(ProcDlls.Uri + "/" + dllName);
+            _procDlls.DeleteBlob(_procDlls.Uri + "/" + dllName);
         }
 
         /// <summary>
@@ -264,7 +254,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            return ProcDlls.GetBlobData(ProcDlls.Uri + "/" + dllName);
+            return _procDlls.GetBlobData(_procDlls.Uri + "/" + dllName);
         }
 
         /// <summary>
@@ -280,7 +270,7 @@ namespace Disibox.Data.Client
             RequireAdminUser();
 
             var procDllNames = new List<string>();
-            foreach (var procDll in ProcDlls.GetBlobs())
+            foreach (var procDll in _procDlls.GetBlobs())
             {
                 var procDllUri = procDll.Uri.ToString();
                 var lastSlashIndex = procDllUri.LastIndexOf('/');
@@ -318,8 +308,8 @@ namespace Disibox.Data.Client
             var userId = GenerateUserId(userIsAdmin);
             var user = new User(userId, userEmail, userPwd, userIsAdmin);
 
-            Users.AddEntity(user);
-            Users.SaveChanges();
+            _users.AddEntity(user);
+            _users.SaveChanges();
         }
 
         /// <summary>
@@ -339,7 +329,7 @@ namespace Disibox.Data.Client
             RequireAdminUser();
             RequireExistingUser(userEmail);
 
-            var user = Users.Entities.Where(u => u.Email == userEmail).First();
+            var user = _users.Entities.Where(u => u.Email == userEmail).First();
             
             if (user.IsAdmin)
             {
@@ -348,8 +338,8 @@ namespace Disibox.Data.Client
                     throw new CannotDeleteLastAdminException();
             }
 
-            Users.DeleteEntity(user);
-            Users.SaveChanges();
+            _users.DeleteEntity(user);
+            _users.SaveChanges();
         }
 
         /// <summary>
@@ -364,7 +354,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            var users = Users.Entities.ToList();
+            var users = _users.Entities.ToList();
             return users.Where(u => u.IsAdmin).Select(u => u.Email).ToList();
         }
 
@@ -380,7 +370,7 @@ namespace Disibox.Data.Client
             RequireLoggedInUser();
             RequireAdminUser();
 
-            var users = Users.Entities.ToList();
+            var users = _users.Entities.ToList();
             return users.Where(u => !u.IsAdmin).Select(u => u.Email).ToList();
         }
 
@@ -401,7 +391,7 @@ namespace Disibox.Data.Client
 
             var hashedPwd = Hash.ComputeMD5(userPwd);
             var predicate = new Func<User, bool>(u => u.Email == userEmail && u.HashedPassword == hashedPwd);
-            var q = Users.Entities.Where(predicate).ToList();
+            var q = _users.Entities.Where(predicate).ToList();
             if (q.Count() != 1)
                 throw new UserNotExistingException(userEmail);
             var user = q.First();
@@ -434,7 +424,7 @@ namespace Disibox.Data.Client
         /// if he's not, an appropriate exception is thrown.
         /// </summary>
         /// <exception cref="UserNotAdminException">If logged in user is not administrator.</exception>
-        protected virtual void RequireAdminUser()
+        private void RequireAdminUser()
         {
             if (_loggedUserIsAdmin) return;
             throw new UserNotAdminException();
@@ -444,7 +434,7 @@ namespace Disibox.Data.Client
         /// Checks if there is a logged in user.
         /// </summary>
         /// <exception cref="UserNotLoggedInException">No user is currently logged in.</exception>
-        protected virtual void RequireLoggedInUser()
+        private void RequireLoggedInUser()
         {
             if (_userIsLoggedIn) return;
             throw new UserNotLoggedInException();
@@ -485,7 +475,7 @@ namespace Disibox.Data.Client
         /// <exception cref="UserNotExistingException">There is no user with given email address.</exception>
         private void RequireExistingUser(string userEmail)
         {
-            var matches = Users.Entities.Where(u => u.Email == userEmail).ToList();
+            var matches = _users.Entities.Where(u => u.Email == userEmail).ToList();
             if (matches.Count == 1) return;
             throw new UserNotExistingException(userEmail);
         }
@@ -497,7 +487,7 @@ namespace Disibox.Data.Client
         /// <exception cref="UserExistingException">There is a user with given email address.</exception>
         private void RequireNotExistingUser(string userEmail)
         {
-            var matches = Users.Entities.Where(u => u.Email == userEmail).ToList();
+            var matches = _users.Entities.Where(u => u.Email == userEmail).ToList();
             if (matches.Count == 0) return;
             throw new UserExistingException(userEmail);
         }
@@ -521,7 +511,7 @@ namespace Disibox.Data.Client
 
         private string GenerateUserId(bool userIsAdmin)
         {
-            var nextUserIdEntry = Entries.Entities.Where(e => e.RowKey == "NextUserId").First();
+            var nextUserIdEntry = _entries.Entities.Where(e => e.RowKey == "NextUserId").First();
             var nextUserId = int.Parse(nextUserIdEntry.Value);
 
             var firstIdChar = (userIsAdmin) ? 'a' : 'u';
@@ -531,16 +521,16 @@ namespace Disibox.Data.Client
             nextUserIdEntry.Value = nextUserId.ToString();
 
             // Next method must be called in order to save the update.
-            Entries.UpdateEntity(nextUserIdEntry);
-            Entries.SaveChanges();
+            _entries.UpdateEntity(nextUserIdEntry);
+            _entries.SaveChanges();
 
             return userId;
         }
 
         private IList<FileMetadata> GetFileMetadataForAdminUser()
         {
-            var files = Files.GetBlobs();
-            var filesPrefix = Files.Uri + "/";
+            var files = _files.GetBlobs();
+            var filesPrefix = _files.Uri + "/";
             var fileMetadata = new List<FileMetadata>();
 
             foreach (var file in files)
@@ -561,8 +551,8 @@ namespace Disibox.Data.Client
 
         private IList<FileMetadata> GetFileMetadataForCommonUser()
         {
-            var files = Files.GetBlobs();
-            var filesPrefix = Files.Uri + "/" + _loggedUserId + "/";
+            var files = _files.GetBlobs();
+            var filesPrefix = _files.Uri + "/" + _loggedUserId + "/";
             var fileOwner = GetUserEmailByUserId(_loggedUserId);
             var fileMetadata = new List<FileMetadata>();
 
@@ -582,7 +572,7 @@ namespace Disibox.Data.Client
 
         private string GetFileNameFromUri(string fileUri)
         {
-            var prefix = Files.Uri + "/" + _loggedUserId + "/";
+            var prefix = _files.Uri + "/" + _loggedUserId + "/";
 
             var index = fileUri.IndexOf(prefix);
             if (index == -1 && !_loggedUserIsAdmin)
@@ -594,7 +584,7 @@ namespace Disibox.Data.Client
 
         private string GetUserEmailByUserId(string userId)
         {
-            return Users.Entities.Where(u => u.RowKey == userId).First().Email;
+            return _users.Entities.Where(u => u.RowKey == userId).First().Email;
         }
     }
 }

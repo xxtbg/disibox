@@ -25,24 +25,6 @@ namespace Disibox.Data.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("entries")]
-        public string EntriesTableName {
-            get {
-                return ((string)(this["EntriesTableName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("users")]
-        public string UsersTableName {
-            get {
-                return ((string)(this["UsersTableName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("UseDevelopmentStorage=true")]
         public string DataConnectionString {
             get {
