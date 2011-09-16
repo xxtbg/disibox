@@ -75,7 +75,7 @@ namespace Disibox.Data
             return new AzureContainer(blobClient, container);
         }
 
-        public static AzureContainer Create(string containerName, string blobEndpointUri, StorageCredentials credentials)
+        public static void Create(string containerName, string blobEndpointUri, StorageCredentials credentials)
         {
             // Requirements
             Require.NotEmpty(containerName, "containerName");
@@ -85,7 +85,6 @@ namespace Disibox.Data
             var blobClient = CreateBlobClient(blobEndpointUri, credentials);
             var container = CreateContainer(containerName, blobClient);
             container.CreateIfNotExist();
-            return new AzureContainer(blobClient, container);
         }
 
         public string AddBlob(string blobName, string blobContentType, Stream blobContent)
