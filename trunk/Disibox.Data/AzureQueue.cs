@@ -63,7 +63,7 @@ namespace Disibox.Data
             return new AzureQueue<TMsg>(queue);
         }
 
-        public static AzureQueue<TMsg> Create(string queueName, string queueEndpointUri, StorageCredentials credentials)
+        public static void Create(string queueName, string queueEndpointUri, StorageCredentials credentials)
         {
             // Requirements
             Require.NotEmpty(queueName, "queueName");
@@ -72,21 +72,24 @@ namespace Disibox.Data
 
             var queue = CreateQueue(queueName, queueEndpointUri, credentials);
             queue.CreateIfNotExist();
-            return new AzureQueue<TMsg>(queue);
         }
 
-        public TMsg DequeueMessage()
+        public TMsg DequeueMessage(ReadMode readMode = ReadMode.Blocking)
         {
             // Requirements
             RequireExistingQueue();
 
             // TODO Very ugly, there should be another way...
             CloudQueueMessage queueMsg;
-            while ((queueMsg = _queue.GetMessage()) == null)
-                Thread.Sleep(1000);
+            if (readMode == ReadMode.Blocking)
+                while ((queueMsg = _queue.GetMessage()) == null)
+                    Thread.Sleep(1000);
+            else // if (readMode == ReadMode.NotBlocking)
+                queueMsg = _queue.GetMessage();
 
             var msg = new TMsg();
-            msg.FromString(queueMsg.AsString);
+            if (queueMsg != null)
+                msg.FromString(queueMsg.AsString);
             _queue.DeleteMessage(queueMsg);
 
             return msg;
@@ -151,5 +154,10 @@ namespace Disibox.Data
             if (Exists()) return;
             throw new QueueNotExistingException(_queue.Name);
         }
+    }
+
+    public enum ReadMode
+    {
+        Blocking, NotBlocking
     }
 }

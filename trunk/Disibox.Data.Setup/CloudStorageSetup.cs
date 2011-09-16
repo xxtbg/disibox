@@ -99,7 +99,8 @@ namespace Disibox.Data.Setup
         private static AzureContainer SetupBlobContainer(string containerName, string blobEndpointUri, StorageCredentials credentials)
         {
             PrintStep("Creating " + containerName + " blob container...");
-            var container = AzureContainer.Create(containerName, blobEndpointUri, credentials);
+            AzureContainer.Create(containerName, blobEndpointUri, credentials);
+            var container = AzureContainer.Connect(containerName, blobEndpointUri, credentials);
             if (_doReset)
             {
                 PrintStep(" * Resetting its content");
@@ -126,7 +127,8 @@ namespace Disibox.Data.Setup
         private static void SetupProcessingQueue(string queueName, string queueEndpointUri, StorageCredentials credentials)
         {
             PrintStep("Creating " + queueName + " processing queue...");
-            var queue = AzureQueue<ProcessingMessage>.Create(queueName, queueEndpointUri, credentials);
+            AzureQueue<ProcessingMessage>.Create(queueName, queueEndpointUri, credentials);
+            var queue = AzureQueue<ProcessingMessage>.Connect(queueName, queueEndpointUri, credentials);
 
             if (!_doReset) return;
             PrintStep(" * Resetting its content");
