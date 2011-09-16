@@ -26,19 +26,17 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace AzureStorageExamples.Data
+namespace AzureStorageExamples
 {
-    public interface IStorage
+    public static class QueueExamples
     {
-        string Name { get; }
-
-        Uri Uri { get; }
-
-        void Clear();
-
-        void Delete();
-
-        bool Exists();
+        public static void RunAll()
+        {
+            
+        }
     }
 }

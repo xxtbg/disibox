@@ -25,20 +25,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
-
-namespace AzureStorageExamples.Data
+namespace AzureStorageExamples
 {
-    public interface IStorage
+    public static class ExamplesRunner
     {
-        string Name { get; }
-
-        Uri Uri { get; }
-
-        void Clear();
-
-        void Delete();
-
-        bool Exists();
+        public static void Main()
+        {
+            TableExamples.RunAll();
+        }
     }
 }

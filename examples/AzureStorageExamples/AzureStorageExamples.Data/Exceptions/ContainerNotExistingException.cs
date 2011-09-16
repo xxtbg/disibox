@@ -27,18 +27,13 @@
 
 using System;
 
-namespace AzureStorageExamples.Data
+namespace AzureStorageExamples.Data.Exceptions
 {
-    public interface IStorage
+    public class ContainerNotExistingException : Exception
     {
-        string Name { get; }
-
-        Uri Uri { get; }
-
-        void Clear();
-
-        void Delete();
-
-        bool Exists();
+        public ContainerNotExistingException(string containerName) : base(containerName)
+        {
+            // Empty
+        }
     }
 }

@@ -42,8 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AzureContainer.cs" />
+    <Compile Include="AzureQueue.cs" />
     <Compile Include="AzureTable.cs" />
+    <Compile Include="Exceptions\ContainerNotExistingException.cs" />
+    <Compile Include="Exceptions\QueueNotExistingException.cs" />
     <Compile Include="Exceptions\TableNotExistingException.cs" />
+    <Compile Include="IMessage.cs" />
     <Compile Include="IStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Require.cs" />
