@@ -60,9 +60,23 @@ namespace Disibox.Processing.Tests.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap BmpAlpha {
+            get {
+                object obj = ResourceManager.GetObject("BmpAlpha", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap BmpImage {
             get {
                 object obj = ResourceManager.GetObject("BmpImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap InvertedBmpAlpha {
+            get {
+                object obj = ResourceManager.GetObject("InvertedBmpAlpha", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -74,9 +88,23 @@ namespace Disibox.Processing.Tests.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap InvertedJpgAlpha {
+            get {
+                object obj = ResourceManager.GetObject("InvertedJpgAlpha", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap InvertedJpgImage {
             get {
                 object obj = ResourceManager.GetObject("InvertedJpgImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap InvertedPngAlpha {
+            get {
+                object obj = ResourceManager.GetObject("InvertedPngAlpha", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -88,9 +116,23 @@ namespace Disibox.Processing.Tests.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap JpgAlpha {
+            get {
+                object obj = ResourceManager.GetObject("JpgAlpha", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap JpgImage {
             get {
                 object obj = ResourceManager.GetObject("JpgImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap PngAlpha {
+            get {
+                object obj = ResourceManager.GetObject("PngAlpha", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

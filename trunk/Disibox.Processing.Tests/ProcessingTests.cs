@@ -33,7 +33,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Resources;
 using Disibox.Data.Client;
 using Disibox.Data.Entities;
 using Disibox.Data.Setup;
@@ -154,9 +153,21 @@ namespace Disibox.Processing.Tests
         }
 
         [Test]
+        public void UploadAndInvertBmpAlphaAsAdminUser()
+        {
+            UploadAndInvertImage("alpha.bmp", Resources.BmpAlpha, Resources.InvertedBmpAlpha, ImageFormat.Bmp, UserType.AdminUser);
+        }
+
+        [Test]
         public void UploadAndInvertJpgImageAsAdminUser()
         {
             UploadAndInvertImage("image.jpg", Resources.JpgImage, Resources.InvertedJpgImage, ImageFormat.Jpeg, UserType.AdminUser);
+        }
+
+        [Test]
+        public void UploadAndInvertJpgAlphaAsAdminUser()
+        {
+            UploadAndInvertImage("alpha.jpg", Resources.JpgAlpha, Resources.InvertedJpgAlpha, ImageFormat.Jpeg, UserType.AdminUser);
         }
 
         [Test]
@@ -166,9 +177,21 @@ namespace Disibox.Processing.Tests
         }
 
         [Test]
+        public void UploadAndInvertPngAlphaAsAdminUser()
+        {
+            UploadAndInvertImage("alpha.png", Resources.PngAlpha, Resources.InvertedPngAlpha, ImageFormat.Png, UserType.AdminUser);
+        }
+
+        [Test]
         public void UploadAndInvertBmpImageAsCommonUser()
         {
             UploadAndInvertImage("image.bmp", Resources.BmpImage, Resources.InvertedBmpImage, ImageFormat.Bmp, UserType.CommonUser);
+        }
+
+        [Test]
+        public void UploadAndInvertBmpAlphaAsCommomUser()
+        {
+            UploadAndInvertImage("alpha.bmp", Resources.BmpAlpha, Resources.InvertedBmpAlpha, ImageFormat.Bmp, UserType.CommonUser);
         }
 
         [Test]
@@ -178,9 +201,21 @@ namespace Disibox.Processing.Tests
         }
 
         [Test]
+        public void UploadAndInvertJpgAlphaAsCommonUser()
+        {
+            UploadAndInvertImage("alpha.jpg", Resources.JpgAlpha, Resources.InvertedJpgAlpha, ImageFormat.Jpeg, UserType.CommonUser);
+        }
+
+        [Test]
         public void UploadAndInvertPngImageAsCommonUser()
         {
             UploadAndInvertImage("image.png", Resources.PngImage, Resources.InvertedPngImage, ImageFormat.Png, UserType.CommonUser);
+        }
+
+        [Test]
+        public void UploadAndInvertPngAlphaAsCommonUser()
+        {
+            UploadAndInvertImage("alpha.png", Resources.PngAlpha, Resources.InvertedPngAlpha, ImageFormat.Png, UserType.CommonUser);
         }
 
         private void UploadFileAndProcessMd5(string fileName, Stream fileContent, bool commonUser = false)
