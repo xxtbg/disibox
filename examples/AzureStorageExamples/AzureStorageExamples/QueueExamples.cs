@@ -25,10 +25,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
+using AzureStorageExamples.Data;
+using AzureStorageExamples.Messages;
+using AzureStorageExamples.Properties;
+using Microsoft.WindowsAzure;
 
 namespace AzureStorageExamples
 {
@@ -36,7 +39,37 @@ namespace AzureStorageExamples
     {
         public static void RunAll()
         {
+            IntegerSortQueue();
+        }
+
+        private static void IntegerSortQueue()
+        {
+            var connectionString = Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var queueEndpointUri = storageAccount.QueueEndpoint.ToString();
+            var credentials = storageAccount.Credentials;
             
+            AzureQueue<IntSortMessage>.Create("inputs", queueEndpointUri, credentials);
+            var inputs = AzureQueue<IntSortMessage>.Connect("inputs", queueEndpointUri, credentials);
+
+            AzureQueue<IntSortMessage>.Create("results", queueEndpointUri, credentials);
+            var outputs = AzureQueue<IntSortMessage>.Connect("results", queueEndpointUri, credentials);
+
+            var integers = new List<int> {6, 2, 8, 4, 0};
+            inputs.EnqueueMessage(IntSortMessage.FromList(integers));
+
+            var msg = inputs.DequeueMessage();
+            var sortedIntegers = msg.Integers.ToList();
+            sortedIntegers.Sort();
+            outputs.EnqueueMessage(IntSortMessage.FromList(sortedIntegers));
+
+            var sortedMsg = outputs.DequeueMessage();
+            Debug.Assert(sortedMsg.Integers.Count == sortedIntegers.Count);
+            for (var i = 0; i < sortedIntegers.Count; ++i)
+                Debug.Assert(sortedMsg.Integers[i] == sortedIntegers[i]);
+
+            inputs.Delete();
+            outputs.Delete();
         }
     }
 }
