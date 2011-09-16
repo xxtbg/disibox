@@ -136,7 +136,8 @@ namespace Disibox.Data.Setup
         private static void SetupEntriesTable(string tableEndpointUri, StorageCredentials credentials)
         {
             PrintStep("Creating entries table...");
-            var entriesTable = AzureTable<Entry>.Create(tableEndpointUri, credentials);
+            AzureTable<Entry>.Create(tableEndpointUri, credentials);
+            var entriesTable = AzureTable<Entry>.Connect(tableEndpointUri, credentials);
             if (_doReset)
                 entriesTable.Clear();
 
@@ -153,7 +154,8 @@ namespace Disibox.Data.Setup
         private static void SetupUsersTable(string tableEndpointUri, StorageCredentials credentials)
         {
             PrintStep("Creating users table...");
-            var usersTable = AzureTable<User>.Create(tableEndpointUri, credentials);
+            AzureTable<User>.Create(tableEndpointUri, credentials);
+            var usersTable = AzureTable<User>.Connect(tableEndpointUri, credentials);
             if (_doReset)
                 usersTable.Clear();
 

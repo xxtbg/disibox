@@ -72,7 +72,7 @@ namespace Disibox.Data
             return new AzureTable<TEntity>(tableClient);
         }
 
-        public static AzureTable<TEntity> Create(string tableEndpointUri, StorageCredentials credentials)
+        public static void Create(string tableEndpointUri, StorageCredentials credentials)
         {
             // Requirements
             Require.NotEmpty(tableEndpointUri, "tableEndpointUri");
@@ -80,7 +80,6 @@ namespace Disibox.Data
 
             var tableClient = CreateTableClient(tableEndpointUri, credentials);
             tableClient.CreateTableIfNotExist(TableName);
-            return new AzureTable<TEntity>(tableClient);
         }
 
         public void AddEntity(TEntity entity)
