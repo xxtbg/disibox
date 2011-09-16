@@ -25,13 +25,25 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace AzureStorageExamples
+using System;
+
+namespace AzureStorageExamples.Entities
 {
-    public static class Program
+    public class UsbDrive : Device
     {
-        public static void Main()
+        public UsbDrive(string deviceId, string deviceName, int capacityInMb)
+            : base(deviceId, deviceName, "Usb drive", "Usb port")
         {
-            TableExamples.RunAll();
+            CapacityInMb = capacityInMb;
         }
+
+        // Required for serialization.
+        [Obsolete]
+        public UsbDrive()
+        {
+            // Empty
+        }
+
+        public int CapacityInMb { get; set; }
     }
 }

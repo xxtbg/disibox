@@ -25,13 +25,28 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace AzureStorageExamples
+using System;
+
+namespace AzureStorageExamples.Entities
 {
-    public static class Program
+    public class Screen : Device
     {
-        public static void Main()
+        public Screen(string deviceId, string deviceName, int widthInPixel, int heightInPixel)
+            : base(deviceId, deviceName, "Screen", "DVI")
         {
-            TableExamples.RunAll();
+            WidthInPixel = widthInPixel;
+            HeightInPixel = heightInPixel;
         }
+
+        // Required for serialization.
+        [Obsolete]
+        public Screen()
+        {
+            // Empty
+        }
+
+        public int WidthInPixel { get; set; }
+
+        public int HeightInPixel { get; set; }
     }
 }

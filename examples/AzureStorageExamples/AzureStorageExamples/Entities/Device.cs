@@ -25,13 +25,35 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace AzureStorageExamples
+using System;
+using Microsoft.WindowsAzure.StorageClient;
+
+namespace AzureStorageExamples.Entities
 {
-    public static class Program
+    public class Device : TableServiceEntity
     {
-        public static void Main()
+        private static readonly string TableName = (typeof (Device)).Name.ToLower();
+
+        public Device(string deviceId, string deviceName = "Generic device",
+              string deviceRole = "Generic role", string deviceSocket = "Generic socket")
+            : base(TableName, deviceId)
         {
-            TableExamples.RunAll();
+            Name = deviceName;
+            Role = deviceRole;
+            Socket = deviceSocket;
         }
+
+        // Required for serialization.
+        [Obsolete]
+        public Device()
+        {
+            // Empty
+        }
+
+        public string Name { get; set; }
+
+        public string Role { get; set; }
+
+        public string Socket { get; set; }
     }
 }

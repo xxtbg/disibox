@@ -25,13 +25,28 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-namespace AzureStorageExamples
+using System;
+using Microsoft.WindowsAzure.StorageClient;
+
+namespace AzureStorageExamples.Entities
 {
-    public static class Program
+    public class Fruit : TableServiceEntity
     {
-        public static void Main()
+        private static readonly string TableName = (typeof(Fruit)).Name.ToLower();
+
+        public Fruit(string fruitId, string fruitName)
+            : base(TableName, fruitId)
         {
-            TableExamples.RunAll();
+            Name = fruitName;
         }
+
+        // Required for serialization.
+        [Obsolete]
+        public Fruit()
+        {
+            // Empty
+        }
+
+        public string Name { get; set; }
     }
 }
