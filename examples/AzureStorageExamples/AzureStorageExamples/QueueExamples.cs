@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -43,7 +44,10 @@ namespace AzureStorageExamples
 
         public static void RunAll()
         {
+            Console.WriteLine(" * Integer sort queue");
             IntegerSortQueue();
+
+            Console.WriteLine(" * Integer sort custom queue");
             IntegerSortCustomQueue();
         }
 

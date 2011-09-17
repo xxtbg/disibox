@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
 using System.Diagnostics;
 using System.Linq;
 using AzureStorageExamples.Data;
@@ -39,11 +40,19 @@ namespace AzureStorageExamples
     {
         public static void RunAll()
         {
+            Console.WriteLine(" * Use table");
             UseTable();
+
+            Console.WriteLine("* Use table without type safety");
             UseTableWithoutTypeSafety();
 
+            Console.WriteLine(" * Use custom table");
             UseCustomTable();
+
+            Console.WriteLine(" * Use custom table with type safety");
             UseCustomTableWithTypeSafety();
+
+            Console.WriteLine(" * Use custom table with inheritance");
             UseCustomTableWithInheritance();
         }
 

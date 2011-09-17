@@ -25,15 +25,25 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+using System;
+
 namespace AzureStorageExamples
 {
-    public static class ExamplesRunner
+    public static class ExampleRunner
     {
         public static void Main()
         {
+            Console.WriteLine("Running blob examples...");
             BlobExamples.RunAll();
+            Console.WriteLine();
+
+            Console.WriteLine("Running queue examples...");
             QueueExamples.RunAll();
+            Console.WriteLine();
+
+            Console.WriteLine("Running table examples...");
             TableExamples.RunAll();
+            Console.WriteLine();
         }
     }
 }

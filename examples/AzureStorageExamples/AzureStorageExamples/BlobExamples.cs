@@ -27,16 +27,62 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
+using AzureStorageExamples.Data;
+using AzureStorageExamples.Properties;
+using Microsoft.WindowsAzure;
 
 namespace AzureStorageExamples
 {
     public static class BlobExamples
     {
+        private const int StreamCount = 9;
+        private const int StreamLength = 16;
+
         public static void RunAll()
         {
+            Console.WriteLine(" * Use custom container");
+            UseCustomContainer();
+        }
 
+        private static void UseCustomContainer()
+        {
+            var container = CreateCustomContainer("container");
+            var streams = CreateSimpleStreams();
+
+            for (var i = 0; i < streams.Count; ++i)
+                container.AddBlob(i + ".txt", "text/plain", streams[i]);
+
+            var blobs = container.GetBlobs();
+            Debug.Assert(blobs.Count() == streams.Count);
+
+            container.Delete();
+        }
+
+        private static AzureContainer CreateCustomContainer(string containerName)
+        {
+            var connectionString = Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var blobEndpointUri = storageAccount.BlobEndpoint.ToString();
+            var credentials = storageAccount.Credentials;
+            AzureContainer.Create(containerName, blobEndpointUri, credentials);
+            return AzureContainer.Connect(containerName, blobEndpointUri, credentials);
+        }
+
+        private static IList<Stream> CreateSimpleStreams()
+        {
+            var streams = new List<Stream>();
+            var bytes = new byte[StreamLength];
+            for (var i = 0; i < StreamCount; ++i)
+            {
+                for (var j = 0; j < StreamLength; ++j)
+                    bytes[j] = (byte) i;
+                streams.Add(new MemoryStream(bytes));
+            }
+            return streams;
         }
     }
 }
