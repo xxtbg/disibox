@@ -34,16 +34,19 @@ using System.Text;
 using AzureStorageExamples.Data;
 using AzureStorageExamples.Properties;
 using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureStorageExamples
 {
     public static class BlobExamples
     {
-        private const int StreamCount = 9;
-        private const int StreamLength = 16;
+        private const int StreamCount = 8;
 
         public static void RunAll()
         {
+            Console.WriteLine(" * Manipulate generic blob");
+            ManipulateGenericBlob();
+
             Console.WriteLine(" * Manipulate block blob");
             ManipulateBlockBlob();
 
@@ -57,25 +60,93 @@ namespace AzureStorageExamples
             UseCustomContainer();
         }
 
+        private static void ManipulateGenericBlob()
+        {
+            var container = CreateContainer("container");
+
+            var blob = container.GetBlobReference(container.Uri + "/blob");
+            var streams = CreateSimpleStreams(128);
+            blob.UploadFromStream(streams[0]);
+            Debug.Assert(blob.Properties.Length == streams[0].Length);
+
+            blob.Metadata.Add("Author", "Pino");
+            blob.Metadata.Add("Date", "Duemilamai");
+            Debug.Assert(blob.Metadata.Count == 2);
+            Debug.Assert(blob.Metadata.Get("Author") == "Pino");
+            Debug.Assert(blob.Metadata.Get("Date") == "Duemilamai");
+
+            container.Delete();
+        }
+
         private static void ManipulateBlockBlob()
         {
-            
+            var container = CreateContainer("container");
+
+            var blockBlob = container.GetBlockBlobReference(container.Uri + "/blockblob");
+            var streams = CreateSimpleStreams(256);
+            var blockIds = new List<string>();
+            for (var i = 0; i < streams.Count; ++i)
+            {
+                var blockId = EncodeTo64("b" + i);
+                blockBlob.PutBlock(blockId, streams[i], null);
+                blockIds.Add(blockId);
+            }
+            blockBlob.PutBlockList(blockIds);
+
+            blockBlob.FetchAttributes();
+            Debug.Assert(blockBlob.Properties.Length == streams.Count*streams[0].Length);
+
+            var blocks = blockBlob.DownloadBlockList();
+            Debug.Assert(blocks.Count() == streams.Count);
+            Debug.Assert(blocks.Count(b => !b.Committed) == 0);
+
+            container.Delete();
         }
 
         private static void ManipulatePageBlob()
         {
-            
+            var container = CreateContainer("container");
+
+            var pageBlob = container.GetPageBlobReference(container.Uri + "/pageblob");
+            var streams = CreateSimpleStreams(1024 * 1024); // 1MB
+            pageBlob.Create(streams.Count * streams[0].Length);
+            for (var i = 0; i < streams.Count; ++i)
+                pageBlob.WritePages(streams[i], i * streams[0].Length);
+
+            pageBlob.FetchAttributes();
+            Debug.Assert(pageBlob.Properties.Length == streams.Count * streams[0].Length);
+
+            //var pages = pageBlob.GetPageRanges();
+            //Debug.Assert(pages.Count() == 2);
+
+            container.Delete();
         }
 
         private static void UseAzureDrive()
         {
-            
+            var container = CreateContainer("container");
+
+            var pageBlob = container.GetPageBlobReference(container.Uri + "/pageblob");
+            //pageBlob.Create(128 * 1024 * 1024); // 128MB
+
+            var drive = CreateCloudDrive(pageBlob.Uri); // REFERENZA
+            drive.Create(64); // Must be called once in a VHD lifetime.
+            var driveLetter = drive.Mount(32, DriveMountOptions.None);
+
+            var testFilename = driveLetter + "\\test.txt";
+            var testContent = "We are testing Azure Drive!";
+            File.WriteAllText(testFilename, testContent);
+            var readContent = File.ReadAllText(testFilename);
+            Debug.Assert(readContent == testContent);
+
+            drive.Unmount();
+            container.Delete();
         }
 
         private static void UseCustomContainer()
         {
             var container = CreateCustomContainer("container");
-            var streams = CreateSimpleStreams();
+            var streams = CreateSimpleStreams(128);
 
             for (var i = 0; i < streams.Count; ++i)
                 container.AddBlob(i + ".txt", "text/plain", streams[i]);
@@ -84,6 +155,17 @@ namespace AzureStorageExamples
             Debug.Assert(blobs.Count() == streams.Count);
 
             container.Delete();
+        }
+
+        private static CloudBlobContainer CreateContainer(string containerName)
+        {
+            var connectionString = Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var blobEndpointUri = storageAccount.BlobEndpoint.ToString();
+            var credentials = storageAccount.Credentials;
+            var container = new CloudBlobContainer(blobEndpointUri + "/" + containerName, credentials);
+            container.CreateIfNotExist();
+            return container;
         }
 
         private static AzureContainer CreateCustomContainer(string containerName)
@@ -96,17 +178,31 @@ namespace AzureStorageExamples
             return AzureContainer.Connect(containerName, blobEndpointUri, credentials);
         }
 
-        private static IList<Stream> CreateSimpleStreams()
+        private static CloudDrive CreateCloudDrive(Uri pageBlobUri)
+        {
+            var connectionString = Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var credentials = storageAccount.Credentials;
+            return new CloudDrive(pageBlobUri, credentials);
+        }
+
+        private static IList<Stream> CreateSimpleStreams(int streamLength)
         {
             var streams = new List<Stream>();
-            var bytes = new byte[StreamLength];
+            var bytes = new byte[streamLength];
             for (var i = 0; i < StreamCount; ++i)
             {
-                for (var j = 0; j < StreamLength; ++j)
+                for (var j = 0; j < streamLength; ++j)
                     bytes[j] = (byte) i;
                 streams.Add(new MemoryStream(bytes));
             }
             return streams;
+        }
+
+        private static string EncodeTo64(string toEncode)
+        {
+            var toEncodeAsBytes = Encoding.ASCII.GetBytes(toEncode);
+            return Convert.ToBase64String(toEncodeAsBytes);
         }
     }
 }
