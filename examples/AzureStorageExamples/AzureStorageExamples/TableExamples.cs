@@ -43,7 +43,7 @@ namespace AzureStorageExamples
             Console.WriteLine(" * Use table");
             UseTable();
 
-            Console.WriteLine("* Use table without type safety");
+            Console.WriteLine(" * Use table without type safety");
             UseTableWithoutTypeSafety();
 
             Console.WriteLine(" * Use custom table");

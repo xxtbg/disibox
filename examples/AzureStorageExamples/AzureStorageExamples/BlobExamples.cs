@@ -44,8 +44,32 @@ namespace AzureStorageExamples
 
         public static void RunAll()
         {
+            Console.WriteLine(" * Manipulate block blob");
+            ManipulateBlockBlob();
+
+            Console.WriteLine(" * Manipulate page blob");
+            ManipulatePageBlob();
+
+            Console.WriteLine(" * Use Azure drive");
+            UseAzureDrive();
+
             Console.WriteLine(" * Use custom container");
             UseCustomContainer();
+        }
+
+        private static void ManipulateBlockBlob()
+        {
+            
+        }
+
+        private static void ManipulatePageBlob()
+        {
+            
+        }
+
+        private static void UseAzureDrive()
+        {
+            
         }
 
         private static void UseCustomContainer()
