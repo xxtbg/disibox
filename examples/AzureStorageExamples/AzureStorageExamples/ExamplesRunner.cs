@@ -31,6 +31,8 @@ namespace AzureStorageExamples
     {
         public static void Main()
         {
+            BlobExamples.RunAll();
+            QueueExamples.RunAll();
             TableExamples.RunAll();
         }
     }

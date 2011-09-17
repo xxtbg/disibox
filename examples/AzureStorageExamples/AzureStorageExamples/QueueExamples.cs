@@ -28,48 +28,97 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using AzureStorageExamples.Data;
 using AzureStorageExamples.Messages;
 using AzureStorageExamples.Properties;
 using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.StorageClient;
 
 namespace AzureStorageExamples
 {
     public static class QueueExamples
     {
+        private static readonly IList<int> Integers = new List<int> {6, 2, 8, 4, 0};
+
         public static void RunAll()
         {
             IntegerSortQueue();
+            IntegerSortCustomQueue();
         }
 
         private static void IntegerSortQueue()
+        {
+            var inputs = SetupIntSortQueue("inputs");
+            var outputs = SetupIntSortQueue("outputs");
+
+            inputs.AddMessage(new CloudQueueMessage(ListToString(Integers)));
+            var integersToSort = StringToList(inputs.GetMessage().AsString).ToList();
+            integersToSort.Sort();
+            outputs.AddMessage(new CloudQueueMessage(ListToString(integersToSort)));
+
+            var sortedOutput = StringToList(outputs.GetMessage().AsString);
+            Debug.Assert(sortedOutput.Count == integersToSort.Count);
+            for (var i = 0; i < integersToSort.Count; ++i)
+                Debug.Assert(sortedOutput[i] == integersToSort[i]);
+
+            inputs.Delete();
+            outputs.Delete();
+        }
+
+        private static void IntegerSortCustomQueue()
+        {
+            var inputs = SetupIntSortCustomQueue("inputs");
+            var outputs = SetupIntSortCustomQueue("outputs");
+
+            inputs.EnqueueMessage(IntSortMessage.FromList(Integers));
+            var integersToSort = inputs.DequeueMessage().Integers.ToList();
+            integersToSort.Sort();
+            outputs.EnqueueMessage(IntSortMessage.FromList(integersToSort));
+
+            var sortedMsg = outputs.DequeueMessage();
+            Debug.Assert(sortedMsg.Integers.Count == integersToSort.Count);
+            for (var i = 0; i < integersToSort.Count; ++i)
+                Debug.Assert(sortedMsg.Integers[i] == integersToSort[i]);
+
+            inputs.Delete();
+            outputs.Delete();
+        }
+
+        private static CloudQueue SetupIntSortQueue(string queueName)
         {
             var connectionString = Settings.Default.DataConnectionString;
             var storageAccount = CloudStorageAccount.Parse(connectionString);
             var queueEndpointUri = storageAccount.QueueEndpoint.ToString();
             var credentials = storageAccount.Credentials;
-            
-            AzureQueue<IntSortMessage>.Create("inputs", queueEndpointUri, credentials);
-            var inputs = AzureQueue<IntSortMessage>.Connect("inputs", queueEndpointUri, credentials);
+            var queue = new CloudQueue(queueEndpointUri + "/" + queueName, credentials);
+            queue.CreateIfNotExist();
+            return queue;
+        }
 
-            AzureQueue<IntSortMessage>.Create("results", queueEndpointUri, credentials);
-            var outputs = AzureQueue<IntSortMessage>.Connect("results", queueEndpointUri, credentials);
+        private static AzureQueue<IntSortMessage> SetupIntSortCustomQueue(string queueName)
+        {
+            var connectionString = Settings.Default.DataConnectionString;
+            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var queueEndpointUri = storageAccount.QueueEndpoint.ToString();
+            var credentials = storageAccount.Credentials;
+            AzureQueue<IntSortMessage>.Create(queueName, queueEndpointUri, credentials);
+            return AzureQueue<IntSortMessage>.Connect(queueName, queueEndpointUri, credentials);
+        }
 
-            var integers = new List<int> {6, 2, 8, 4, 0};
-            inputs.EnqueueMessage(IntSortMessage.FromList(integers));
+        private static string ListToString(IList<int> integers)
+        {
+            if (integers.Count == 0) return "";
+            var builder = new StringBuilder();
+            builder.Append(integers[0]);
+            for (var i = 1; i < integers.Count; ++i)
+                builder.Append("," + integers[i]);
+            return builder.ToString();
+        }
 
-            var msg = inputs.DequeueMessage();
-            var sortedIntegers = msg.Integers.ToList();
-            sortedIntegers.Sort();
-            outputs.EnqueueMessage(IntSortMessage.FromList(sortedIntegers));
-
-            var sortedMsg = outputs.DequeueMessage();
-            Debug.Assert(sortedMsg.Integers.Count == sortedIntegers.Count);
-            for (var i = 0; i < sortedIntegers.Count; ++i)
-                Debug.Assert(sortedMsg.Integers[i] == sortedIntegers[i]);
-
-            inputs.Delete();
-            outputs.Delete();
+        private static IList<int> StringToList(string integers)
+        {
+            return integers.Split(',').Select(int.Parse).ToList();
         }
     }
 }
