@@ -31,6 +31,8 @@ public final class ExampleRunner
 {
 	public static void main(String[] args)
 	{
+		BlobExamples.RunAll();
+		QueueExamples.RunAll();
 		TableExamples.runAll();
 	}
 }

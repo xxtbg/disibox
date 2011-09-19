@@ -36,7 +36,7 @@ import org.soyatec.windowsazure.table.ITableServiceEntity;
 import org.soyatec.windowsazure.table.TableServiceContext;
 import org.soyatec.windowsazure.table.TableStorageClient;
 
-public final class TableExamples 
+final class TableExamples 
 {
 	public static void runAll() 
 	{

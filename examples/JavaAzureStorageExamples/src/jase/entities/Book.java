@@ -29,24 +29,30 @@ package jase.entities;
 
 import org.soyatec.windowsazure.table.AbstractTableServiceEntity;
 
-public class Device extends AbstractTableServiceEntity
+public class Book extends AbstractTableServiceEntity
 {
-	public static final String TABLE_NAME = Device.class.getSimpleName().toLowerCase();
+	public static final String TABLE_NAME = Book.class.getSimpleName().toLowerCase();
 	
-	private String name;
+	private String title;
+	private String author;
 	
-	private Device(String deviceId, String deviceName) 
+	private Book(String bookId, String bookTitle, String bookAuthor) 
 	{
-		super(TABLE_NAME, deviceId);
-		name = deviceName;
+		super(TABLE_NAME, bookId);
+		title = bookTitle;
+		author = bookAuthor;
 	}
+
+	public String getTitle() { return title; }
 	
-	public String getName() { return name; }
+	public void setTitle(String bookTitle) { title = bookTitle; }
 	
-	public void setName(String deviceName) { name = deviceName; }
+	public String getAuthor() { return author; }
 	
-	public static Device create(String deviceId, String deviceName)
+	public void setAuthor(String bookAuthor) { author = bookAuthor; }
+	
+	public static Book create(String bookId, String bookTitle, String bookAuthor)
 	{
-		return new Device(deviceId, deviceName);
+		return new Book(bookId, bookTitle, bookAuthor);
 	}
 }

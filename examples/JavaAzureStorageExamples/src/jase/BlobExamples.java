@@ -25,28 +25,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-package jase.entities;
+package jase;
 
-import org.soyatec.windowsazure.table.AbstractTableServiceEntity;
-
-public class Device extends AbstractTableServiceEntity
+final class BlobExamples 
 {
-	public static final String TABLE_NAME = Device.class.getSimpleName().toLowerCase();
-	
-	private String name;
-	
-	private Device(String deviceId, String deviceName) 
+	public static void RunAll()
 	{
-		super(TABLE_NAME, deviceId);
-		name = deviceName;
-	}
-	
-	public String getName() { return name; }
-	
-	public void setName(String deviceName) { name = deviceName; }
-	
-	public static Device create(String deviceId, String deviceName)
-	{
-		return new Device(deviceId, deviceName);
+		
 	}
 }
