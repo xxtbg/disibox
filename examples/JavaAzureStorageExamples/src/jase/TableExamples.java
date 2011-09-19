@@ -46,7 +46,7 @@ final class TableExamples
 	private static void useTable()
 	{
 		// The context is bound to a specific table, unlike the .NET version.
-		TableServiceContext devices = setupTable(Device.TABLE_NAME);
+		TableServiceContext devices = createTable(Device.TABLE_NAME);
 		
 		Device pinoMouse = Device.create("m1", "PinoMouse");
         Device ginoCam = Device.create("c7", "GinoCam");
@@ -65,20 +65,31 @@ final class TableExamples
 		deleteTable(Device.TABLE_NAME);
 	}
 	
-	private static TableServiceContext setupTable(String tableName)
+	private static TableServiceContext createTable(String tableName)
 	{
-		TableStorageClient client = TableStorageClient.create(Settings.TABLE_ENDPOINT, true, "local", "local");
+		TableStorageClient client = createTableClient();
 		ITable table = client.getTableReference(tableName);
-		if (!table.isTableExist())
-			table.createTable();
+		if (table.isTableExist())
+			table.deleteTable();
+		table.createTable();
 		return table.getTableServiceContext();
 	}
 	
 	private static void deleteTable(String tableName)
 	{
-		TableStorageClient client = TableStorageClient.create(Settings.TABLE_ENDPOINT, true, "local", "local");
+		TableStorageClient client = createTableClient();
 		ITable table = client.getTableReference(tableName);
 		if (table.isTableExist())
 			table.deleteTable();
+	}
+	
+	private static TableStorageClient createTableClient()
+	{
+		return TableStorageClient.create(
+			Settings.TABLE_ENDPOINT, 
+			true, 
+			Settings.DEV_ACCOUNT_NAME, 
+			Settings.DEV_ACCOUNT_KEY
+		);
 	}
 }

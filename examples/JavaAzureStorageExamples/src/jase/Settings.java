@@ -34,4 +34,8 @@ final class Settings
 	public static final URI BLOB_ENDPOINT  = URI.create("http://127.0.0.1:10000");
 	public static final URI QUEUE_ENDPOINT = URI.create("http://127.0.0.1:10001");
 	public static final URI TABLE_ENDPOINT = URI.create("http://127.0.0.1:10002");
+	
+	public static final String DEV_ACCOUNT_NAME = "devstoreaccount1";
+	public static final String DEV_ACCOUNT_KEY = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsu" +
+                                                 "Fq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 }
