@@ -29,6 +29,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Windows.Media.Imaging;
 using Color = System.Drawing.Color;
 
 namespace Disibox.Processing.Tools
@@ -50,7 +51,7 @@ namespace Disibox.Processing.Tools
         public override ProcessingOutput ProcessFile(Stream file, string fileContentType)
         {
             var format = GetFormatFromContentType(fileContentType);
-            var bitmap = new Bitmap(file, true);
+            var bitmap = GetBitmapFromStream(file, format);
             var inverted = SlowInvertImage(bitmap);
             var invertedStream = new MemoryStream();
             inverted.Save(invertedStream, format);
@@ -73,6 +74,35 @@ namespace Disibox.Processing.Tools
                 }
             }
             return invertedBmp;
+        }
+
+        private static Bitmap GetBitmapFromSource(BitmapSource source)
+        {
+            Bitmap bitmap;
+            using (var outStream = new MemoryStream())
+            {
+                // From System.Media.BitmapImage to System.Drawing.Bitmap 
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(source));
+                enc.Save(outStream);
+                bitmap = new Bitmap(outStream);
+            }
+            return bitmap;
+        }
+
+        private static Bitmap GetBitmapFromStream(Stream input, ImageFormat format)
+        {
+            BitmapDecoder decoder;
+
+            if (format == ImageFormat.Bmp)
+                decoder = new BmpBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+            else if (format == ImageFormat.Png)
+                decoder = new PngBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+            else // Jpeg and other formats...
+                decoder = new JpegBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+
+            var source = decoder.Frames[0];
+            return GetBitmapFromSource(source);
         }
 
         private static ImageFormat GetFormatFromContentType(string imageContentType)
