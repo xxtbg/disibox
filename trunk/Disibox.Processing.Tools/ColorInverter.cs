@@ -26,6 +26,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -76,14 +77,15 @@ namespace Disibox.Processing.Tools
             return invertedBmp;
         }
 
-        private static Bitmap GetBitmapFromSource(BitmapSource source)
+        private static Bitmap GetBitmapFromFrames(IEnumerable<BitmapFrame> frames)
         {
             Bitmap bitmap;
             using (var outStream = new MemoryStream())
             {
                 // From System.Media.BitmapImage to System.Drawing.Bitmap 
                 BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(source));
+                foreach (var frame in frames)
+                    enc.Frames.Add(BitmapFrame.Create(frame));
                 enc.Save(outStream);
                 bitmap = new Bitmap(outStream);
             }
@@ -93,16 +95,13 @@ namespace Disibox.Processing.Tools
         private static Bitmap GetBitmapFromStream(Stream input, ImageFormat format)
         {
             BitmapDecoder decoder;
-
             if (format == ImageFormat.Bmp)
                 decoder = new BmpBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
             else if (format == ImageFormat.Png)
                 decoder = new PngBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
             else // Jpeg and other formats...
                 decoder = new JpegBitmapDecoder(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-
-            var source = decoder.Frames[0];
-            return GetBitmapFromSource(source);
+            return GetBitmapFromFrames(decoder.Frames);
         }
 
         private static ImageFormat GetFormatFromContentType(string imageContentType)
