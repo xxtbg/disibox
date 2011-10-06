@@ -33,19 +33,13 @@ namespace Disibox.Data.Entities
     /// <summary>
     /// Table entity representing an entry, that is, a (name, value) pair.
     /// </summary>
-    public sealed class Entry : TableServiceEntity
+    public class Entry : TableServiceEntity
     {
         private static readonly string TableName = (typeof (Entry)).Name.ToLower(); 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="entryName"></param>
-        /// <param name="entryValue"></param>
         public Entry(string entryName, string entryValue)
+            : base(TableName, entryName)
         {
-            RowKey = entryName;
-            PartitionKey = TableName;
             Value = entryValue;
         }
 
@@ -55,8 +49,7 @@ namespace Disibox.Data.Entities
         [Obsolete]
         public Entry()
         {
-            RowKey = TableName;
-            PartitionKey = TableName;
+            // Empty
         }
 
         /// <summary>

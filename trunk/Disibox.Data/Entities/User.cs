@@ -34,7 +34,7 @@ namespace Disibox.Data.Entities
     /// <summary>
     /// Table entity representing a user.
     /// </summary>
-    public sealed class User : TableServiceEntity
+    public class User : TableServiceEntity
     {
         private static readonly string TableName = (typeof (User)).Name.ToLower();
 
@@ -47,9 +47,8 @@ namespace Disibox.Data.Entities
         /// <param name="userPwd">User password (NOT hashed).</param>
         /// <param name="userType">The type of user (admin or common).</param>
         public User(string userId, string userEmail, string userPwd, UserType userType)
+            : base(TableName, userId)
         {
-            RowKey = userId;
-            PartitionKey = TableName;
             Email = userEmail;
             HashedPassword = Hash.ComputeMD5(userPwd);
             IsAdmin = (userType == UserType.AdminUser);
@@ -61,8 +60,7 @@ namespace Disibox.Data.Entities
         [Obsolete]
         public User()
         {
-            RowKey = TableName;
-            PartitionKey = TableName;
+            // Empty
         }
 
         /// <summary>
