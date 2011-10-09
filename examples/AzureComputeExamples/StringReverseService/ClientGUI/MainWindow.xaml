@@ -1,0 +1,14 @@
+﻿<Window x:Class="ClientGUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Reverse String Service Client" Height="168" Width="412" ResizeMode="NoResize">
+    <Grid>
+        <Button Content="Reverse" Height="23" HorizontalAlignment="Left" Margin="121,91,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="button1_Click" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="121,9,0,0" Name="inputString" VerticalAlignment="Top" Width="258" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,12,0,0" Name="textBlock1" Text="String to reverse" VerticalAlignment="Top" />
+        <TextBlock Height="23" HorizontalAlignment="Left" Margin="12,52,0,0" Name="textBlock2" Text="Reversed String" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="121,52,0,0" Name="outputString" VerticalAlignment="Top" Width="258" IsReadOnly="True" />
+        <Button Content="Exit" Height="23" HorizontalAlignment="Left" Margin="304,91,0,0" Name="button2" VerticalAlignment="Top" Width="75" Click="button2_Click" />
+        <Button Content="Reset" Height="23" HorizontalAlignment="Left" Margin="214,91,0,0" Name="button3" VerticalAlignment="Top" Width="75" Click="button3_Click" />
+    </Grid>
+</Window>
