@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "WebPollProject", "WebPollProject\WebPollProject.ccproj", "{A126053E-7A7A-4917-A20A-BFD1C560F001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebPoll", "WebPoll\WebPoll.csproj", "{966D1EB5-061A-463C-96B1-D0CFE5D428B9}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A126053E-7A7A-4917-A20A-BFD1C560F001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A126053E-7A7A-4917-A20A-BFD1C560F001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A126053E-7A7A-4917-A20A-BFD1C560F001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A126053E-7A7A-4917-A20A-BFD1C560F001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{966D1EB5-061A-463C-96B1-D0CFE5D428B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{966D1EB5-061A-463C-96B1-D0CFE5D428B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{966D1EB5-061A-463C-96B1-D0CFE5D428B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{966D1EB5-061A-463C-96B1-D0CFE5D428B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
